@@ -10,5 +10,5 @@ case class Game(
 
 object Game {
   def create(id: String, columns: Int, rows: Int, player1: Player, player2: Player): Game =
-    Game(id, Board(columns, rows), player1, player2)
+    Game(id, Board.initialize(columns, rows, player1, player2), player1, player2)
 }
