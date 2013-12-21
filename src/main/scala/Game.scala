@@ -1,0 +1,14 @@
+package jousse.org
+package bot
+
+case class Game(
+  id: String,
+  board: Board,
+  player1: Player,
+  player2: Player
+)
+
+object Game {
+  def create(id: String, columns: Int, rows: Int, player1: Player, player2: Player): Game =
+    Game(id, Board(columns, rows), player1, player2)
+}
