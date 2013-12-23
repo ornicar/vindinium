@@ -5,17 +5,20 @@ case class Board(board: Vector[Vector[Thing]]) {
 
   def get(x: Int, y: Int) : Option[Thing] = (board lift x).flatMap( _ lift y)
 
-  def thingAtPositionToString(thing: Thing, x: Int, y: Int, rows: Int, cols: Int) : String = {
+  def nbColumns = ((board lift 0).getOrElse(Vector())).length
+
+  def nbRows = board.length
+
+  def thingAtPositionToString(thing: Thing, x: Int, y: Int) : String = {
 
     def thingToString(thing: Thing): String = thing match {
       case Player(number, _) => number.toString
       case _ => "X"
-
     }
 
     if(y == 0) {
       "|" + thingToString(thing)
-    } else if (y == cols-1) {
+    } else if (y == nbColumns-1) {
       thingToString(thing) + "|\n"
     } else {
       thingToString(thing)
@@ -24,15 +27,12 @@ case class Board(board: Vector[Vector[Thing]]) {
 
   override def toString = {
 
-    val columns = ((board lift 0).getOrElse(Vector())).length
-    val dashes = (List.fill(columns)("-")).mkString
-
     val stringVector = for{
          (thingVector, x) <- board.zipWithIndex
          (thing, y) <- thingVector.zipWithIndex
-    } yield(thingAtPositionToString(thing, x, y, board.length, thingVector.length))
+    } yield(thingAtPositionToString(thing, x, y))
 
-    val line = "+" + dashes + "+\n"
+    val line = "+" + "-" * nbColumns + "+\n"
 
     line + stringVector.mkString + line
   }
