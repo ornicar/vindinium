@@ -9,11 +9,14 @@ case class Board(board: Vector[Vector[Tile]]) {
 
   def nbRows = board.length
 
+  def nbTiles = nbRows * nbColumns
+
   def thingAtPositionToString(thing: Tile, pos: Pos) : String = {
 
     def thingToString(thing: Tile): String = thing match {
       case Player(number, _) => number.toString
-      case _ => "X"
+      case Wall() => "Y"
+      case _ => " "
     }
 
     if(pos.y == 0) {
@@ -70,4 +73,17 @@ object Board {
     }} )
   }
 
+  def fillWithRandomWalls(board: Board, wallPercentage: Int = 20) : Board = {
+
+    val nbWalls : Int = board.nbTiles / wallPercentage * 100
+
+    def fillBoard(board: Board, totalWalls: Int = nbWalls, currentWallNumber: Int = 0): Board =
+      (nbWalls, currentWallNumber) match {
+      case (0, y)           => board
+      case (x, y) if x == y => board
+      case _                => fillBoard(board, totalWalls, currentWallNumber + 1)
+    }
+
+    fillBoard(board, nbWalls, 0)
+  }
 }
