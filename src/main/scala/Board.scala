@@ -3,7 +3,7 @@ package bot
 
 case class Board(board: Vector[Vector[Thing]]) {
 
-  def get(x: Int, y: Int) : Thing = board(x)(y)
+  def get(x: Int, y: Int) : Option[Thing] = (board lift x).flatMap( _ lift y)
 
 }
 
