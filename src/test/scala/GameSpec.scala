@@ -12,10 +12,6 @@ class GameSpec extends Specification {
       game.id mustEqual "testGame"
     }
 
-    "should have players" in {
-      game.board.get(0,0) must beAnInstanceOf[Player]
-      game.board.get(rows-1, columns-1) must beAnInstanceOf[Player]
-    }
   }
 }
 

@@ -5,6 +5,30 @@ case class Board(board: Vector[Vector[Thing]]) {
 
   def get(x: Int, y: Int) : Option[Thing] = (board lift x).flatMap( _ lift y)
 
+  def thingAtPositionToString(thing: Thing, x: Int, y: Int, rows: Int, cols: Int) : String = {
+    if(y == 0) {
+      "|X"
+    } else if (y == cols-1) {
+      "X|\n"
+    } else {
+      "X"
+    }
+  }
+
+  override def toString = {
+
+    val columns = ((board lift 0).getOrElse(Vector())).length
+    val dashes = (List.fill(columns)("-")).mkString
+
+    val stringVector = for{
+         (thingVector, x) <- board.zipWithIndex
+         (thing, y) <- thingVector.zipWithIndex
+    } yield(thingAtPositionToString(thing, x, y, board.length, thingVector.length))
+
+    val line = "+" + dashes + "+\n"
+
+    line + stringVector.mkString + line
+  }
 }
 
 object Board {
@@ -21,4 +45,5 @@ object Board {
       case _                                          => new Thing()
     }} )
   }
+
 }
