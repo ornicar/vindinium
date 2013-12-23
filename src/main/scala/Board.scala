@@ -3,22 +3,22 @@ package bot
 
 case class Board(board: Vector[Vector[Tile]]) {
 
-  def get(x: Int, y: Int) : Option[Tile] = (board lift x).flatMap( _ lift y)
+  def get(pos: Pos) : Option[Tile] = (board lift pos.x).flatMap( _ lift pos.y)
 
   def nbColumns = ((board lift 0).getOrElse(Vector())).length
 
   def nbRows = board.length
 
-  def thingAtPositionToString(thing: Tile, x: Int, y: Int) : String = {
+  def thingAtPositionToString(thing: Tile, pos: Pos) : String = {
 
     def thingToString(thing: Tile): String = thing match {
       case Player(number, _) => number.toString
       case _ => "X"
     }
 
-    if(y == 0) {
+    if(pos.y == 0) {
       "|" + thingToString(thing)
-    } else if (y == nbColumns-1) {
+    } else if (pos.y == nbColumns-1) {
       thingToString(thing) + "|\n"
     } else {
       thingToString(thing)
@@ -47,7 +47,7 @@ case class Board(board: Vector[Vector[Tile]]) {
     val stringVector = for{
          (thingVector, x) <- board.zipWithIndex
          (thing, y) <- thingVector.zipWithIndex
-    } yield(thingAtPositionToString(thing, x, y))
+    } yield(thingAtPositionToString(thing, Pos(x, y)))
 
     val line = "+" + "-" * nbColumns + "+\n"
 
