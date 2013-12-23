@@ -1,4 +1,4 @@
 package jousse.org
 package bot
 
-case class Player(name: String) extends Thing
+case class Player(number: Int, name: String) extends Thing

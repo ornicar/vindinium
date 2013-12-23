@@ -6,12 +6,19 @@ case class Board(board: Vector[Vector[Thing]]) {
   def get(x: Int, y: Int) : Option[Thing] = (board lift x).flatMap( _ lift y)
 
   def thingAtPositionToString(thing: Thing, x: Int, y: Int, rows: Int, cols: Int) : String = {
+
+    def thingToString(thing: Thing): String = thing match {
+      case Player(number, _) => number.toString
+      case _ => "X"
+
+    }
+
     if(y == 0) {
-      "|X"
+      "|" + thingToString(thing)
     } else if (y == cols-1) {
-      "X|\n"
+      thingToString(thing) + "|\n"
     } else {
-      "X"
+      thingToString(thing)
     }
   }
 
