@@ -1,17 +1,17 @@
 package jousse.org
 package bot
 
-case class Board(board: Vector[Vector[Thing]]) {
+case class Board(board: Vector[Vector[Tile]]) {
 
-  def get(x: Int, y: Int) : Option[Thing] = (board lift x).flatMap( _ lift y)
+  def get(x: Int, y: Int) : Option[Tile] = (board lift x).flatMap( _ lift y)
 
   def nbColumns = ((board lift 0).getOrElse(Vector())).length
 
   def nbRows = board.length
 
-  def thingAtPositionToString(thing: Thing, x: Int, y: Int) : String = {
+  def thingAtPositionToString(thing: Tile, x: Int, y: Int) : String = {
 
-    def thingToString(thing: Thing): String = thing match {
+    def thingToString(thing: Tile): String = thing match {
       case Player(number, _) => number.toString
       case _ => "X"
     }
@@ -24,6 +24,23 @@ case class Board(board: Vector[Vector[Thing]]) {
       thingToString(thing)
     }
   }
+
+  /**
+   * Return the grid to the following format:
+   *
+   * +----------+
+   * |2XXXXXXXXX|
+   * |XXXXXXXXXX|
+   * |XXXXXXXXXX|
+   * |XXXXXXXXXX|
+   * |XXXXXXXXXX|
+   * |XXXXXXXXXX|
+   * |XXXXXXXXXX|
+   * |XXXXXXXXXX|
+   * |XXXXXXXXXX|
+   * |XXXXXXXXX1|
+   * +----------+
+   **/
 
   override def toString = {
 
@@ -49,7 +66,7 @@ object Board {
     Board( Vector.tabulate(columns, rows){ (i,j) => (i,j) match {
       case (0,0)                                      => if(rdnValue == 1) player1 else player2
       case (x,y) if x == (columns-1) && y == (rows-1) => if(rdnValue == 1) player2 else player1
-      case _                                          => new Thing()
+      case _                                          => new Tile()
     }} )
   }
 
