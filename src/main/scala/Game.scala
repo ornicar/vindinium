@@ -1,5 +1,6 @@
 package jousse.org
 package bot
+import scala.util.{ Try, Success, Failure }
 
 case class Player(
   number: Int,
@@ -13,6 +14,6 @@ case class Game(
 )
 
 object Game {
-  def create(id: String, rows: Int, columns: Int, player1: Player, player2: Player): Game =
-    Game(id, Board.empty, player1, player2)
+  def create(id: String, size: Int, player1: Player, player2: Player): Try[Game] =
+    Generator(size) map { board => Game(id, board, player1, player2) }
 }
