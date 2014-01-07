@@ -10,6 +10,6 @@ object Tile {
   case object Air extends Tile(' ')
   case object Wall extends Tile('#')
   case object Potion extends Tile('!')
-  case object Monster extends Tile('&')
+  case object Monster extends Tile('x')
   case class Hero(number: Int) extends Tile(number.toString.head)
 }

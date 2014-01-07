@@ -3,29 +3,30 @@ package bot
 
 case class Board(tiles: Vector[Vector[Tile]]) {
 
-  def get(pos: Pos) : Option[Tile] = (tiles lift pos.x).flatMap( _ lift pos.y)
+  def get(pos: Pos): Option[Tile] = (tiles lift pos.x).flatMap(_ lift pos.y)
 
-  def up(pos: Pos, tile: Tile): Option[Board] = scala.util.Try(tiles.updated(pos.x, tiles(pos.x).updated(pos.y, tile))).toOption match {
-    case Some(b) => Some(Board(b))
-    case _       => None
-  }
+  def updated(pos: Pos, tile: Tile): Option[Board] =
+    scala.util.Try(tiles.updated(pos.x, tiles(pos.x).updated(pos.y, tile))).toOption map Board.apply
 
-  def nbColumns = ((tiles lift 0).getOrElse(Vector())).length
+  def size = tiles.length
 
-  def nbRows = tiles.length
+  def thingAtPositionToString(tile: Tile, pos: Pos): String = {
 
-  def nbTiles = nbRows * nbColumns
-
-  def thingAtPositionToString(tile: Tile, pos: Pos) : String = {
-
-    if(pos.y == 0) {
+    if (pos.y == 0) {
       "|" + tile
-    } else if (pos.y == nbColumns-1) {
+    }
+    else if (pos.y == size - 1) {
       tile + "|\n"
-    } else {
+    }
+    else {
       tile.toString
     }
   }
+
+  def topLeft = Pos(0, 0)
+  def topRight = Pos(0, size - 1)
+  def bottomLeft = Pos(size - 1, 0)
+  def bottomRight = Pos(size - 1, size - 1)
 
   /**
    * Return the grid to the following format:
@@ -42,16 +43,16 @@ case class Board(tiles: Vector[Vector[Tile]]) {
    * |XXXXXXXXXX|
    * |XXXXXXXXX1|
    * +----------+
-   **/
+   */
 
   override def toString = {
 
-    val stringVector = for{
-         (thingVector, x) <- tiles.zipWithIndex
-         (thing, y) <- thingVector.zipWithIndex
-    } yield(thingAtPositionToString(thing, Pos(x, y)))
+    val stringVector = for {
+      (thingVector, x) <- tiles.zipWithIndex
+      (thing, y) <- thingVector.zipWithIndex
+    } yield (thingAtPositionToString(thing, Pos(x, y)))
 
-    val line = "+" + "-" * nbColumns + "+\n"
+    val line = "+" + "-" * size + "+\n"
 
     line + stringVector.mkString + line
   }
