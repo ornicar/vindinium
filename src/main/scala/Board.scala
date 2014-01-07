@@ -5,6 +5,11 @@ case class Board(board: Vector[Vector[Tile]]) {
 
   def get(pos: Pos) : Option[Tile] = (board lift pos.x).flatMap( _ lift pos.y)
 
+  def up(pos: Pos, tile: Tile): Option[Board] = scala.util.Try(board.updated(pos.x, board(pos.x).updated(pos.y, tile))).toOption match {
+    case Some(b) => Some(Board(b))
+    case _       => None
+  }
+
   def nbColumns = ((board lift 0).getOrElse(Vector())).length
 
   def nbRows = board.length
@@ -15,7 +20,7 @@ case class Board(board: Vector[Vector[Tile]]) {
 
     def thingToString(thing: Tile): String = thing match {
       case Player(number, _) => number.toString
-      case Wall() => "Y"
+      case Wall() => "X"
       case _ => " "
     }
 
@@ -60,7 +65,7 @@ case class Board(board: Vector[Vector[Tile]]) {
 
 object Board {
 
-  def initialize(columns: Int, rows: Int, player1: Player, player2: Player) : Board = {
+  def initialize(rows: Int, columns: Int, player1: Player, player2: Player) : Board = {
 
     val rnd = new scala.util.Random
     val range = 1 to 2
@@ -75,15 +80,46 @@ object Board {
 
   def fillWithRandomWalls(board: Board, wallPercentage: Int = 20) : Board = {
 
-    val nbWalls : Int = board.nbTiles / wallPercentage * 100
+    //Let's say we want a fixed percentage of walls
+    val nbWalls : Int = board.nbTiles * wallPercentage / 100
+    println(s"willFill ${nbWalls} walls")
 
     def fillBoard(board: Board, totalWalls: Int = nbWalls, currentWallNumber: Int = 0): Board =
       (nbWalls, currentWallNumber) match {
-      case (0, y)           => board
-      case (x, y) if x == y => board
-      case _                => fillBoard(board, totalWalls, currentWallNumber + 1)
+      //There is nothing to fill
+      case (0, 0)                           => board
+      //We have filled everything
+      case (max, current) if max == current => board
+      case _                                => fillBoard(
+        fillRandomTileWithWall(board).getOrElse(board),
+        totalWalls,
+        currentWallNumber + 1)
     }
 
     fillBoard(board, nbWalls, 0)
   }
+
+
+  def fillRandomTileWithWall(board: Board): Option[Board] = {
+    val randomPosition = getRandomPos(board)
+    board.get(randomPosition) match {
+      case Some(Player(_,_)) => None
+      case Some(Wall())      => None
+      case None              => None
+      case _                 => board.up(randomPosition, Wall())
+
+    }
+  }
+
+  def getRandomPos(board: Board): Pos = {
+
+    val rnd = new scala.util.Random
+    val range = 0 to math.max((board.nbRows-1),(board.nbColumns-1))
+    val xRandomValue = range(rnd.nextInt(range.length))
+    val yRandomValue = range(rnd.nextInt(range.length))
+
+    Pos(xRandomValue, yRandomValue)
+
+  }
+
 }
