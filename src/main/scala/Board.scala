@@ -1,18 +1,18 @@
 package jousse.org
 package bot
 
-case class Board(board: Vector[Vector[Tile]]) {
+case class Board(tiles: Vector[Vector[Tile]]) {
 
-  def get(pos: Pos) : Option[Tile] = (board lift pos.x).flatMap( _ lift pos.y)
+  def get(pos: Pos) : Option[Tile] = (tiles lift pos.x).flatMap( _ lift pos.y)
 
-  def up(pos: Pos, tile: Tile): Option[Board] = scala.util.Try(board.updated(pos.x, board(pos.x).updated(pos.y, tile))).toOption match {
+  def up(pos: Pos, tile: Tile): Option[Board] = scala.util.Try(tiles.updated(pos.x, tiles(pos.x).updated(pos.y, tile))).toOption match {
     case Some(b) => Some(Board(b))
     case _       => None
   }
 
-  def nbColumns = ((board lift 0).getOrElse(Vector())).length
+  def nbColumns = ((tiles lift 0).getOrElse(Vector())).length
 
-  def nbRows = board.length
+  def nbRows = tiles.length
 
   def nbTiles = nbRows * nbColumns
 
@@ -47,7 +47,7 @@ case class Board(board: Vector[Vector[Tile]]) {
   override def toString = {
 
     val stringVector = for{
-         (thingVector, x) <- board.zipWithIndex
+         (thingVector, x) <- tiles.zipWithIndex
          (thing, y) <- thingVector.zipWithIndex
     } yield(thingAtPositionToString(thing, Pos(x, y)))
 

@@ -6,7 +6,7 @@ class GeneratorSpec extends Specification {
 
   "The generator" should {
     "generate, doh!" in {
-      Generator(8) must beSuccessfulTry.like {
+      Generator(20) must beSuccessfulTry.like {
         case board => println(board); success
       }
     }
