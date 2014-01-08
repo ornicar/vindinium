@@ -14,6 +14,8 @@ case class Hero(
 
   def fight(enemy: Hero) = withLife(-enemy.life) -> enemy.withLife(-life)
 
+  def fightMine = withLife(-Hero.mineEffect)
+
   def withLife(diff: Int) = copy(life = math.max(0, math.min(Hero.maxLife, life + diff)))
 
   def reSpawn(p: Pos) = copy(life = Hero.maxLife, pos = p)
@@ -28,4 +30,5 @@ object Hero {
 
   val maxLife = 100
   val beerEffect = 50
+  val mineEffect = -40
 }

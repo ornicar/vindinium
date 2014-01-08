@@ -16,10 +16,9 @@ object Arbiter {
       case tile => game hero destPos match {
         case Some(enemy) => fight(enemy)
         case None => tile match {
-          case Some(Tile.Air)                            => walk(destPos)
-          case Some(Tile.Beer)                           => drink(destPos)
-          case Some(Tile.Mine(owner)) if owner == number => walk(destPos)
-          case _                                         => walk(destPos)
+          case Some(Tile.Beer)                         => drink(destPos)
+          case Some(Tile.Mine(n)) if n != Some(number) => mine(destPos)
+          case _                                       => walk(destPos)
         }
       }
     }
@@ -36,10 +35,16 @@ object Arbiter {
       val (h1, h2) = hero fight enemy
       List(h1 -> h2, h2 -> h1).foldLeft(g) {
         case (game, (x, y)) => if (x.isDead) game
-            .withHero(reSpawn(x))
-            .withBoard(_.transferMines(x.number, if (y.isAlive) Some(y.number) else None))
-          else game withHero hero
+          .withHero(reSpawn(x))
+          .withBoard(_.transferMines(x.number, if (y.isAlive) Some(y.number) else None))
+        else game withHero hero
       }
+    }
+
+    def mine(pos: Pos) = walk(pos) map { g =>
+      val h1 = hero.fightMine
+      if (h1.isAlive) g.withHero(h1).withBoard(_.transferMine(pos, Some(h1.number)))
+      else g.withHero(reSpawn(h1)).withBoard(_.transferMines(h1.number, None))
     }
 
     @annotation.tailrec
