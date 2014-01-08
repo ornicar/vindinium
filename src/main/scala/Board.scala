@@ -10,51 +10,26 @@ case class Board(tiles: Vector[Vector[Tile]]) {
 
   def size = tiles.length
 
-  def thingAtPositionToString(tile: Tile, pos: Pos): String = {
-
-    if (pos.y == 0) {
-      "|" + tile
-    }
-    else if (pos.y == size - 1) {
-      tile + "|\n"
-    }
-    else {
-      tile.toString
-    }
-  }
-
   def topLeft = Pos(0, 0)
   def topRight = Pos(0, size - 1)
   def bottomLeft = Pos(size - 1, 0)
   def bottomRight = Pos(size - 1, size - 1)
 
-  /**
-   * Return the grid to the following format:
-   *
-   * +----------+
-   * |2XXXXXXXXX|
-   * |XXXXXXXXXX|
-   * |XXXXXXXXXX|
-   * |XXXXXXXXXX|
-   * |XXXXXXXXXX|
-   * |XXXXXXXXXX|
-   * |XXXXXXXXXX|
-   * |XXXXXXXXXX|
-   * |XXXXXXXXXX|
-   * |XXXXXXXXX1|
-   * +----------+
-   */
-
   override def toString = {
+
+    def thingAtPositionToString(tile: Tile, pos: Pos): String =
+      if (pos.y == 0) "|" + tile
+      else if (pos.y == size - 1) tile + "|\n"
+      else tile.toString
 
     val stringVector = for {
       (thingVector, x) <- tiles.zipWithIndex
       (thing, y) <- thingVector.zipWithIndex
-    } yield (thingAtPositionToString(thing, Pos(x, y)))
+    } yield thingAtPositionToString(thing, Pos(x, y))
 
     val line = "+" + "-" * size + "+\n"
 
-    line + stringVector.mkString + line
+    line + stringVector + line
   }
 }
 
