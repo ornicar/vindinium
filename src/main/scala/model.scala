@@ -1,4 +1,4 @@
-package jousse.org
+package org.jousse
 package bot
 
 case class Pos(x: Int, y: Int) {

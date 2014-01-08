@@ -1,4 +1,4 @@
-package jousse.org
+package org.jousse
 package bot
 
 case class Board(tiles: Vector[Vector[Tile]]) {

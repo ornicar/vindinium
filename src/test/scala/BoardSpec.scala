@@ -1,5 +1,5 @@
 import org.specs2.mutable._
-import jousse.org.bot._
+import org.jousse.bot._
 
 class BoardSpec extends Specification {
 

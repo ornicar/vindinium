@@ -1,4 +1,4 @@
-package jousse.org
+package org.jousse
 package bot
 
 import scala.util.{ Try, Success, Failure }

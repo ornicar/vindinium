@@ -1,4 +1,4 @@
-package jousse.org.bot
+package org.jousse.bot
 
 import org.specs2.mutable._
 

@@ -1,4 +1,4 @@
-package jousse.org
+package org.jousse
 
 package object bot {
 
@@ -14,4 +14,6 @@ package object bot {
       fua
     }
   }
+
+  // implicit final class BotPimpedOption
 }
