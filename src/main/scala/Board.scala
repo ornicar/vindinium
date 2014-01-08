@@ -18,11 +18,6 @@ case class Board(tiles: Vector[Vector[Tile]]) {
 
   val size = tiles.length
 
-  def topLeft = Pos(0, 0)
-  def topRight = Pos(0, size - 1)
-  def bottomLeft = Pos(size - 1, 0)
-  def bottomRight = Pos(size - 1, size - 1)
-
   def isAir(pos: Pos) = get(pos).fold(false)(Tile.Air==)
 
   def mirrorX(pos: Pos) = pos.copy(x = size - pos.x - 1)
@@ -39,6 +34,11 @@ case class Board(tiles: Vector[Vector[Tile]]) {
       case Some(Tile.Mine(Some(owner))) if owner == from => transferMine(pos, to)
       case _ => b
     }
+  }
+
+  def countMines(of: Int) = tiles.flatten.foldLeft(0) {
+    case (c, Tile.Mine(Some(owner))) if owner == of => c + 1
+    case (c, _)                                     => c
   }
 
   override def toString = {
