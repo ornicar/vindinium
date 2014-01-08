@@ -17,7 +17,7 @@ object Arbiter {
         case Some(enemy) => fight(enemy)
         case None => tile match {
           case Some(Tile.Air)                            => justWalk(destPos)
-          case Some(Tile.Potion)                         => drink(destPos)
+          case Some(Tile.Beer)                         => drink(destPos)
           case Some(Tile.Mine(owner)) if owner == number => justWalk(destPos)
           case _                                         => justWalk(destPos)
         }
@@ -29,7 +29,7 @@ object Arbiter {
     }
 
     def drink(destPos: Pos) = Success {
-      game.step(_.withHero(_.drinkPotion moveTo destPos))
+      game.step(_.withHero(_.drinkBeer moveTo destPos))
     }
 
     def fight(enemy: Hero) = ???

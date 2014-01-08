@@ -9,7 +9,7 @@ object Generator {
     size: Int,
     attempts: Int = 20,
     wallPercent: Int = 40,
-    potionPercent: Int = 3,
+    beerPercent: Int = 3,
     monsterPercent: Int = 5): Try[Game] = {
 
     def generateBoard(attempt: Int): Try[Board] = {
@@ -18,9 +18,9 @@ object Generator {
         (1 to size).toVector map { _ =>
           (1 to size).toVector map { _ =>
             Random.nextInt(100) match {
-              case x if x < potionPercent => Tile.Potion
-              case x if x < (potionPercent + monsterPercent) => Tile.Monster
-              case x if x < (potionPercent + monsterPercent + wallPercent) => Tile.Wall
+              case x if x < beerPercent => Tile.Beer
+              case x if x < (beerPercent + monsterPercent) => Tile.Monster
+              case x if x < (beerPercent + monsterPercent + wallPercent) => Tile.Wall
               case _ => Tile.Air
             }
           }

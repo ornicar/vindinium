@@ -10,7 +10,7 @@ case class Hero(
 
   def moveTo(p: Pos) = copy(pos = p)
 
-  def drinkPotion = copy(life = math.min(Hero.maxLife, life + Hero.potionEffect))
+  def drinkBeer = copy(life = math.min(Hero.maxLife, life + Hero.beerEffect))
 
   def render = s"@$number"
 }
@@ -18,5 +18,5 @@ case class Hero(
 object Hero {
 
   val maxLife = 100
-  val potionEffect = 50
+  val beerEffect = 50
 }
