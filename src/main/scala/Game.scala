@@ -2,16 +2,6 @@ package org.jousse
 package bot
 import scala.util.{ Try, Success, Failure }
 
-case class Hero(
-    number: Int,
-    name: String,
-    pos: Pos,
-    life: Int,
-    gold: Int) {
-
-  def render = s"@$number"
-}
-
 case class Game(
     id: String,
     board: Board,
@@ -27,10 +17,15 @@ case class Game(
   def hero(number: Int): Hero = heroes lift number getOrElse hero1
   def hero(pos: Pos): Option[Hero] = heroes find (_.pos == pos)
 
-  def step(withBoard: Board => Board) = copy(
-    turn = turn + 1,
-    board = withBoard(board)
-  )
+  def step(update: Game => Game) = update(this).copy(turn = turn + 1)
+
+  def withHero(f: Hero => Hero): Game = withHero(hero, f)
+
+  def withHero(hero: Hero, f: Hero => Hero): Game = copy(
+    hero1 = if (hero.number == 1) f(hero1) else hero1,
+    hero2 = if (hero.number == 2) f(hero2) else hero2,
+    hero3 = if (hero.number == 3) f(hero3) else hero3,
+    hero4 = if (hero.number == 4) f(hero4) else hero4)
 
   override def toString = {
 

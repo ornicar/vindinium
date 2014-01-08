@@ -11,16 +11,28 @@ object Arbiter {
     val board = game.board
 
     def reach(destPos: Pos) = board get destPos match {
-      case None                                      => n00b("Moving out the board")
-      case Some(Tile.Wall)                           => n00b("Hitting the wall")
-      case Some(Tile.Air)                            => justWalk(destPos)
-      case Some(Tile.Mine(owner)) if owner == number => justWalk(destPos)
-      case _                                         => justWalk(destPos)
+      case None            => n00b("Moving out the board")
+      case Some(Tile.Wall) => n00b("Hitting the wall")
+      case tile => game hero destPos match {
+        case Some(enemy) => fight(enemy)
+        case None => tile match {
+          case Some(Tile.Air)                            => justWalk(destPos)
+          case Some(Tile.Potion)                         => drink(destPos)
+          case Some(Tile.Mine(owner)) if owner == number => justWalk(destPos)
+          case _                                         => justWalk(destPos)
+        }
+      }
     }
 
     def justWalk(destPos: Pos) = Success {
-      game
+      game.step(_.withHero(_ moveTo destPos))
     }
+
+    def drink(destPos: Pos) = Success {
+      game.step(_.withHero(_.drinkPotion moveTo destPos))
+    }
+
+    def fight(enemy: Hero) = ???
 
     if (game.hero != hero) n00b(s"Not hero $number turn to move")
     else reach(hero.pos to dir)
