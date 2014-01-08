@@ -1,12 +1,17 @@
 package org.jousse
 package bot
 
+import scala.util.Try
+
 case class Board(tiles: Vector[Vector[Tile]]) {
 
   def get(pos: Pos): Option[Tile] = (tiles lift pos.x).flatMap(_ lift pos.y)
 
-  def updated(pos: Pos, tile: Tile): Option[Board] =
-    scala.util.Try(tiles.updated(pos.x, tiles(pos.x).updated(pos.y, tile))).toOption map Board.apply
+  def update(pos: Pos, tile: Tile): Board = Try {
+    tiles.updated(pos.x, tiles(pos.x).updated(pos.y, tile))
+  } map Board.apply getOrElse this
+
+  def remove(pos: Pos): Board = update(pos, Tile.Air)
 
   def size = tiles.length
 

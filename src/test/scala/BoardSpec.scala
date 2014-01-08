@@ -8,11 +8,11 @@ class BoardSpec extends Specification {
 
   "The board" should {
     "be updated with a valid pos" in {
-      board.updated(Pos(1,1), Tile.Wall) must beSome
+      board.update(Pos(1,1), Tile.Wall) must_!= board
     }
 
     "not be updated with an invalid pos" in {
-      board.updated(Pos(0,size+1), Tile.Wall) must beNone
+      board.update(Pos(0,size+1), Tile.Wall) must_== board
     }
 
   }
