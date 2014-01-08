@@ -5,12 +5,20 @@ case class Hero(
     number: Int,
     name: String,
     pos: Pos,
-    life: Int,
-    gold: Int) {
+    life: Int = Hero.maxLife,
+    gold: Int = 0) {
 
   def moveTo(p: Pos) = copy(pos = p)
 
-  def drinkBeer = copy(life = math.min(Hero.maxLife, life + Hero.beerEffect))
+  def drinkBeer = withLife(life + Hero.beerEffect)
+
+  def fight(enemy: Hero) = withLife(-enemy.life) -> enemy.withLife(-life)
+
+  def withLife(diff: Int) = copy(life = math.max(0, math.min(Hero.maxLife, life + diff)))
+
+  def reSpawn(p: Pos) = copy(life = Hero.maxLife, pos = p)
+
+  def isDead = life == 0
 
   def render = s"@$number"
 }

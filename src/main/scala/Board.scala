@@ -13,7 +13,7 @@ case class Board(tiles: Vector[Vector[Tile]]) {
 
   def remove(pos: Pos): Board = update(pos, Tile.Air)
 
-  def size = tiles.length
+  val size = tiles.length
 
   def topLeft = Pos(0, 0)
   def topRight = Pos(0, size - 1)
@@ -21,6 +21,9 @@ case class Board(tiles: Vector[Vector[Tile]]) {
   def bottomRight = Pos(size - 1, size - 1)
 
   def isAir(pos: Pos) = get(pos).fold(false)(Tile.Air==)
+
+  def mirrorX(pos: Pos) = pos.copy(x = size - pos.x - 1)
+  def mirrorY(pos: Pos) = pos.copy(y = size - pos.y - 1)
 
   override def toString = {
 

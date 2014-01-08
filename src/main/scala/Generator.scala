@@ -46,13 +46,6 @@ object Generator {
       }
     }
 
-    def mkHero(number: Int, name: String, pos: Pos) = Hero(
-      number = number,
-      name = name,
-      pos = pos,
-      life = 100,
-      gold = 0).pp
-
     generateBoard(attempts) map { board =>
 
       @annotation.tailrec
@@ -68,10 +61,10 @@ object Generator {
         val game = Game(
           id = RandomString(6),
           board = board,
-          hero1 = mkHero(1, "Alaric", hp),
-          hero2 = mkHero(2, "Luther", hp.copy(x = board.size - hp.x - 1)),
-          hero3 = mkHero(3, "Thorfinn", hp.copy(x = board.size - hp.x - 1, y = board.size - hp.y - 1)),
-          hero4 = mkHero(4, "York", hp.copy(y = board.size - hp.y - 1))
+          hero1 = Hero(1, "Alaric", hp),
+          hero2 = Hero(2, "Luther", hp.copy(x = board.size - hp.x - 1)),
+          hero3 = Hero(3, "Thorfinn", hp.copy(x = board.size - hp.x - 1, y = board.size - hp.y - 1)),
+          hero4 = Hero(4, "York", hp.copy(y = board.size - hp.y - 1))
         )
 
         if (Validator game game) game else generateGame
