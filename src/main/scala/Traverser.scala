@@ -3,7 +3,7 @@ package bot
 
 object Traverser {
 
-  def apply(board: Board, from: Pos) = {
+  def apply(board: Board, from: Pos): Seq[Pos] = {
 
     @annotation.tailrec
     def traverseTR(toVisit: Seq[Pos], visited: Set[Pos], accumulator: Seq[Pos]): Seq[Pos] = {

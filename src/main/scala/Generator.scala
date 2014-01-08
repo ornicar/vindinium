@@ -35,17 +35,21 @@ object Generator {
           xs2 ++ xs2.reverse
         }
 
-        val board = replicate(sector(size / 2))
+        val boardDraft = replicate(sector(size / 2))
 
         @annotation.tailrec
         def generateHeroPos(posAttempts: Int): Try[Pos] = {
           val pos = Pos(Random nextInt (size / 2 - 2), Random nextInt (size / 2 - 2))
-          if (Validator.heroPos(board, pos)) Success(pos)
+          if (Validator.heroPos(boardDraft, pos)) Success(pos)
           else if (posAttempts < maxAttempts) generateHeroPos(posAttempts + 1)
           else fail("Can't find a good starting position")
         }
 
         generateHeroPos(1) map { hp =>
+          println(boardDraft)
+          val board = boardDraft.allPos.diff(Traverser(boardDraft, hp)).foldLeft(boardDraft) {
+            case (b, pos) => b.update(pos, Tile.Wall)
+          }
           Game(
             id = RandomString(6),
             board = board,

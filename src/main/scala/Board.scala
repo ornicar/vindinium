@@ -9,7 +9,10 @@ case class Board(tiles: Vector[Vector[Tile]]) {
 
   def update(pos: Pos, tile: Tile): Board = Try {
     tiles.updated(pos.x, tiles(pos.x).updated(pos.y, tile))
-  } map Board.apply getOrElse this
+  } map Board.apply getOrElse {
+    println(pos)
+    this
+  }
 
   def remove(pos: Pos): Board = update(pos, Tile.Air)
 
@@ -25,11 +28,18 @@ case class Board(tiles: Vector[Vector[Tile]]) {
   def mirrorX(pos: Pos) = pos.copy(x = size - pos.x - 1)
   def mirrorY(pos: Pos) = pos.copy(y = size - pos.y - 1)
 
+  def allPos = (0 to size - 1).toList flatMap { x =>
+    (0 to size - 1).toList map { Pos(x, _) }
+  }
+
   override def toString = {
 
     val stringVector = tiles flatMap { xs =>
       xs.zipWithIndex map {
-        case (tile, y) => if (y == 0) s"|$tile" else if (y == size - 1) s"$tile|\n" else tile.toString
+        case (tile, y) => {
+          val x = tile.render
+          if (y == 0) s"|$x" else if (y == size - 1) s"$x|\n" else x
+        }
       }
     }
 
