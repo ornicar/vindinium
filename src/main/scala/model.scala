@@ -35,3 +35,9 @@ object Tile {
   case object Beer extends Tile(' ', '♥')
   case class Mine(owner: Option[Int]) extends Tile('$', owner.fold('-')(_.toString.head))
 }
+
+sealed trait Finish
+object Finish {
+  case object TurnMax extends Finish
+  case class GoldWin(hero: Hero) extends Finish
+}
