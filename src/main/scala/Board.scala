@@ -32,6 +32,13 @@ case class Board(tiles: Vector[Vector[Tile]]) {
     (0 to size - 1).toList map { Pos(x, _) }
   }
 
+  def transferMines(from: Int, to: Option[Int]): Board = allPos.foldLeft(this) {
+    case (b, pos) => b get pos match {
+      case Some(Tile.Mine(Some(owner))) if owner == from => b.update(pos, Tile.Mine(to))
+      case _ => b
+    }
+  }
+
   override def toString = {
 
     val stringVector = tiles flatMap { xs =>

@@ -10,7 +10,7 @@ object Generator {
     maxAttempts: Int = 20,
     wallPercent: Int = 40,
     beerPercent: Int = 3,
-    monsterPercent: Int = 5): Try[Game] = size match {
+    minePercent: Int = 5): Try[Game] = size match {
     case s if s < 8      ⇒ fail("Board is too small")
     case s if s % 2 != 0 ⇒ fail("Board size is odd")
     case _ ⇒ {
@@ -22,8 +22,8 @@ object Generator {
             (1 to size).toVector map { _ =>
               Random.nextInt(100) match {
                 case x if x < beerPercent => Tile.Beer
-                case x if x < (beerPercent + monsterPercent) => Tile.Monster
-                case x if x < (beerPercent + monsterPercent + wallPercent) => Tile.Wall
+                case x if x < (beerPercent + minePercent) => Tile.Mine(None)
+                case x if x < (beerPercent + minePercent + wallPercent) => Tile.Wall
                 case _ => Tile.Air
               }
             }
@@ -46,7 +46,6 @@ object Generator {
         }
 
         generateHeroPos(1) map { hp =>
-          println(boardDraft)
           val board = boardDraft.allPos.diff(Traverser(boardDraft, hp)).foldLeft(boardDraft) {
             case (b, pos) => b.update(pos, Tile.Wall)
           }

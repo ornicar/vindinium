@@ -33,9 +33,13 @@ object Arbiter {
     }
 
     def fight(enemy: Hero) = walk(enemy.pos) map { g =>
-      val (h2, e2) = hero fight enemy
-      g.withHero(if (h2.isDead) reSpawn(h2) else h2)
-        .withHero(if (e2.isDead) reSpawn(e2) else e2)
+      val (h1, h2) = hero fight enemy
+      List(h1 -> h2, h2 -> h1).foldLeft(g) {
+        case (game, (x, y)) => if (x.isDead) game
+            .withHero(reSpawn(x))
+            .withBoard(_.transferMines(x.number, if (y.isAlive) Some(y.number) else None))
+          else game withHero hero
+      }
     }
 
     @annotation.tailrec

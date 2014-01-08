@@ -33,6 +33,5 @@ object Tile {
   case object Air extends Tile(' ', ' ')
   case object Wall extends Tile('#', '#')
   case object Beer extends Tile(' ', '♥')
-  case object Monster extends Tile('ò', '<')
-  case class Mine(owner: Int) extends Tile('$', owner.toString.head)
+  case class Mine(owner: Option[Int]) extends Tile('$', owner.fold('-')(_.toString.head))
 }

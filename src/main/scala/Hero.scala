@@ -18,7 +18,8 @@ case class Hero(
 
   def reSpawn(p: Pos) = copy(life = Hero.maxLife, pos = p)
 
-  def isDead = life == 0
+  def isAlive = life >0
+  def isDead = !isAlive
 
   def render = s"@$number"
 }
