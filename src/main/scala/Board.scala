@@ -32,9 +32,11 @@ case class Board(tiles: Vector[Vector[Tile]]) {
     (0 to size - 1).toList map { Pos(x, _) }
   }
 
+  def transferMine(pos: Pos, to: Option[Int]): Board = update(pos, Tile.Mine(to))
+
   def transferMines(from: Int, to: Option[Int]): Board = allPos.foldLeft(this) {
     case (b, pos) => b get pos match {
-      case Some(Tile.Mine(Some(owner))) if owner == from => b.update(pos, Tile.Mine(to))
+      case Some(Tile.Mine(Some(owner))) if owner == from => transferMine(pos, to)
       case _ => b
     }
   }
