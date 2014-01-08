@@ -1,5 +1,6 @@
 package jousse.org
 package bot
+import scala.util.{ Try, Success, Failure }
 
 case class Player(
   number: Int,
@@ -19,4 +20,4 @@ case class Game(
   def players = List(player1, player2, player3, player4)
 
   def player = players lift (turn % 4) getOrElse player1
-}
+    }
