@@ -6,6 +6,7 @@ import scala.util.{ Random, Try, Success, Failure }
 object Generator {
 
   def apply(
+    config: Config,
     size: Int,
     maxAttempts: Int = 20,
     wallPercent: Int = 40,
@@ -52,6 +53,7 @@ object Generator {
           Game(
             id = RandomString(6),
             board = board,
+            config = config,
             hero1 = Hero(1, "Alaric", hp),
             hero2 = Hero(2, "Luther", hp.copy(x = board.size - hp.x - 1)),
             hero3 = Hero(3, "Thorfinn", hp.copy(x = board.size - hp.x - 1, y = board.size - hp.y - 1)),

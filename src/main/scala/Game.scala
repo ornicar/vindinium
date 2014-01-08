@@ -5,6 +5,7 @@ import scala.util.{ Try, Success, Failure }
 case class Game(
     id: String,
     board: Board,
+    config: Config,
     hero1: Hero,
     hero2: Hero,
     hero3: Hero,

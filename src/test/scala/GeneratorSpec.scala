@@ -11,7 +11,8 @@ class GeneratorSpec extends Specification {
         size = 30,
         wallPercent = wallP,
         beerPercent = 2,
-        minePercent = 3) must beSuccessfulTry.like {
+        minePercent = 3,
+        config = Config()) must beSuccessfulTry.like {
           case game => {
             println(game)
             success
