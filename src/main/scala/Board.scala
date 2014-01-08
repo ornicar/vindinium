@@ -27,9 +27,9 @@ case class Board(tiles: Vector[Vector[Tile]]) {
       (thing, y) <- thingVector.zipWithIndex
     } yield thingAtPositionToString(thing, Pos(x, y))
 
-    val line = "+" + "-" * size + "+\n"
+    val line = "+" + "--" * size + "+\n"
 
-    line + stringVector + line
+    line + stringVector.mkString + line
   }
 }
 

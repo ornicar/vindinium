@@ -19,13 +19,14 @@ case object Dir {
   case object Right
 }
 
-sealed abstract class Tile(char: Char) {
-  override def toString = char.toString
+sealed abstract class Tile(char1: Char, char2: Char) {
+  override def toString = char1.toString + char2.toString
 }
 object Tile {
-  case object Air extends Tile(' ')
-  case object Wall extends Tile('#')
-  case object Potion extends Tile('!')
-  case object Monster extends Tile('x')
-  case class Hero(number: Int) extends Tile(number.toString.head)
+  case object Air extends Tile(' ', ' ')
+  case object Wall extends Tile('#', '#')
+  case object Potion extends Tile('/', '\\')
+  case object Monster extends Tile('o', '<')
+  case class Mine(owner: Int) extends Tile('$', owner.toString.head)
+  case class Hero(number: Int) extends Tile('@', number.toString.head)
 }
