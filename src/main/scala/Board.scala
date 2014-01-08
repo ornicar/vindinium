@@ -19,15 +19,11 @@ case class Board(tiles: Vector[Vector[Tile]]) {
 
   override def toString = {
 
-    def thingAtPositionToString(tile: Tile, pos: Pos): String =
-      if (pos.y == 0) "|" + tile
-      else if (pos.y == size - 1) tile + "|\n"
-      else tile.toString
-
-    val stringVector = for {
-      (thingVector, x) <- tiles.zipWithIndex
-      (thing, y) <- thingVector.zipWithIndex
-    } yield thingAtPositionToString(thing, Pos(x, y))
+    val stringVector = tiles flatMap { xs =>
+      xs.zipWithIndex map {
+        case (tile, y) => if (y == 0) s"|$tile" else if (y == size - 1) s"$tile|\n" else tile.toString
+      }
+    }
 
     val line = "+" + "--" * size + "+\n"
 
