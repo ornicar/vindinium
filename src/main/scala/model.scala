@@ -35,5 +35,4 @@ object Tile {
   case object Potion extends Tile('/', '\\')
   case object Monster extends Tile('o', '<')
   case class Mine(owner: Int) extends Tile('$', owner.toString.head)
-  case class Hero(number: Int) extends Tile('@', number.toString.head)
 }

@@ -7,10 +7,8 @@ object Arbiter {
 
   def move(game: Game, number: Int, dir: Dir): Try[Game] = {
 
+    val hero = game hero number
     val board = game.board
-    val fromPos = board findHero number
-
-    def n00b(err: String) = Failure(new Exception(s"n00b! $err"))
 
     def reach(destPos: Pos) = board get destPos match {
       case None                                      => n00b("Moving out the board")
@@ -21,15 +19,12 @@ object Arbiter {
     }
 
     def justWalk(destPos: Pos) = Success {
-      game.step(_.updated(
-
-      ))
+      game
     }
 
-    if (game.player.number != number) n00b(s"Not player $number turn to move")
-    else fromPos match {
-      case None      => n00b(s"The hero number $number is not on the map")
-      case Some(pos) => reach(pos to dir)
-    }
+    if (game.hero != hero) n00b(s"Not hero $number turn to move")
+    else reach(hero.pos to dir)
   }
+
+  private def n00b(err: String) = Failure(new Exception(s"n00b! $err"))
 }
