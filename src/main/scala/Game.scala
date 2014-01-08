@@ -20,4 +20,9 @@ case class Game(
   def players = List(player1, player2, player3, player4)
 
   def player = players lift (turn % 4) getOrElse player1
-    }
+
+  def step(withBoard: Board => Board) = copy(
+    turn = turn + 1,
+    board = withBoard(board)
+  )
+}

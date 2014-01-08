@@ -15,6 +15,15 @@ case class Board(tiles: Vector[Vector[Tile]]) {
   def bottomLeft = Pos(size - 1, 0)
   def bottomRight = Pos(size - 1, size - 1)
 
+  lazy val indexedTiles = tiles.map(_.zipWithIndex).zipWithIndex
+
+  def find(tile: Tile): Option[Pos] = (indexedTiles collectFirst {
+    case (xs, i) if xs.map(_._1) contains tile =>
+      xs find (_._1 == tile) map (t => Pos(i, t._2))
+  }).flatten
+
+  def findHero(number: Int) = find(Tile.Hero(number))
+
   override def toString = {
 
     def thingAtPositionToString(tile: Tile, pos: Pos): String =

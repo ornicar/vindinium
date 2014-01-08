@@ -9,14 +9,21 @@ case class Pos(x: Int, y: Int) {
   def down = copy(y = y + 1)
 
   def neighbors = Set(left, right, up, down)
+
+  def to(dir: Dir) = dir match {
+    case Dir.Up    => up
+    case Dir.Down  => down
+    case Dir.Left  => left
+    case Dir.Right => right
+  }
 }
 
 sealed trait Dir
 case object Dir {
-  case object Up
-  case object Down
-  case object Left
-  case object Right
+  case object Up extends Dir
+  case object Down extends Dir
+  case object Left extends Dir
+  case object Right extends Dir
 }
 
 sealed abstract class Tile(char1: Char, char2: Char) {
