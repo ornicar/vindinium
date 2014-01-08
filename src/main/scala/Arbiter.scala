@@ -11,8 +11,8 @@ object Arbiter {
     val board = game.board
 
     def reach(destPos: Pos) = board get destPos match {
-      case None            => n00b("Moving out the board")
-      case Some(Tile.Wall) => n00b("Hitting the wall")
+      case None            => fail("Moving out the board")
+      case Some(Tile.Wall) => fail("Hitting the wall")
       case tile => game hero destPos match {
         case Some(enemy) => fight(enemy)
         case None => tile match {
@@ -45,9 +45,7 @@ object Arbiter {
       else reSpawn(h)
     }
 
-    if (game.hero != hero) n00b(s"Not hero $number turn to move")
+    if (game.hero != hero) fail(s"Not hero $number turn to move")
     else reach(hero.pos to dir)
   }
-
-  private def n00b(err: String) = Failure(new Exception(s"n00b! $err"))
 }
