@@ -8,3 +8,6 @@ libraryDependencies ++= Seq(
 scalacOptions ++= Seq("-feature", "-language:_", "-unchecked", "-deprecation")
 
 play.Project.playScalaSettings
+
+play.Project.templatesImport ++= Seq(
+  "org.jousse.bot._")

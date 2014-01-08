@@ -32,7 +32,7 @@ sealed abstract class Tile(char1: Char, char2: Char) {
 object Tile {
   case object Air extends Tile(' ', ' ')
   case object Wall extends Tile('#', '#')
-  case object Beer extends Tile(' ', '♥')
+  case object Beer extends Tile(' ', 'ó')
   case class Mine(owner: Option[Int]) extends Tile('$', owner.fold('-')(_.toString.head))
 }
 
