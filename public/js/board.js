@@ -7,6 +7,7 @@ jQuery( document ).ready(function( $ ) {
                '  ', '$-', 'XX', '@1',
                '[]', '  ', '  ', '  '];
                **/
+
     var game = {"id":"wkbfki","turn":0,"heroes":[{"id":1,"name":"Alaric","pos":[0,1],"life":100,"gold":0},{"id":2,"name":"Luther","pos":[9,1],"life":100,"gold":0},{"id":3,"name":"Thorfinn","pos":[9,8],"life":100,"gold":0},{"id":4,"name":"York","pos":[0,8],"life":100,"gold":0}],"board":{"size":10,"tiles":["##","@1","  ","  ","##","##","  ","  ","@4","##","  ","  ","  ","##","##","##","##","  ","  ","  ","  ","  ","  ","  ","##","##","  ","  ","  ","  ","  ","  ","[]","  ","  ","  ","  ","[]","  ","  ","$-","  ","  ","##","  ","  ","##","  ","  ","$-","$-","  ","  ","##","  ","  ","##","  ","  ","$-","  ","  ","[]","  ","  ","  ","  ","[]","  ","  ","  ","  ","  ","  ","##","##","  ","  ","  ","  ","  ","  ","  ","##","##","##","##","  ","  ","  ","##","@2","  ","  ","##","##","  ","  ","@3","##"]}}
 
     //Should be
@@ -71,7 +72,7 @@ jQuery( document ).ready(function( $ ) {
         value = game.board.tiles[index];
         console.log(value);
         switch (value) {
-            case 'XX':
+            case '##':
                 if(groundTiles[index]) {
                     var tile = groundTiles[index];
                     tile.render(index);
@@ -88,7 +89,6 @@ jQuery( document ).ready(function( $ ) {
                     ground.render(index);
 
                     groundTiles[index] = ground;
-                    
 
                     var wall = sprite({
                         context: canvas.getContext("2d"),
