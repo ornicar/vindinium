@@ -14,11 +14,11 @@ object Arbiter {
       case Some(tile) => game hero destPos match {
         case Some(_) => stay
         case None => tile match {
-          case Tile.Air                          => walk(destPos)
-          case Tile.Tavern                       => drink
+          case Tile.Air                      => walk(destPos)
+          case Tile.Tavern                   => drink
           case Tile.Mine(n) if n != Some(id) => mine(destPos)
-          case Tile.Mine(n)                      => stay
-          case Tile.Wall                         => stay
+          case Tile.Mine(n)                  => stay
+          case Tile.Wall                     => stay
         }
       }
     }
