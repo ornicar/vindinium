@@ -1,10 +1,30 @@
 //Thanks to http://www.williammalone.com/articles/create-html5-canvas-javascript-sprite-animation/
 jQuery( document ).ready(function( $ ) {
 
+    /**
     var map = ['  ', 'XX', 'XX', '  ', 
                '  ', 'XX', 'XX', '  ',
                '  ', '$-', 'XX', '@1',
                '[]', '  ', '  ', '  '];
+               **/
+    var game = {"id":"wkbfki","turn":0,"heroes":[{"id":1,"name":"Alaric","pos":[0,1],"life":100,"gold":0},{"id":2,"name":"Luther","pos":[9,1],"life":100,"gold":0},{"id":3,"name":"Thorfinn","pos":[9,8],"life":100,"gold":0},{"id":4,"name":"York","pos":[0,8],"life":100,"gold":0}],"board":{"size":10,"tiles":["##","@1","  ","  ","##","##","  ","  ","@4","##","  ","  ","  ","##","##","##","##","  ","  ","  ","  ","  ","  ","  ","##","##","  ","  ","  ","  ","  ","  ","[]","  ","  ","  ","  ","[]","  ","  ","$-","  ","  ","##","  ","  ","##","  ","  ","$-","$-","  ","  ","##","  ","  ","##","  ","  ","$-","  ","  ","[]","  ","  ","  ","  ","[]","  ","  ","  ","  ","  ","  ","##","##","  ","  ","  ","  ","  ","  ","  ","##","##","##","##","  ","  ","  ","##","@2","  ","  ","##","##","  ","  ","@3","##"]}}
+
+    //Should be
+    /**
++--------------------+
+|##@1    ####    @4##|
+|      ########      |
+|        ####        |
+|    []        []    |
+|$-    ##    ##    $-|
+|$-    ##    ##    $-|
+|    []        []    |
+|        ####        |
+|      ########      |
+|##@2    ####    @3##|
++--------------------+
+**/
+
 
     var groundTiles = [];
 
@@ -14,7 +34,7 @@ jQuery( document ).ready(function( $ ) {
         canvas;	
 
     var tileSize = 32;
-    var boardSize = 4;
+    var boardSize = game.board.size;
 
     var canvas = document.getElementById("board");
     canvas.width = tileSize * boardSize;
@@ -27,7 +47,9 @@ jQuery( document ).ready(function( $ ) {
 
     var grassImage = new Image();
     grassImage.src = "img/tilesets/tallgrass.png";
-    // Start the game loop as soon as the sprite sheet is loaded
+
+    var goblinImage = new Image();
+    goblinImage.src = "img/goblin.png";
 
     var flaskImage = new Image();
     flaskImage.src = "img/item-flask.png";
@@ -41,12 +63,12 @@ jQuery( document ).ready(function( $ ) {
 		ticksPerFrame: 8
     });
 
-    $(map).each(function( index ) {
+    $(game.board.tiles).each(function( index ) {
         renderTile(index);
     });
 
     function renderTile(index) {
-        value = map[index];
+        value = game.board.tiles[index];
         console.log(value);
         switch (value) {
             case 'XX':
@@ -64,6 +86,8 @@ jQuery( document ).ready(function( $ ) {
                         numberOfFrames: 1
                     });
                     ground.render(index);
+
+                    groundTiles[index] = ground;
                     
 
                     var wall = sprite({
@@ -76,6 +100,36 @@ jQuery( document ).ready(function( $ ) {
                         numberOfFrames: 1
                     });
                     wall.render(index, false);
+                }
+                break;
+
+
+            case '$-':
+                if(groundTiles[index]) {
+                    var tile = groundTiles[index];
+                    tile.render(index);
+                } else {
+                    
+                    var ground = sprite({
+                        context: canvas.getContext("2d"),
+                        width: tileSize,
+                        height: tileSize,
+                        image: groundImage,
+                        spriteLine: 5,
+                        numberOfFrames: 1
+                    });
+                    ground.render(index);
+
+                    groundTiles[index] = ground;
+
+                    var goblin = sprite({
+                        context: canvas.getContext("2d"),
+                        width: tileSize,
+                        height: tileSize,
+                        image: goblinImage,
+                        numberOfFrames: 1
+                    });
+                    goblin.render(index, false);
                 }
                 break;
 
