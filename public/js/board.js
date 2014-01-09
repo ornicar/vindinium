@@ -11,11 +11,6 @@ jQuery( document ).ready(function( $ ) {
 
     var groundTiles = [];
 
-	var flask,
-        flaskImage,
-        groundImage,
-        canvas;	
-
     var groundTileSize = 24;
     var objectTileSize = 32;
     var boardSize = game.board.size;
@@ -80,7 +75,7 @@ jQuery( document ).ready(function( $ ) {
 
         switch (value) {
             case '##':
-                var wall = sprite({
+                sprite({
                     context: canvas.getContext("2d"),
                     width: groundTileSize,
                     height: groundTileSize,
@@ -88,123 +83,111 @@ jQuery( document ).ready(function( $ ) {
                     spriteLine: 5,
                     spriteColumn: 2,
                     numberOfFrames: 1
-                });
-                wall.render(index, false);
+                }).render(index, false);
 
                 break;
 
 
             case '$-':
-                var goblin = sprite({
+                sprite({
                     context: canvas.getContext("2d"),
                     width: objectTileSize,
                     height: objectTileSize,
                     image: goblinImage,
                     numberOfFrames: 1
-                });
-                goblin.render(index, false);
+                }).render(index, false);
 
                 break;
 
 
             case '$1':
-                var player = sprite({
+                sprite({
                     context: canvas.getContext("2d"),
                     width: objectTileSize,
                     height: objectTileSize,
                     image: goblinPlayer1Image,
                     numberOfFrames: 1
-                });
-                player.render(index, false);
+                }).render(index, false);
                 break;
 
             case '$2':
-                var player = sprite({
+                sprite({
                     context: canvas.getContext("2d"),
                     width: objectTileSize,
                     height: objectTileSize,
                     image: goblinPlayer2Image,
                     numberOfFrames: 1
-                });
-                player.render(index, false);
+                }).render(index, false);
                 break;
 
             case '$3':
-                var player = sprite({
+                sprite({
                     context: canvas.getContext("2d"),
                     width: objectTileSize,
                     height: objectTileSize,
                     image: goblinPlayer3Image,
                     numberOfFrames: 1
-                });
-                player.render(index, false);
+                }).render(index, false);
                 break;
             case '$4':
-                var player = sprite({
+                sprite({
                     context: canvas.getContext("2d"),
                     width: objectTileSize,
                     height: objectTileSize,
                     image: goblinPlayer4Image,
                     numberOfFrames: 1
-                });
-                player.render(index, false);
+                }).render(index, false);
                 break;
 
             case '@1':
-                var player = sprite({
+                sprite({
                     context: canvas.getContext("2d"),
                     width: objectTileSize,
                     height: objectTileSize,
                     image: player1Image,
                     numberOfFrames: 1
-                });
-                player.render(index, false);
+                }).render(index, false);
                 break;
 
             case '@2':
-                var player = sprite({
+                sprite({
                     context: canvas.getContext("2d"),
                     width: objectTileSize,
                     height: objectTileSize,
                     image: player2Image,
                     numberOfFrames: 1
-                });
-                player.render(index, false);
+                }).render(index, false);
                 break;
 
             case '@3':
-                var player = sprite({
+                sprite({
                     context: canvas.getContext("2d"),
                     width: objectTileSize,
                     height: objectTileSize,
                     image: player3Image,
                     numberOfFrames: 1
-                });
-                player.render(index, false);
+                }).render(index, false);
                 break;
             case '@4':
-                var player = sprite({
+                sprite({
                     context: canvas.getContext("2d"),
                     width: objectTileSize,
                     height: objectTileSize,
                     image: player4Image,
                     numberOfFrames: 1
-                });
-                player.render(index, false);
+                }).render(index, false);
                 break;
 
             case '[]':
-                var beer = sprite({
+                sprite({
                     context: canvas.getContext("2d"),
                     width: objectTileSize,
                     height: objectTileSize,
                     image: beerImage,
                     numberOfFrames: 1
-                });
-                beer.render(index, false);
+                }).render(index, false);
 
                 break;
-            case '  ':
             default:
 
                 break;
@@ -244,10 +227,6 @@ jQuery( document ).ready(function( $ ) {
     function gameLoop () {
 
         window.requestAnimationFrame(gameLoop);
-
-        //flask.update();
-        //flask.render(5);
-
     }
 
     function sprite (options) {
@@ -271,7 +250,7 @@ jQuery( document ).ready(function( $ ) {
             var x = coords.x;
             var y = coords.y;
 
-            var clear = typeof clear !== 'undefined' ? clear : true;
+            clear = typeof clear !== 'undefined' ? clear : true;
 
             if(clear) {
                 // Clear the canvas
