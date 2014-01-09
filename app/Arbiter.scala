@@ -14,13 +14,17 @@ object Arbiter {
       case None            => fail("Moving out the board")
       case Some(Tile.Wall) => fail("Hitting the wall")
       case tile => game hero destPos match {
-        case Some(enemy) => fight(enemy)
+        case Some(enemy) => attack(enemy)
         case None => tile match {
           case Some(Tile.Beer)                         => drink(destPos)
           case Some(Tile.Mine(n)) if n != Some(number) => mine(destPos)
           case _                                       => walk(destPos)
         }
       }
+    }
+
+    def stay = Success {
+      game.step(identity)
     }
 
     def walk(pos: Pos) = Success {
@@ -31,8 +35,8 @@ object Arbiter {
       _.withBoard(_ remove pos).withHero(_.drinkBeer)
     }
 
-    def fight(enemy: Hero) = walk(enemy.pos) map { g =>
-      val (h1, h2) = hero fight enemy
+    def attack(enemy: Hero) = stay map { g =>
+      val (h1, h2) = hero attack enemy
       List(h1 -> h2, h2 -> h1).foldLeft(g) {
         case (game, (x, y)) => if (x.isDead) game
           .withHero(reSpawn(x))
