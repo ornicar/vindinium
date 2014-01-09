@@ -5,7 +5,7 @@ import scala.util.{ Random, Try, Success, Failure }
 
 object Arbiter {
 
-  def move(game: Game, number: Int, dir: Dir): Try[Game] = {
+  def move(game: Game, id: Int, dir: Dir): Try[Game] = {
 
     val board = game.board
 
@@ -16,7 +16,7 @@ object Arbiter {
         case None => tile match {
           case Tile.Air                          => walk(destPos)
           case Tile.Tavern                       => drink
-          case Tile.Mine(n) if n != Some(number) => mine(destPos)
+          case Tile.Mine(n) if n != Some(id) => mine(destPos)
           case Tile.Mine(n)                      => stay
           case Tile.Wall                         => stay
         }
@@ -36,9 +36,9 @@ object Arbiter {
     }
 
     def mine(pos: Pos) = stay map { g =>
-      val h1 = g.hero(number).fightMine
-      if (h1.isAlive) g.withHero(h1).withBoard(_.transferMine(pos, Some(h1.number)))
-      else g.withHero(reSpawn(h1)).withBoard(_.transferMines(h1.number, None))
+      val h1 = g.hero(id).fightMine
+      if (h1.isAlive) g.withHero(h1).withBoard(_.transferMine(pos, Some(h1.id)))
+      else g.withHero(reSpawn(h1)).withBoard(_.transferMines(h1.id, None))
     }
 
     @annotation.tailrec
@@ -49,21 +49,21 @@ object Arbiter {
     }
 
     def fights(g: Game): Game =
-      (g.hero(number).pos.neighbors map g.hero).flatten.foldLeft(g)(attack)
+      (g.hero(id).pos.neighbors map g.hero).flatten.foldLeft(g)(attack)
 
     def attack(g: Game, enemy: Hero): Game = {
-      val (h1, h2) = g hero number attack enemy
+      val (h1, h2) = g hero id attack enemy
       List(h1 -> h2, h2 -> h1).foldLeft(g) {
         case (game, (x, y)) => if (x.isDead) game
           .withHero(reSpawn(x))
-          .withBoard(_.transferMines(x.number, if (y.isAlive) Some(y.number) else None))
+          .withBoard(_.transferMines(x.id, if (y.isAlive) Some(y.id) else None))
         else game withHero x
       }
     }
 
-    def finalize(g: Game) = g.withHero(number, _.day withGold g.board.countMines(number))
+    def finalize(g: Game) = g.withHero(id, _.day withGold g.board.countMines(id))
 
-    if (game.hero.number != number) fail(s"Not hero $number turn to move")
+    if (game.hero.id != id) fail(s"Not hero $id turn to move")
     else reach(game.hero.pos to dir) map fights map finalize
   }
 }

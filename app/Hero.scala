@@ -2,7 +2,7 @@ package org.jousse
 package bot
 
 case class Hero(
-    number: Int,
+    id: Int,
     name: String,
     pos: Pos,
     life: Int = Hero.maxLife,
@@ -27,7 +27,7 @@ case class Hero(
   def isAlive = life >0
   def isDead = !isAlive
 
-  def render = s"@$number"
+  def render = s"@$id"
 }
 
 object Hero {
