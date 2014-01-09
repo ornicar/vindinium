@@ -3,12 +3,12 @@ package bot
 
 case class Pos(x: Int, y: Int) {
 
-  val north = copy(y = y - 1)
-  val south = copy(y = y + 1)
-  val east = copy(x = x + 1)
-  val west = copy(x = x - 1)
+  def north = copy(y = y - 1)
+  def south = copy(y = y + 1)
+  def east = copy(x = x + 1)
+  def west = copy(x = x - 1)
 
-  val neighbors = Set(north, south, east, west)
+  def neighbors = Set(north, south, east, west)
 
   val closeTo = neighbors contains _
 

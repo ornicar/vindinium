@@ -7,9 +7,7 @@ object Arbiter {
 
   def move(game: Game, id: Int, dir: Dir): Try[Game] = {
 
-    val board = game.board
-
-    def reach(destPos: Pos) = board get destPos match {
+    def reach(destPos: Pos) = game.board get destPos match {
       case None => stay
       case Some(tile) => game hero destPos match {
         case Some(_) => stay
@@ -43,7 +41,7 @@ object Arbiter {
 
     @annotation.tailrec
     def reSpawn(h: Hero): Hero = {
-      val pos = Pos(Random nextInt (board.size / 2 - 2), Random nextInt (board.size / 2 - 2))
+      val pos = Pos(Random nextInt (game.board.size / 2 - 2), Random nextInt (game.board.size / 2 - 2))
       if (Validator.heroPos(game, pos)) h reSpawn pos
       else reSpawn(h)
     }
