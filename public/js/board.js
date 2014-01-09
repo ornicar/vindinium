@@ -43,7 +43,7 @@ jQuery( document ).ready(function( $ ) {
     playerImage.src = assets + "img/hero.png";
 
     var player1Image = new Image();
-    player1Image.src = assets + "img/player_red.png";
+    player1Image.src = assets + "img/fireheart/player1.png";
 
     var goblinPlayer1Image = new Image();
     goblinPlayer1Image.src = assets + "img/goblin2_red.png";
