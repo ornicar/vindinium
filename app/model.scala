@@ -10,6 +10,8 @@ case class Pos(x: Int, y: Int) {
 
   def neighbors = Set(left, right, up, down)
 
+  val closeTo = neighbors contains _
+
   def to(dir: Dir) = dir match {
     case Dir.Up    => up
     case Dir.Down  => down
@@ -32,7 +34,7 @@ sealed abstract class Tile(char1: Char, char2: Char) {
 object Tile {
   case object Air extends Tile(' ', ' ')
   case object Wall extends Tile('#', '#')
-  case object Beer extends Tile(' ', 'ó')
+  case object Tavern extends Tile('[', ']')
   case class Mine(owner: Option[Int]) extends Tile('$', owner.fold('-')(_.toString.head))
 }
 

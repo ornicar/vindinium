@@ -22,6 +22,7 @@ case class Board(tiles: Vector[Vector[Tile]]) {
 
   def mirrorX(pos: Pos) = pos.copy(x = size - pos.x - 1)
   def mirrorY(pos: Pos) = pos.copy(y = size - pos.y - 1)
+  def mirrorXY(pos: Pos) = mirrorX(mirrorY(pos))
 
   def allPos = (0 to size - 1).toList flatMap { x =>
     (0 to size - 1).toList map { Pos(x, _) }
@@ -40,6 +41,12 @@ case class Board(tiles: Vector[Vector[Tile]]) {
     case (c, Tile.Mine(Some(owner))) if owner == of => c + 1
     case (c, _)                                     => c
   }
+  def countMines = tiles.flatten count {
+    case Tile.Mine(_) => true
+    case _ => false
+  }
+
+  def section = Board(tiles = tiles.take(size / 2).map(_.take(size / 2)))
 
   override def toString = {
 

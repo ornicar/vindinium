@@ -19,11 +19,7 @@ object Traverser {
     }
 
     def walkableFrom(pos: Pos) = pos.neighbors filter { p =>
-      board get p match {
-        case None            => false
-        case Some(Tile.Wall) => false
-        case _               => true
-      }
+      (board get p) == Some(Tile.Air)
     }
 
     traverseTR(Seq(from), Set.empty, Seq.empty)

@@ -11,14 +11,15 @@ object Arbiter {
     val board = game.board
 
     def reach(destPos: Pos) = board get destPos match {
-      case None            => fail("Moving out the board")
-      case Some(Tile.Wall) => fail("Hitting the wall")
-      case tile => game hero destPos match {
+      case None => stay
+      case Some(tile) => game hero destPos match {
         case Some(enemy) => attack(enemy)
         case None => tile match {
-          case Some(Tile.Beer)                         => drink(destPos)
-          case Some(Tile.Mine(n)) if n != Some(number) => mine(destPos)
-          case _                                       => walk(destPos)
+          case Tile.Tavern                       => drink
+          case Tile.Mine(n) if n != Some(number) => mine(destPos)
+          case Tile.Mine(n)                      => stay
+          case Tile.Air                          => walk(destPos)
+          case Tile.Wall                         => stay
         }
       }
     }
@@ -31,8 +32,8 @@ object Arbiter {
       game.step(_.withHero(_ moveTo pos))
     }
 
-    def drink(pos: Pos) = walk(pos) map {
-      _.withBoard(_ remove pos).withHero(_.drinkBeer)
+    def drink = stay map {
+      _.withHero(_.drinkBeer)
     }
 
     def attack(enemy: Hero) = stay map { g =>
@@ -45,7 +46,7 @@ object Arbiter {
       }
     }
 
-    def mine(pos: Pos) = walk(pos) map { g =>
+    def mine(pos: Pos) = stay map { g =>
       val h1 = hero.fightMine
       if (h1.isAlive) g.withHero(h1).withBoard(_.transferMine(pos, Some(h1.number)))
       else g.withHero(reSpawn(h1)).withBoard(_.transferMines(h1.number, None))

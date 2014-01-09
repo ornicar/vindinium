@@ -1,8 +1,9 @@
-### Run the HTTP server
+*Four legendary heroes were fighting for the land of Vindinium*
 
-```
-sbt
-> run 9874
-```
+*Making their way in the dangerous woods*
 
-curl localhost:9874
+*Slashing goblins and stealing gold mines*
+
+*And looking for a tavern where to drink their gold*
+
+Game rules: https://bitbucket.org/vjousse/24hcodebot/wiki/Rules

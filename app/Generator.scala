@@ -5,72 +5,102 @@ import scala.util.{ Random, Try, Success, Failure }
 
 object Generator {
 
-  def apply(
-    config: Config,
-    maxAttempts: Int = 20): Try[Game] = config.size match {
+  val maxAttempts = 100
+
+  def apply(config: Config): Try[Game] = config.size match {
     case s if s < 8      ⇒ fail("Board is too small")
     case s if s % 2 != 0 ⇒ fail("Board size is odd")
-    case _ ⇒ {
+    case _               ⇒ attempt(config)
+  }
 
-      import config._
+  private def attempt(config: Config, attempts: Int = 1): Try[Game] = {
 
-      def generateGame(gameAttempts: Int): Try[Game] = {
+    val boardDraft = generateBoard(config)
 
-        def sector(size: Int) = Board {
-          (1 to size).toVector map { _ =>
-            (1 to size).toVector map { _ =>
-              Random.nextInt(100) match {
-                case x if x < beerPercent => Tile.Beer
-                case x if x < (beerPercent + minePercent) => Tile.Mine(None)
-                case x if x < (beerPercent + minePercent + wallPercent) => Tile.Wall
-                case _ => Tile.Air
-              }
-            }
-          }
+    generateHeroPos(boardDraft) flatMap { heroPos =>
+
+      val board = fillBoard(boardDraft, heroPos)
+
+      if (board.countMines == 0) fail("Board has no mine")
+      else placeTaverns(board, heroPos, config) map { finalBoard =>
+        generateGame(finalBoard, config, heroPos)
+      }
+    }
+  } recoverWith {
+    case err if attempts < maxAttempts => {
+      println(s"$err, attempt $attempts/$maxAttempts")
+      attempt(config, attempts + 1)
+    }
+  }
+
+  private def generateGame(board: Board, config: Config, heroPos: Pos) = Game(
+    id = RandomString(6),
+    board = board,
+    config = config,
+    hero1 = Hero(1, "Alaric", heroPos),
+    hero2 = Hero(2, "Luther", board mirrorX heroPos),
+    hero3 = Hero(3, "Thorfinn", board mirrorXY heroPos),
+    hero4 = Hero(4, "York", board mirrorY heroPos)
+  )
+
+  private def placeTaverns(board: Board, heroPos: Pos, config: Config): Try[Board] = {
+
+    val reachable = Traverser(board, heroPos)
+
+    def doPlace(poss: List[Pos]): Try[Board] = poss match {
+      case Nil => fail("No place found for a tavern")
+      case pos :: rest => {
+        val b2 = List(pos, board mirrorX pos, board mirrorXY pos, board mirrorY pos).foldLeft(board) {
+          case (b, p) => b.update(p, Tile.Tavern)
         }
+        if (Traverser(b2, heroPos).size == reachable.size - 4) Success(b2)
+        else doPlace(rest)
+      }
+    }
 
-        def replicate(board: Board) = Board {
-          val xs2 = board.tiles map { xs => xs ++ xs.reverse }
-          xs2 ++ xs2.reverse
-        }
+    doPlace(Random.shuffle(Traverser(board.section, heroPos).toList))
+  }
 
-        val boardDraft = replicate(sector(size / 2))
+  private def generateHeroPos(board: Board, attempts: Int = 1): Try[Pos] = {
+    val pos = Pos(Random nextInt (board.size / 2 - 2), Random nextInt (board.size / 2 - 2))
+    if (Validator.heroPos(board, pos)) Success(pos)
+    else fail("Can't find a good starting position")
+  } recoverWith {
+    case err if attempts < maxAttempts => generateHeroPos(board, attempts + 1)
+  }
 
-        if (!Validator.board(boardDraft)) fail("The board has no mine")
-        else {
+  private def fillBoard(board: Board, heroPos: Pos) = {
+    val reachable = Traverser(board, heroPos)
+    board.allPos.diff(reachable).foldLeft(board) {
+      case (b, pos) => b get pos match {
+        case Some(Tile.Mine(_)) =>
+          if (reachable exists { _ closeTo pos }) b
+          else b.update(pos, Tile.Wall)
+        case _ => b.update(pos, Tile.Wall)
+      }
+    }
+  }
 
-          @annotation.tailrec
-          def generateHeroPos(posAttempts: Int): Try[Pos] = {
-            val pos = Pos(Random nextInt (size / 2 - 2), Random nextInt (size / 2 - 2))
-            if (Validator.heroPos(boardDraft, pos)) Success(pos)
-            else if (posAttempts < maxAttempts) generateHeroPos(posAttempts + 1)
-            else fail("Can't find a good starting position")
-          }
+  private def generateBoard(config: Config): Board = {
 
-          generateHeroPos(1) map { hp =>
-            val board = boardDraft.allPos.diff(Traverser(boardDraft, hp)).foldLeft(boardDraft) {
-              case (b, pos) => b.update(pos, Tile.Wall)
-            }
-            Game(
-              id = RandomString(6),
-              board = board,
-              config = config,
-              hero1 = Hero(1, "Alaric", hp),
-              hero2 = Hero(2, "Luther", hp.copy(x = board.size - hp.x - 1)),
-              hero3 = Hero(3, "Thorfinn", hp.copy(x = board.size - hp.x - 1, y = board.size - hp.y - 1)),
-              hero4 = Hero(4, "York", hp.copy(y = board.size - hp.y - 1))
-            )
-          }
-        } recoverWith {
-          case err if gameAttempts < maxAttempts => {
-            println(s"$err, attempt $gameAttempts/$maxAttempts")
-            generateGame(gameAttempts + 1)
+    def sector(size: Int) = Board {
+      (1 to size).toVector map { _ =>
+        (1 to size).toVector map { _ =>
+          Random.nextInt(100) match {
+            case x if x < config.minePercent => Tile.Mine(None)
+            case x if x < (config.minePercent + config.wallPercent) => Tile.Wall
+            case _ => Tile.Air
           }
         }
       }
-
-      generateGame(1)
     }
+
+    def replicate(board: Board) = Board {
+      val xs2 = board.tiles map { xs => xs ++ xs.reverse }
+      xs2 ++ xs2.reverse
+    }
+
+    replicate(sector(config.size / 2))
   }
 
   private object RandomString {

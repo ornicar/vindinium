@@ -10,7 +10,7 @@ case class Hero(
 
   def moveTo(p: Pos) = copy(pos = p)
 
-  def drinkBeer = withLife(life + Hero.beerLife)
+  def drinkBeer = if (gold >= -Hero.beerGold) withGold(Hero.beerGold).withLife(life + Hero.beerLife) else this
 
   def attack(enemy: Hero) = withLife(-Hero.attackLife) -> enemy.withLife(-Hero.defendLife)
 
@@ -33,7 +33,8 @@ case class Hero(
 object Hero {
 
   val maxLife = 100
-  val beerLife = 50
+  val beerLife = 30
+  val beerGold = -1
   val dayLife = -1
   val mineLife = -40
   val attackLife = -10
