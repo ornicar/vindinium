@@ -42,6 +42,31 @@ jQuery( document ).ready(function( $ ) {
     var playerImage = new Image();
     playerImage.src = assets + "img/hero.png";
 
+    var player1Image = new Image();
+    player1Image.src = assets + "img/player_red.png";
+
+    var goblinPlayer1Image = new Image();
+    goblinPlayer1Image.src = assets + "img/goblin2_red.png";
+
+    var player2Image = new Image();
+    player2Image.src = assets + "img/player_blue.png";
+
+    var goblinPlayer2Image = new Image();
+    goblinPlayer2Image.src = assets + "img/goblin2_blue.png";
+
+
+    var player3Image = new Image();
+    player3Image.src = assets + "img/player_purple.png";
+
+    var goblinPlayer3Image = new Image();
+    goblinPlayer3Image.src = assets + "img/goblin2_purple.png";
+
+    var player4Image = new Image();
+    player4Image.src = assets + "img/player_white.png";
+
+    var goblinPlayer4Image = new Image();
+    goblinPlayer4Image.src = assets + "img/goblin2_white.png";
+
     function drawGround() {
         $(game.board.tiles).each(function( index ) {
             renderTile(index);
@@ -82,16 +107,87 @@ jQuery( document ).ready(function( $ ) {
                 break;
 
 
+            case '$1':
+                var player = sprite({
+                    context: canvas.getContext("2d"),
+                    width: objectTileSize,
+                    height: objectTileSize,
+                    image: goblinPlayer1Image,
+                    numberOfFrames: 1
+                });
+                player.render(index, false);
+                break;
+
+            case '$2':
+                var player = sprite({
+                    context: canvas.getContext("2d"),
+                    width: objectTileSize,
+                    height: objectTileSize,
+                    image: goblinPlayer2Image,
+                    numberOfFrames: 1
+                });
+                player.render(index, false);
+                break;
+
+            case '$3':
+                var player = sprite({
+                    context: canvas.getContext("2d"),
+                    width: objectTileSize,
+                    height: objectTileSize,
+                    image: goblinPlayer3Image,
+                    numberOfFrames: 1
+                });
+                player.render(index, false);
+                break;
+            case '$4':
+                var player = sprite({
+                    context: canvas.getContext("2d"),
+                    width: objectTileSize,
+                    height: objectTileSize,
+                    image: goblinPlayer4Image,
+                    numberOfFrames: 1
+                });
+                player.render(index, false);
+                break;
 
             case '@1':
+                var player = sprite({
+                    context: canvas.getContext("2d"),
+                    width: objectTileSize,
+                    height: objectTileSize,
+                    image: player1Image,
+                    numberOfFrames: 1
+                });
+                player.render(index, false);
+                break;
+
             case '@2':
+                var player = sprite({
+                    context: canvas.getContext("2d"),
+                    width: objectTileSize,
+                    height: objectTileSize,
+                    image: player2Image,
+                    numberOfFrames: 1
+                });
+                player.render(index, false);
+                break;
+
             case '@3':
+                var player = sprite({
+                    context: canvas.getContext("2d"),
+                    width: objectTileSize,
+                    height: objectTileSize,
+                    image: player3Image,
+                    numberOfFrames: 1
+                });
+                player.render(index, false);
+                break;
             case '@4':
                 var player = sprite({
                     context: canvas.getContext("2d"),
                     width: objectTileSize,
                     height: objectTileSize,
-                    image: playerImage,
+                    image: player4Image,
                     numberOfFrames: 1
                 });
                 player.render(index, false);
