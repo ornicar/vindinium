@@ -16,42 +16,31 @@ jQuery( document ).ready(function( $ ) {
         groundImage,
         canvas;	
 
-    var tileSize = 32;
+    var groundTileSize = 24;
+    var objectTileSize = 32;
     var boardSize = game.board.size;
 
     var canvas = document.getElementById("board");
-    canvas.width = tileSize * boardSize;
-    canvas.height = tileSize * boardSize;
+    canvas.width = groundTileSize * boardSize;
+    canvas.height = groundTileSize * boardSize;
 
     var groundImage = new Image();
-    groundImage.src = assets + "img/tilesets/plowed_soil.png";
+    groundImage.src = assets + "img/tilesets/plowed_soil_24.png";
     // Start the game loop as soon as the sprite sheet is loaded
     groundImage.addEventListener("load", gameLoop);
     groundImage.addEventListener("load", drawGround);
 
     var grassImage = new Image();
-    grassImage.src = assets + "img/tilesets/tallgrass.png";
+    grassImage.src = assets + "img/tilesets/tallgrass_24.png";
 
     var goblinImage = new Image();
-    goblinImage.src = assets + "img/goblin.png";
+    goblinImage.src = assets + "img/goblin2_bw.png";
 
     var beerImage = new Image();
     beerImage.src = assets + "img/barrel.png";
 
     var playerImage = new Image();
-    playerImage.src = assets + "img/player.png";
-
-    var flaskImage = new Image();
-    flaskImage.src = assets + "img/item-flask.png";
-
-    var flask = sprite({
-        context: canvas.getContext("2d"),
-        width: tileSize,
-        height: tileSize,
-        image: flaskImage,
-		numberOfFrames: 6,
-		ticksPerFrame: 8
-    });
+    playerImage.src = assets + "img/hero.png";
 
     function drawGround() {
         $(game.board.tiles).each(function( index ) {
@@ -61,7 +50,6 @@ jQuery( document ).ready(function( $ ) {
 
     function renderTile(index) {
         value = game.board.tiles[index];
-        console.log(value);
 
         renderGround(index);
 
@@ -69,8 +57,8 @@ jQuery( document ).ready(function( $ ) {
             case '##':
                 var wall = sprite({
                     context: canvas.getContext("2d"),
-                    width: tileSize,
-                    height: tileSize,
+                    width: groundTileSize,
+                    height: groundTileSize,
                     image: grassImage,
                     spriteLine: 5,
                     spriteColumn: 2,
@@ -84,8 +72,8 @@ jQuery( document ).ready(function( $ ) {
             case '$-':
                 var goblin = sprite({
                     context: canvas.getContext("2d"),
-                    width: tileSize,
-                    height: tileSize,
+                    width: objectTileSize,
+                    height: objectTileSize,
                     image: goblinImage,
                     numberOfFrames: 1
                 });
@@ -101,8 +89,8 @@ jQuery( document ).ready(function( $ ) {
             case '@4':
                 var player = sprite({
                     context: canvas.getContext("2d"),
-                    width: tileSize,
-                    height: tileSize,
+                    width: objectTileSize,
+                    height: objectTileSize,
                     image: playerImage,
                     numberOfFrames: 1
                 });
@@ -112,8 +100,8 @@ jQuery( document ).ready(function( $ ) {
             case '[]':
                 var beer = sprite({
                     context: canvas.getContext("2d"),
-                    width: tileSize,
-                    height: tileSize,
+                    width: objectTileSize,
+                    height: objectTileSize,
                     image: beerImage,
                     numberOfFrames: 1
                 });
@@ -138,8 +126,8 @@ jQuery( document ).ready(function( $ ) {
             
             var ground = sprite({
                 context: canvas.getContext("2d"),
-                width: tileSize,
-                height: tileSize,
+                width: groundTileSize,
+                height: groundTileSize,
                 image: groundImage,
                 spriteLine: 5,
                 numberOfFrames: 1
@@ -194,17 +182,25 @@ jQuery( document ).ready(function( $ ) {
                 that.context.clearRect(x*that.width, y*that.width, that.width, that.height);
             }
 
-            // Draw the animation
+            // Draw the sprite
             that.context.drawImage(
-            that.image,
-            that.spriteColumn*that.width + frameIndex * that.width,
-            that.spriteLine*that.height,
-            that.width,
-            that.height,
-            x*that.width,
-            y*that.width,
-            that.width,
-            that.height);
+                that.image,
+                //Source x
+                that.spriteColumn*that.width + frameIndex * that.width,
+                //Source y
+                that.spriteLine*that.height,
+                //Source width
+                that.width,
+                //Source height
+                that.height,
+                //Destination x
+                x*groundTileSize-((that.width-groundTileSize)/2),
+                //Destination y
+                y*groundTileSize-(that.height-groundTileSize),
+                //Destination width
+                that.width,
+                //Destination height
+                that.height);
         };
 
         that.update = function () {
