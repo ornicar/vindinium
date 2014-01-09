@@ -4,7 +4,13 @@
 
 @main("24hCodeBot") {
 
-	<pre>@game</pre>
 
-<pre>@Json.stringify(JsonFormat(game))</pre>
+        <canvas id="board"></canvas>
+
+        <pre>@game</pre>
+
+        <script language="javascript">
+        var assets = "/assets/";
+        var game = @Html(Json.stringify(JsonFormat(game)));
+        </script>
 }

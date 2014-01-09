@@ -8,24 +8,6 @@ jQuery( document ).ready(function( $ ) {
                '[]', '  ', '  ', '  '];
                **/
 
-    var game = {"id":"wkbfki","turn":0,"heroes":[{"id":1,"name":"Alaric","pos":[0,1],"life":100,"gold":0},{"id":2,"name":"Luther","pos":[9,1],"life":100,"gold":0},{"id":3,"name":"Thorfinn","pos":[9,8],"life":100,"gold":0},{"id":4,"name":"York","pos":[0,8],"life":100,"gold":0}],"board":{"size":10,"tiles":["##","@1","  ","  ","##","##","  ","  ","@4","##","  ","  ","  ","##","##","##","##","  ","  ","  ","  ","  ","  ","  ","##","##","  ","  ","  ","  ","  ","  ","[]","  ","  ","  ","  ","[]","  ","  ","$-","  ","  ","##","  ","  ","##","  ","  ","$-","$-","  ","  ","##","  ","  ","##","  ","  ","$-","  ","  ","[]","  ","  ","  ","  ","[]","  ","  ","  ","  ","  ","  ","##","##","  ","  ","  ","  ","  ","  ","  ","##","##","##","##","  ","  ","  ","##","@2","  ","  ","##","##","  ","  ","@3","##"]}}
-
-    //Should be
-    /**
-+--------------------+
-|##@1    ####    @4##|
-|      ########      |
-|        ####        |
-|    []        []    |
-|$-    ##    ##    $-|
-|$-    ##    ##    $-|
-|    []        []    |
-|        ####        |
-|      ########      |
-|##@2    ####    @3##|
-+--------------------+
-**/
-
 
     var groundTiles = [];
 
@@ -42,18 +24,18 @@ jQuery( document ).ready(function( $ ) {
     canvas.height = tileSize * boardSize;
 
     var groundImage = new Image();
-    groundImage.src = "img/tilesets/plowed_soil.png";
+    groundImage.src = assets + "img/tilesets/plowed_soil.png";
     // Start the game loop as soon as the sprite sheet is loaded
     groundImage.addEventListener("load", gameLoop);
 
     var grassImage = new Image();
-    grassImage.src = "img/tilesets/tallgrass.png";
+    grassImage.src = assets + "img/tilesets/tallgrass.png";
 
     var goblinImage = new Image();
-    goblinImage.src = "img/goblin.png";
+    goblinImage.src = assets + "img/goblin.png";
 
     var flaskImage = new Image();
-    flaskImage.src = "img/item-flask.png";
+    flaskImage.src = assets + "img/item-flask.png";
 
     var flask = sprite({
         context: canvas.getContext("2d"),
