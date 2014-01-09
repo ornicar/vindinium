@@ -38,6 +38,9 @@ jQuery( document ).ready(function( $ ) {
     var beerImage = new Image();
     beerImage.src = assets + "img/barrel.png";
 
+    var playerImage = new Image();
+    playerImage.src = assets + "img/player.png";
+
     var flaskImage = new Image();
     flaskImage.src = assets + "img/item-flask.png";
 
@@ -90,6 +93,21 @@ jQuery( document ).ready(function( $ ) {
 
                 break;
 
+
+
+            case '@1':
+            case '@2':
+            case '@3':
+            case '@4':
+                var player = sprite({
+                    context: canvas.getContext("2d"),
+                    width: tileSize,
+                    height: tileSize,
+                    image: playerImage,
+                    numberOfFrames: 1
+                });
+                player.render(index, false);
+                break;
 
             case '[]':
                 var beer = sprite({
