@@ -27,6 +27,7 @@ jQuery( document ).ready(function( $ ) {
     groundImage.src = assets + "img/tilesets/plowed_soil.png";
     // Start the game loop as soon as the sprite sheet is loaded
     groundImage.addEventListener("load", gameLoop);
+    groundImage.addEventListener("load", drawGround);
 
     var grassImage = new Image();
     grassImage.src = assets + "img/tilesets/tallgrass.png";
@@ -46,9 +47,11 @@ jQuery( document ).ready(function( $ ) {
 		ticksPerFrame: 8
     });
 
-    $(game.board.tiles).each(function( index ) {
-        renderTile(index);
-    });
+    function drawGround() {
+        $(game.board.tiles).each(function( index ) {
+            renderTile(index);
+        });
+    }
 
     function renderTile(index) {
         value = game.board.tiles[index];
