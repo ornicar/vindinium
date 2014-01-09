@@ -7,18 +7,17 @@ object Arbiter {
 
   def move(game: Game, number: Int, dir: Dir): Try[Game] = {
 
-    val hero = game hero number
     val board = game.board
 
     def reach(destPos: Pos) = board get destPos match {
       case None => stay
       case Some(tile) => game hero destPos match {
-        case Some(enemy) => attack(enemy)
+        case Some(_) => stay
         case None => tile match {
+          case Tile.Air                          => walk(destPos)
           case Tile.Tavern                       => drink
           case Tile.Mine(n) if n != Some(number) => mine(destPos)
           case Tile.Mine(n)                      => stay
-          case Tile.Air                          => walk(destPos)
           case Tile.Wall                         => stay
         }
       }
@@ -36,18 +35,8 @@ object Arbiter {
       _.withHero(_.drinkBeer)
     }
 
-    def attack(enemy: Hero) = stay map { g =>
-      val (h1, h2) = hero attack enemy
-      List(h1 -> h2, h2 -> h1).foldLeft(g) {
-        case (game, (x, y)) => if (x.isDead) game
-          .withHero(reSpawn(x))
-          .withBoard(_.transferMines(x.number, if (y.isAlive) Some(y.number) else None))
-        else game withHero hero
-      }
-    }
-
     def mine(pos: Pos) = stay map { g =>
-      val h1 = hero.fightMine
+      val h1 = g.hero(number).fightMine
       if (h1.isAlive) g.withHero(h1).withBoard(_.transferMine(pos, Some(h1.number)))
       else g.withHero(reSpawn(h1)).withBoard(_.transferMines(h1.number, None))
     }
@@ -59,9 +48,22 @@ object Arbiter {
       else reSpawn(h)
     }
 
-    def finalize(g: Game) = g.withHero(hero, _.day withGold g.board.countMines(number))
+    def fights(g: Game): Game =
+      (g.hero(number).pos.neighbors map g.hero).flatten.foldLeft(g)(attack)
 
-    if (game.hero != hero) fail(s"Not hero $number turn to move")
-    else reach(hero.pos to dir) map finalize
+    def attack(g: Game, enemy: Hero): Game = {
+      val (h1, h2) = g hero number attack enemy
+      List(h1 -> h2, h2 -> h1).foldLeft(g) {
+        case (game, (x, y)) => if (x.isDead) game
+          .withHero(reSpawn(x))
+          .withBoard(_.transferMines(x.number, if (y.isAlive) Some(y.number) else None))
+        else game withHero x
+      }
+    }
+
+    def finalize(g: Game) = g.withHero(number, _.day withGold g.board.countMines(number))
+
+    if (game.hero.number != number) fail(s"Not hero $number turn to move")
+    else reach(game.hero.pos to dir) map fights map finalize
   }
 }
