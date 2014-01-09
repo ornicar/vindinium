@@ -10,11 +10,11 @@ case class Hero(
 
   def moveTo(p: Pos) = copy(pos = p)
 
-  def drinkBeer = withLife(life + Hero.beerEffect)
+  def drinkBeer = withLife(life + Hero.beerLife)
 
-  def fight(enemy: Hero) = withLife(-enemy.life) -> enemy.withLife(-life)
+  def attack(enemy: Hero) = withLife(-Hero.attackLife) -> enemy.withLife(-Hero.defendLife)
 
-  def fightMine = withLife(-Hero.mineEffect)
+  def fightMine = withLife(-Hero.mineLife)
 
   def withLife(diff: Int) = copy(life = math.max(0, math.min(Hero.maxLife, life + diff)))
 
@@ -31,6 +31,9 @@ case class Hero(
 object Hero {
 
   val maxLife = 100
-  val beerEffect = 50
-  val mineEffect = -40
+  val beerLife = 50
+  val dayLife = -1
+  val mineLife = -40
+  val attackLife = -10
+  val defendLife = -15
 }
