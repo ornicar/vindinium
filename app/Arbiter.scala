@@ -58,7 +58,7 @@ object Arbiter {
       else reSpawn(h)
     }
 
-    def finalize(g: Game) = g.withHero(hero, _ withGold g.board.countMines(number))
+    def finalize(g: Game) = g.withHero(hero, _.day withGold g.board.countMines(number))
 
     if (game.hero != hero) fail(s"Not hero $number turn to move")
     else reach(hero.pos to dir) map finalize

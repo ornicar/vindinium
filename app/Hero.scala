@@ -20,6 +20,8 @@ case class Hero(
 
   def withGold(diff: Int) = copy(gold = math.max(0, gold + diff))
 
+  def day = copy(life = math.max(1, life + Hero.dayLife))
+
   def reSpawn(p: Pos) = copy(life = Hero.maxLife, pos = p)
 
   def isAlive = life >0
