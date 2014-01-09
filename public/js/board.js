@@ -35,6 +35,9 @@ jQuery( document ).ready(function( $ ) {
     var goblinImage = new Image();
     goblinImage.src = assets + "img/goblin.png";
 
+    var beerImage = new Image();
+    beerImage.src = assets + "img/barrel.png";
+
     var flaskImage = new Image();
     flaskImage.src = assets + "img/item-flask.png";
 
@@ -56,88 +59,76 @@ jQuery( document ).ready(function( $ ) {
     function renderTile(index) {
         value = game.board.tiles[index];
         console.log(value);
+
+        renderGround(index);
+
         switch (value) {
             case '##':
-                if(groundTiles[index]) {
-                    var tile = groundTiles[index];
-                    tile.render(index);
-                } else {
-                    
-                    var ground = sprite({
-                        context: canvas.getContext("2d"),
-                        width: tileSize,
-                        height: tileSize,
-                        image: groundImage,
-                        spriteLine: 5,
-                        numberOfFrames: 1
-                    });
-                    ground.render(index);
+                var wall = sprite({
+                    context: canvas.getContext("2d"),
+                    width: tileSize,
+                    height: tileSize,
+                    image: grassImage,
+                    spriteLine: 5,
+                    spriteColumn: 2,
+                    numberOfFrames: 1
+                });
+                wall.render(index, false);
 
-                    groundTiles[index] = ground;
-
-                    var wall = sprite({
-                        context: canvas.getContext("2d"),
-                        width: tileSize,
-                        height: tileSize,
-                        image: grassImage,
-                        spriteLine: 5,
-                        spriteColumn: 2,
-                        numberOfFrames: 1
-                    });
-                    wall.render(index, false);
-                }
                 break;
 
 
             case '$-':
-                if(groundTiles[index]) {
-                    var tile = groundTiles[index];
-                    tile.render(index);
-                } else {
-                    
-                    var ground = sprite({
-                        context: canvas.getContext("2d"),
-                        width: tileSize,
-                        height: tileSize,
-                        image: groundImage,
-                        spriteLine: 5,
-                        numberOfFrames: 1
-                    });
-                    ground.render(index);
+                var goblin = sprite({
+                    context: canvas.getContext("2d"),
+                    width: tileSize,
+                    height: tileSize,
+                    image: goblinImage,
+                    numberOfFrames: 1
+                });
+                goblin.render(index, false);
 
-                    groundTiles[index] = ground;
-
-                    var goblin = sprite({
-                        context: canvas.getContext("2d"),
-                        width: tileSize,
-                        height: tileSize,
-                        image: goblinImage,
-                        numberOfFrames: 1
-                    });
-                    goblin.render(index, false);
-                }
                 break;
 
+
+            case '[]':
+                var beer = sprite({
+                    context: canvas.getContext("2d"),
+                    width: tileSize,
+                    height: tileSize,
+                    image: beerImage,
+                    numberOfFrames: 1
+                });
+                beer.render(index, false);
+
+                break;
             case '  ':
             default:
 
-                if(groundTiles[index]) {
-                    var tile = groundTiles[index];
-                    tile.render(index);
-                } else {
-                    var tile = sprite({
-                        context: canvas.getContext("2d"),
-                        width: tileSize,
-                        height: tileSize,
-                        image: groundImage,
-                        spriteLine: 5,
-                        numberOfFrames: 1
-                    });
-                    tile.render(index);
-
-                }
                 break;
 
+        }
+    }
+
+
+    function renderGround(index) {
+
+        if(groundTiles[index]) {
+            var tile = groundTiles[index];
+            tile.render(index);
+        } else {
+            
+            var ground = sprite({
+                context: canvas.getContext("2d"),
+                width: tileSize,
+                height: tileSize,
+                image: groundImage,
+                spriteLine: 5,
+                numberOfFrames: 1
+            });
+            ground.render(index);
+
+            groundTiles[index] = ground;
         }
     }
 
