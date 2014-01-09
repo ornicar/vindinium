@@ -1,7 +1,10 @@
 @(game: Game)
 
+@import play.api.libs.json.Json
+
 @main("24hCodeBot") {
 
 	<pre>@game</pre>
 
+<pre>@Json.stringify(JsonFormat(game))</pre>
 }

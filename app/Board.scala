@@ -28,6 +28,8 @@ case class Board(tiles: Vector[Vector[Tile]]) {
     (0 to size - 1).toList map { Pos(x, _) }
   }
 
+  def posTiles = allPos zip tiles.flatten
+
   def transferMine(pos: Pos, to: Option[Int]): Board = update(pos, Tile.Mine(to))
 
   def transferMines(from: Int, to: Option[Int]): Board = allPos.foldLeft(this) {
