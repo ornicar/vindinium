@@ -45,7 +45,12 @@ object Generator {
 
   private def placeTaverns(board: Board, heroPos: Pos, config: Config): Try[Board] = {
 
+    def nbReachableMines(b: Board) = b.posTiles count {
+      case (p, Tile.Mine(_)) => p.neighbors map b.get exists (Some(Tile.Air)==)
+      case _                 => false
+    }
     val reachable = Traverser(board, heroPos)
+    val nbMines = nbReachableMines(board)
 
     def doPlace(poss: List[Pos]): Try[Board] = poss match {
       case Nil => fail("No place found for a tavern")
@@ -53,7 +58,8 @@ object Generator {
         val b2 = List(pos, board mirrorX pos, board mirrorXY pos, board mirrorY pos).foldLeft(board) {
           case (b, p) => b.update(p, Tile.Tavern)
         }
-        if (Traverser(b2, heroPos).size == reachable.size - 4) Success(b2)
+        val reachable2 = Traverser(b2, heroPos)
+        if (reachable2.size == reachable.size - 4 && nbReachableMines(b2) == nbMines) Success(b2)
         else doPlace(rest)
       }
     }
