@@ -384,7 +384,7 @@ window.drawPosition = function(game) {
         ];
 
         if(wallPosition == 'alone') { 
-            var randomSprite = Math.floor((Math.random()*possibleSprites.length)); 
+            var randomSprite = index % possibleSprites.length; 
             options.image = possibleSprites[randomSprite].img;
             options.spriteLine = possibleSprites[randomSprite].line;
             options.spriteColumn = possibleSprites[randomSprite].column;
@@ -482,9 +482,7 @@ window.drawPosition = function(game) {
         });
 
 
-        var rdn = Math.floor((Math.random()*10)); 
-
-        if(rdn == 1) {
+        if((index % 10) == 1) {
             grassTile.render(index, borderSize);
         }
 
