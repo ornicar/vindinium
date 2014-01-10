@@ -342,13 +342,9 @@ jQuery( document ).ready(function( $ ) {
 
         options.context.fillRect (xPixels, yPixels+objectTileSize, 3, -(objectTileSize*options.life/100));
 
-        /**
-        that.context.fillStyle = "rgb(50,50,50)";
-        that.context.fillRect (xPixels, yPixels, 1, 32);
-        that.context.fillRect (xPixels+4, yPixels, 1, 32);
-        that.context.fillRect (xPixels, yPixels, 5, 1);
-        that.context.fillRect (xPixels, yPixels+32, 5, 1);
-        **/
+        //Lifebar shadow
+        options.context.fillStyle = "rgba(0,0,0,0.4)";
+        options.context.fillRect (xPixels+3, yPixels+objectTileSize+1, 1, -(objectTileSize*options.life/100));
 
     }
 
