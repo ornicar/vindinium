@@ -19,9 +19,9 @@ object JsonFormat {
     "heroes" -> JsArray(g.heroes map apply),
     "board" -> Json.obj(
       "size" -> g.board.size,
-      "tiles" -> JsArray(g.board.posTiles map {
-        case (pos, tile) => JsString((g hero pos).fold(tile.render)(_.render))
-      })
+      "tiles" -> (g.board.posTiles map {
+        case (pos, tile) => (g hero pos).fold(tile.render)(_.render)
+      }).mkString
     )
   )
 

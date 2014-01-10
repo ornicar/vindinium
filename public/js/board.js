@@ -52,6 +52,9 @@ jQuery( document ).ready(function( $ ) {
     var goblinPlayer4Image = new Image();
     goblinPlayer4Image.src = assets + "img/goblin2_white.png";
 
+    // preload tiles parsing
+    game.board.tilesArray = game.board.tiles.match(/.{2}/g);
+
 
     $(window).load(function() {
         drawMap();
@@ -65,16 +68,12 @@ jQuery( document ).ready(function( $ ) {
     }
 
     function drawGround() {
-        $(game.board.tiles).each(function( index ) {
-            renderGround(index);
-        });
+        $(game.board.tilesArray).each(renderGround);
     }
 
 
     function drawObjects() {
-        $(game.board.tiles).each(function( index ) {
-            renderTile(index);
-        });
+      $(game.board.tilesArray).each(renderTile);
     }
 
     function drawBorders() {
@@ -180,7 +179,7 @@ jQuery( document ).ready(function( $ ) {
     }
 
     function renderTile(index) {
-        value = game.board.tiles[index];
+        value = game.board.tilesArray[index];
 
         switch (value) {
             case '##':
@@ -323,7 +322,7 @@ jQuery( document ).ready(function( $ ) {
     }
 
     function renderLifeBar(index, options) {
-        if(index < 0 || index > game.board.tiles) return;
+        if(index < 0 || index > game.board.tilesArray) return;
 
         var coords = indexToCoordinates(index);
         var x = coords.x;
@@ -357,7 +356,7 @@ jQuery( document ).ready(function( $ ) {
 
     function renderObject(index, options) {
 
-        if(index < 0 || index > game.board.tiles) return;
+        if(index < 0 || index > game.board.tilesArray) return;
 
         var objectTile;
 
@@ -374,14 +373,14 @@ jQuery( document ).ready(function( $ ) {
 
     function renderGround(index) {
 
-        if(index < 0 || index > game.board.tiles) return;
+        if(index < 0 || index > game.board.tilesgrray) return;
 
         var groundTile;
 
         if(groundTiles[index]) {
             groundTile = groundTiles[index];
         } else {
-            
+
             groundTile = sprite({
                 context: canvas.getContext("2d"),
                 width: groundTileSize,
@@ -431,12 +430,12 @@ jQuery( document ).ready(function( $ ) {
             var y = coords.y;
             // Clear the canvas
             that.context.clearRect(x*groundTileSize-((that.width-groundTileSize)/2), y*groundTileSize-(that.height-groundTileSize), that.width, that.height);
-        }
+        };
 
 
 
         that.renderAtPosition = function (x, y, shift) {
-            
+
             shift = typeof shift !== 'undefined' ? shift : 0;
 
             // Draw the sprite
@@ -464,27 +463,27 @@ jQuery( document ).ready(function( $ ) {
             var coords = indexToCoordinates(tileIndex);
             var x = coords.x;
             var y = coords.y;
-            
+
             that.renderAtPosition(x, y, shift);
         };
 
         that.update = function () {
 
             tickCount += 1;
-                
+
             if (tickCount > ticksPerFrame) {
-            
+
                 tickCount = 0;
-                
+
                 // If the current frame index is in range
-                if (frameIndex < numberOfFrames - 1) {	
+                if (frameIndex < numberOfFrames - 1) {
                     // Go to the next frame
                     frameIndex += 1;
                 } else if (that.loop) {
                     frameIndex = 0;
                 }
             }
-        }; 
+        };
 
         return that;
     }

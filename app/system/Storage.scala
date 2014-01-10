@@ -22,7 +22,7 @@ final class Storage extends Actor with ActorLogging {
 
   def receive = {
 
-    case game: Game => self ! Save(game.pp)
+    case game: Game => self ! Save(game)
 
     case Save(game) => coll.update(
       BSONDocument("_id" -> game.id),
