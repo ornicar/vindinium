@@ -31,7 +31,7 @@ final class Client(
     case Driver.Auto(play) => when(Waiting) {
 
       case Event(game: Game, _) => {
-        context.system.scheduler.scheduleOnce(500.millis, sender, Server.Play(pov, play(game)))
+        context.system.scheduler.scheduleOnce(botDelay, sender, Server.Play(pov, play(game)))
         goto(Working) using Nothing
       }
     }
@@ -44,6 +44,8 @@ final class Client(
 }
 
 object Client {
+
+  private val botDelay = 5.millis
 
   case class WorkDone(promise: Promise[PlayerInput])
 

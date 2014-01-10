@@ -73,4 +73,7 @@ object Driver {
   case object Http extends Driver
   case class Auto(play: Game => String) extends Driver
   val Immobile = Auto(_ => "stay")
+  val Random = Auto { _ =>
+    scala.util.Random.shuffle(List("north", "south", "east", "west")).head
+  }
 }
