@@ -451,17 +451,20 @@ window.drawPosition = function(game) {
 
         var grassTile = sprite({
             context: canvas.getContext("2d"),
-                   width: groundTileSize,
-                   height: groundTileSize,
-                   image: grassImage,
-                   spriteLine: 5,
-                   numberOfFrames: 1
+            width: groundTileSize,
+            height: groundTileSize,
+            image: grassImage,
+            spriteLine: 5,
+            numberOfFrames: 1
         });
 
+
         var rdn = Math.floor((Math.random()*10)); 
+
         if(rdn == 1) {
             grassTile.render(index, borderSize);
         }
+
     }
 
     function indexToCoordinates(index) {
