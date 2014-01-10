@@ -31,7 +31,7 @@ jQuery( document ).ready(function( $ ) {
     grassImage.src = assets + "img/tilesets/tallgrass_24.png";
 
     var goblinImage = new Image();
-    goblinImage.src = assets + "img/goblin2_bw.png";
+    goblinImage.src = assets + "img/goblin.png";
 
     var beerImage = new Image();
     beerImage.src = assets + "img/barrel.png";
