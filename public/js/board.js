@@ -33,26 +33,26 @@ jQuery( document ).ready(function( $ ) {
     playerImage.src = assets + "img/hero.png";
 
     var player1Image = new Image();
-    player1Image.src = assets + "img/fireheart/player1.png";
+    player1Image.src = assets + "img/fireheart/player1_life.png";
 
     var goblinPlayer1Image = new Image();
     goblinPlayer1Image.src = assets + "img/goblin2_red.png";
 
     var player2Image = new Image();
-    player2Image.src = assets + "img/fireheart/player2.png";
+    player2Image.src = assets + "img/fireheart/player2_life.png";
 
     var goblinPlayer2Image = new Image();
     goblinPlayer2Image.src = assets + "img/goblin2_blue.png";
 
 
     var player3Image = new Image();
-    player3Image.src = assets + "img/fireheart/player3.png";
+    player3Image.src = assets + "img/fireheart/player3_life.png";
 
     var goblinPlayer3Image = new Image();
     goblinPlayer3Image.src = assets + "img/goblin2_purple.png";
 
     var player4Image = new Image();
-    player4Image.src = assets + "img/fireheart/player4.png";
+    player4Image.src = assets + "img/fireheart/player4_life.png";
 
     var goblinPlayer4Image = new Image();
     goblinPlayer4Image.src = assets + "img/goblin2_white.png";
@@ -71,7 +71,6 @@ jQuery( document ).ready(function( $ ) {
     }
 
     function drawBorders() {
-
 
         //Draw the corners
 
@@ -243,6 +242,10 @@ jQuery( document ).ready(function( $ ) {
                 break;
 
             case '@1':
+                renderLifeBar(index, {
+                    context: canvas.getContext("2d"),
+                    life: game.heroes[0].life
+                });
                 renderObject(index, {
                     context: canvas.getContext("2d"),
                     width: objectTileSize,
@@ -255,6 +258,10 @@ jQuery( document ).ready(function( $ ) {
                 break;
 
             case '@2':
+                renderLifeBar(index, {
+                    context: canvas.getContext("2d"),
+                    life: game.heroes[1].life
+                });
                 renderObject(index, {
                     context: canvas.getContext("2d"),
                     width: objectTileSize,
@@ -265,6 +272,10 @@ jQuery( document ).ready(function( $ ) {
                 break;
 
             case '@3':
+                renderLifeBar(index, {
+                    context: canvas.getContext("2d"),
+                    life: game.heroes[2].life
+                });
                 renderObject(index, {
                     context: canvas.getContext("2d"),
                     width: objectTileSize,
@@ -274,6 +285,10 @@ jQuery( document ).ready(function( $ ) {
                 });
                 break;
             case '@4':
+                renderLifeBar(index, {
+                    context: canvas.getContext("2d"),
+                    life: game.heroes[3].life
+                });
                 renderObject(index, {
                     context: canvas.getContext("2d"),
                     width: objectTileSize,
@@ -298,6 +313,43 @@ jQuery( document ).ready(function( $ ) {
                 break;
 
         }
+    }
+
+    function renderLifeBar(index, options) {
+        if(index < 0 || index > game.board.tiles) return;
+
+        var coords = indexToCoordinates(index);
+        var x = coords.x;
+        var y = coords.y;
+
+        //Destination x
+        var xPixels = borderSize + x*groundTileSize-3;
+        //Destination y
+        var yPixels = borderSize + y*groundTileSize-(objectTileSize-groundTileSize);
+
+        var red = "rgb(218,21,39)";
+        var orange = "rgb(238,119,3)";
+        var green = "rgb(56,164,42)";
+
+
+        if(options.life > 66) {
+            options.context.fillStyle = green;
+        } else if (options.life > 33) {
+            options.context.fillStyle = orange;
+        } else {
+            options.context.fillStyle = red;
+        }
+
+        options.context.fillRect (xPixels, yPixels+objectTileSize, 3, -(objectTileSize*options.life/100));
+
+        /**
+        that.context.fillStyle = "rgb(50,50,50)";
+        that.context.fillRect (xPixels, yPixels, 1, 32);
+        that.context.fillRect (xPixels+4, yPixels, 1, 32);
+        that.context.fillRect (xPixels, yPixels, 5, 1);
+        that.context.fillRect (xPixels, yPixels+32, 5, 1);
+        **/
+
     }
 
     function renderObject(index, options) {
