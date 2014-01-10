@@ -17,6 +17,7 @@ jQuery( document ).ready(function( $ ) {
     groundImage.src = assets + "img/tilesets/plowed_soil_24.png";
     // Start the game loop as soon as the sprite sheet is loaded
     groundImage.addEventListener("load", gameLoop);
+    groundImage.addEventListener("load", drawBorders);
     groundImage.addEventListener("load", drawGround);
     groundImage.addEventListener("load", drawObjects);
 
@@ -67,6 +68,109 @@ jQuery( document ).ready(function( $ ) {
         $(game.board.tiles).each(function( index ) {
             renderTile(index);
         });
+    }
+
+    function drawBorders() {
+
+
+        //Draw the corners
+
+        var topLeftCornerTile = sprite({
+            context: canvas.getContext("2d"),
+            width: groundTileSize,
+            height: groundTileSize,
+            image: groundImage,
+            spriteLine: 2,
+            numberOfFrames: 1
+        });
+
+        topLeftCornerTile.renderAtPosition(0, 0);
+
+
+        var bottomLeftCornerTile = sprite({
+            context: canvas.getContext("2d"),
+            width: groundTileSize,
+            height: groundTileSize,
+            image: groundImage,
+            spriteLine: 4,
+            numberOfFrames: 1
+        });
+
+        bottomLeftCornerTile.renderAtPosition(0, boardSize+1);
+
+
+        var bottomRightCornerTile = sprite({
+            context: canvas.getContext("2d"),
+            width: groundTileSize,
+            height: groundTileSize,
+            image: groundImage,
+            spriteLine: 4,
+            spriteColumn: 2,
+            numberOfFrames: 1
+        });
+
+        bottomRightCornerTile.renderAtPosition(boardSize+1, boardSize+1);
+
+
+        var topRightCornerTile = sprite({
+            context: canvas.getContext("2d"),
+            width: groundTileSize,
+            height: groundTileSize,
+            image: groundImage,
+            spriteLine: 2,
+            spriteColumn: 2,
+            numberOfFrames: 1
+        });
+
+        topRightCornerTile.renderAtPosition(boardSize+1, 0);
+
+        //Draw the borders
+        var topBorderTile = sprite({
+            context: canvas.getContext("2d"),
+            width: groundTileSize,
+            height: groundTileSize,
+            image: groundImage,
+            spriteLine: 2,
+            spriteColumn: 1,
+            numberOfFrames: 1
+        });
+
+        var bottomBorderTile = sprite({
+            context: canvas.getContext("2d"),
+            width: groundTileSize,
+            height: groundTileSize,
+            image: groundImage,
+            spriteLine: 4,
+            spriteColumn: 1,
+            numberOfFrames: 1
+        });
+
+        var leftBorderTile = sprite({
+            context: canvas.getContext("2d"),
+            width: groundTileSize,
+            height: groundTileSize,
+            image: groundImage,
+            spriteLine: 3,
+            numberOfFrames: 1
+        });
+
+
+        var rightBorderTile = sprite({
+            context: canvas.getContext("2d"),
+            width: groundTileSize,
+            height: groundTileSize,
+            image: groundImage,
+            spriteLine: 3,
+            spriteColumn: 2,
+            numberOfFrames: 1
+        });
+
+        for(i = 1; i<=boardSize; i++) {
+            topBorderTile.renderAtPosition(i, 0);
+            bottomBorderTile.renderAtPosition(i, boardSize+1);
+            leftBorderTile.renderAtPosition(0, i);
+            rightBorderTile.renderAtPosition(boardSize+1, i);
+        }
     }
 
     function renderTile(index) {
@@ -274,12 +378,11 @@ jQuery( document ).ready(function( $ ) {
             that.context.clearRect(x*groundTileSize-((that.width-groundTileSize)/2), y*groundTileSize-(that.height-groundTileSize), that.width, that.height);
         }
 
-        that.render = function (tileIndex, shift) {
-            var coords = indexToCoordinates(tileIndex);
-            var x = coords.x;
-            var y = coords.y;
+
+
+        that.renderAtPosition = function (x, y, shift) {
             
-            shift = typeof shift !== 'undefined' ? shift : true;
+            shift = typeof shift !== 'undefined' ? shift : 0;
 
             // Draw the sprite
             that.context.drawImage(
@@ -300,6 +403,14 @@ jQuery( document ).ready(function( $ ) {
                 that.width,
                 //Destination height
                 that.height);
+        };
+
+        that.render = function (tileIndex, shift) {
+            var coords = indexToCoordinates(tileIndex);
+            var x = coords.x;
+            var y = coords.y;
+            
+            that.renderAtPosition(x, y, shift);
         };
 
         that.update = function () {
