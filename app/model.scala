@@ -3,10 +3,10 @@ package bot
 
 case class Pos(x: Int, y: Int) {
 
-  def north = copy(y = y - 1)
-  def south = copy(y = y + 1)
-  def east = copy(x = x + 1)
-  def west = copy(x = x - 1)
+  def north = copy(x = x - 1)
+  def south = copy(x = x + 1)
+  def east = copy(y = y + 1)
+  def west = copy(y = y - 1)
 
   def neighbors = Set(north, south, east, west)
 

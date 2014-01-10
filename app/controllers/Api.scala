@@ -17,13 +17,19 @@ object Api extends Controller {
 
   def trainingAlone = Action.async { req =>
     (Server.actor ? Server.RequestToPlayAlone) map {
-      case input: PlayerInput => Ok(JsonFormat(input, req.domain)) as JSON
+      case input: PlayerInput => {
+        println(input.game.render)
+        Ok(JsonFormat(input, req.domain)) as JSON
+      }
     }
   }
 
   def move(gameId: String, token: String, dir: String) = Action.async { req =>
     Server.actor ? Server.Play(Pov(gameId, token), dir) map {
-      case input: PlayerInput => Ok(JsonFormat(input, req.domain)) as JSON
+      case input: PlayerInput => {
+        println(input.game.render)
+        Ok(JsonFormat(input, req.domain)) as JSON
+      }
     } recover {
       case e: NotFoundException => NotFound(e.getMessage)
     }

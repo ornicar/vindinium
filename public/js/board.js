@@ -447,6 +447,24 @@ window.drawPosition = function(game) {
             groundTiles[index] = groundTile;
         }
         groundTile.render(index, borderSize);
+
+
+        var grassTile = sprite({
+            context: canvas.getContext("2d"),
+            width: groundTileSize,
+            height: groundTileSize,
+            image: grassImage,
+            spriteLine: 5,
+            numberOfFrames: 1
+        });
+
+
+        var rdn = Math.floor((Math.random()*10)); 
+
+        if(rdn == 1) {
+            grassTile.render(index, borderSize);
+        }
+
     }
 
     function indexToCoordinates(index) {
