@@ -17,6 +17,9 @@ farmingImage.src = assets + "img/tilesets/farming_fishing_24.png";
 var plantsImage = new Image();
 plantsImage.src = assets + "img/tilesets/plants_24.png";
 
+var goblinImage = new Image();
+goblinImage.src = assets + "img/goblin.png";
+
 var player1Image = new Image();
 player1Image.src = assets + "img/fireheart/player1_life.png";
 
