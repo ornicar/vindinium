@@ -245,7 +245,7 @@ jQuery( document ).ready(function( $ ) {
                 renderLifeBar(index, {
                     context: canvas.getContext("2d"),
                     player: 1,
-                    fillStyle: "rgb(200,0,0)"
+                    life: game.heroes[0].life
                 });
                 renderObject(index, {
                     context: canvas.getContext("2d"),
@@ -311,22 +311,33 @@ jQuery( document ).ready(function( $ ) {
         var x = coords.x;
         var y = coords.y;
 
-        var that = {};
-        that.context = options.context;
-
         //Destination x
-        var xPixels = borderSize + x*groundTileSize-((objectTileSize-groundTileSize)/2);
+        var xPixels = borderSize + x*groundTileSize-3;
         //Destination y
         var yPixels = borderSize + y*groundTileSize-(objectTileSize-groundTileSize);
 
-        that.context.fillStyle = options.fillStyle;
-        that.context.fillRect (xPixels, yPixels, 4, 32);
+        var red = "rgb(218,21,39)";
+        var orange = "rgb(238,119,3)";
+        var green = "rgb(56,164,42)";
 
+
+        if(options.life > 66) {
+            options.context.fillStyle = green;
+        } else if (options.life > 33) {
+            options.context.fillStyle = orange;
+        } else {
+            options.context.fillStyle = red;
+        }
+
+        options.context.fillRect (xPixels, yPixels+objectTileSize, 3, -(objectTileSize*options.life/100));
+
+        /**
         that.context.fillStyle = "rgb(50,50,50)";
         that.context.fillRect (xPixels, yPixels, 1, 32);
         that.context.fillRect (xPixels+4, yPixels, 1, 32);
         that.context.fillRect (xPixels, yPixels, 5, 1);
-        that.context.fillRect (xPixels, yPixels+31, 5, 1);
+        that.context.fillRect (xPixels, yPixels+32, 5, 1);
+        **/
 
     }
 
