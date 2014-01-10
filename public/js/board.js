@@ -361,15 +361,9 @@ window.drawPosition = function(game) {
 
         if(index < 0 || index > game.board.tilesArray) return;
 
-        var neighbors = neighborsAtIndex(index);
-        var neighborsArray = [neighbors.top, neighbors.left, neighbors.bottom, neighbors.right];
+        var alone = false;
 
-        var alone = true;
-
-        for(i=0; i<neighborsArray.length; i++) {
-            if(neighborsArray[i] == '##') alone = false;
-        }
-
+        var wallPosition = getWallPosition(index);
 
         var options = {
             context: canvas.getContext("2d"),
@@ -389,11 +383,16 @@ window.drawPosition = function(game) {
             {img: plantsImage, line: 9, column: 4}
         ];
 
-        if(alone) { 
+        if(wallPosition == 'alone') { 
             var randomSprite = Math.floor((Math.random()*possibleSprites.length)); 
             options.image = possibleSprites[randomSprite].img;
             options.spriteLine = possibleSprites[randomSprite].line;
             options.spriteColumn = possibleSprites[randomSprite].column;
+        } else if(wallPosition == 'middle') {
+            options.image = grassImage;
+            options.spriteLine = 3;
+            options.spriteColumn = 1;
+
         }
 
         var objectTile;
@@ -406,6 +405,30 @@ window.drawPosition = function(game) {
 
         objectTile.render(index, borderSize);
 
+    }
+
+    function getWallPosition(index) {
+
+        if(index < 0 || index > game.board.tilesArray) return;
+
+        var neighbors = neighborsAtIndex(index);
+        var neighborsArray = [neighbors.top, neighbors.left, neighbors.bottom, neighbors.right];
+
+        var alone = true;
+
+        for(i=0; i<neighborsArray.length; i++) {
+            if(neighborsArray[i] == '##') alone = false;
+        }
+
+        if (alone) return 'alone';
+
+        var middle = true;
+
+        for(i=0; i<neighborsArray.length; i++) {
+            if(neighborsArray[i] != '##') middle = false;
+        }
+
+        if (middle) return 'middle';
     }
 
     function renderObject(index, options) {
