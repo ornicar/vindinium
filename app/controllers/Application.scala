@@ -11,16 +11,20 @@ object Application extends Controller {
 
   def index = Action.async {
     system.Pool create Config.random map { game =>
-      Ok(views.html.index(game))
+      val replay = system.Replay(game.id, List(JsonFormat(game)))
+      Ok(views.html.visualize(replay))
     }
   }
 
-  def replay(id: String) = Action.async {
+  def visualization(id: String) = Action.async {
     Storage.get(id) map {
       case Some(replay) => Ok(views.html.visualize(replay))
       case None => NotFound
     }
+  }
 
+  def test = Action {
+    Ok(views.html.test())
   }
 
 }

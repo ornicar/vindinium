@@ -1,7 +1,10 @@
 GET     /                               controllers.Application.index
-GET     /replay/:id                     controllers.Application.replay(id: String)
 
 GET     /api/training/alone             controllers.Api.trainingAlone
 POST    /api/:gameId/:token/play/:dir   controllers.Api.move(gameId: String, token: String, dir: String)
+
+GET     /test                           controllers.Application.test
+
+GET     /$id<[\w]{8}>                   controllers.Application.visualization(id: String)
 
 GET     /assets/*file                   controllers.Assets.at(path="/public", file)
