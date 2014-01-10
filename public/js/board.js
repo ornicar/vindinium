@@ -19,7 +19,6 @@ jQuery( document ).ready(function( $ ) {
     groundImage.addEventListener("load", gameLoop);
     groundImage.addEventListener("load", drawBorders);
     groundImage.addEventListener("load", drawGround);
-    groundImage.addEventListener("load", drawObjects);
 
     var grassImage = new Image();
     grassImage.src = assets + "img/tilesets/tallgrass_24.png";
@@ -56,6 +55,9 @@ jQuery( document ).ready(function( $ ) {
 
     var goblinPlayer4Image = new Image();
     goblinPlayer4Image.src = assets + "img/goblin2_white.png";
+
+
+    player4Image.addEventListener("load", drawObjects);
 
     function drawGround() {
         $(game.board.tiles).each(function( index ) {
