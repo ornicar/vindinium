@@ -1,24 +1,17 @@
 //Thanks to http://www.williammalone.com/articles/create-html5-canvas-javascript-sprite-animation/
 jQuery( document ).ready(function( $ ) {
 
-    /**
-    var map = ['  ', 'XX', 'XX', '  ', 
-               '  ', 'XX', 'XX', '  ',
-               '  ', '$-', 'XX', '@1',
-               '[]', '  ', '  ', '  '];
-               **/
-
-
     var groundTiles = [];
     var objectTiles = [];
 
     var groundTileSize = 24;
     var objectTileSize = 32;
+    var borderSize = 24;
     var boardSize = game.board.size;
 
     var canvas = document.getElementById("board");
-    canvas.width = groundTileSize * boardSize;
-    canvas.height = groundTileSize * boardSize;
+    canvas.width = groundTileSize * boardSize + borderSize * 2;
+    canvas.height = groundTileSize * boardSize + borderSize * 2;
 
     var groundImage = new Image();
     groundImage.src = assets + "img/tilesets/plowed_soil_24.png";
@@ -35,7 +28,6 @@ jQuery( document ).ready(function( $ ) {
 
     var beerImage = new Image();
     beerImage.src = assets + "img/barrel.png";
-
     var playerImage = new Image();
     playerImage.src = assets + "img/hero.png";
 
@@ -82,7 +74,7 @@ jQuery( document ).ready(function( $ ) {
 
         switch (value) {
             case '##':
-                sprite({
+                renderObject(index, {
                     context: canvas.getContext("2d"),
                     width: groundTileSize,
                     height: groundTileSize,
@@ -90,60 +82,60 @@ jQuery( document ).ready(function( $ ) {
                     spriteLine: 5,
                     spriteColumn: 2,
                     numberOfFrames: 1
-                }).render(index, false);
+                });
 
                 break;
 
 
             case '$-':
-                sprite({
+                renderObject(index, {
                     context: canvas.getContext("2d"),
                     width: objectTileSize,
                     height: objectTileSize,
                     image: goblinImage,
                     numberOfFrames: 1
-                }).render(index, false);
+                });
 
                 break;
 
 
             case '$1':
-                sprite({
+                renderObject(index, {
                     context: canvas.getContext("2d"),
                     width: objectTileSize,
                     height: objectTileSize,
                     image: goblinPlayer1Image,
                     numberOfFrames: 1
-                }).render(index, false);
+                });
                 break;
 
             case '$2':
-                sprite({
+                renderObject(index, {
                     context: canvas.getContext("2d"),
                     width: objectTileSize,
                     height: objectTileSize,
                     image: goblinPlayer2Image,
                     numberOfFrames: 1
-                }).render(index, false);
+                });
                 break;
 
             case '$3':
-                sprite({
+                renderObject(index, {
                     context: canvas.getContext("2d"),
                     width: objectTileSize,
                     height: objectTileSize,
                     image: goblinPlayer3Image,
                     numberOfFrames: 1
-                }).render(index, false);
+                });
                 break;
             case '$4':
-                sprite({
+                renderObject(index, {
                     context: canvas.getContext("2d"),
                     width: objectTileSize,
                     height: objectTileSize,
                     image: goblinPlayer4Image,
                     numberOfFrames: 1
-                }).render(index, false);
+                });
                 break;
 
             case '@1':
@@ -159,42 +151,42 @@ jQuery( document ).ready(function( $ ) {
                 break;
 
             case '@2':
-                sprite({
+                renderObject(index, {
                     context: canvas.getContext("2d"),
                     width: objectTileSize,
                     height: objectTileSize,
                     image: player2Image,
                     numberOfFrames: 1
-                }).render(index, false);
+                });
                 break;
 
             case '@3':
-                sprite({
+                renderObject(index, {
                     context: canvas.getContext("2d"),
                     width: objectTileSize,
                     height: objectTileSize,
                     image: player3Image,
                     numberOfFrames: 1
-                }).render(index, false);
+                });
                 break;
             case '@4':
-                sprite({
+                renderObject(index, {
                     context: canvas.getContext("2d"),
                     width: objectTileSize,
                     height: objectTileSize,
                     image: player4Image,
                     numberOfFrames: 1
-                }).render(index, false);
+                });
                 break;
 
             case '[]':
-                sprite({
+                renderObject(index, {
                     context: canvas.getContext("2d"),
                     width: objectTileSize,
                     height: objectTileSize,
                     image: beerImage,
                     numberOfFrames: 1
-                }).render(index, false);
+                });
 
                 break;
             default:
@@ -204,12 +196,11 @@ jQuery( document ).ready(function( $ ) {
         }
     }
 
-    function renderObject(index, options, clear) {
+    function renderObject(index, options) {
 
         if(index < 0 || index > game.board.tiles) return;
 
         var objectTile;
-        clear = typeof clear !== 'undefined' ? clear : true;
 
         if(objectTiles[index]) {
             objectTile = objectTiles[index];
@@ -218,7 +209,7 @@ jQuery( document ).ready(function( $ ) {
             objectTiles[index] = objectTile;
         }
 
-        objectTile.render(index, clear);
+        objectTile.render(index, borderSize);
 
     }
 
@@ -226,12 +217,13 @@ jQuery( document ).ready(function( $ ) {
 
         if(index < 0 || index > game.board.tiles) return;
 
+        var groundTile;
+
         if(groundTiles[index]) {
-            var tile = groundTiles[index];
-            tile.render(index);
+            groundTile = groundTiles[index];
         } else {
             
-            var ground = sprite({
+            groundTile = sprite({
                 context: canvas.getContext("2d"),
                 width: groundTileSize,
                 height: groundTileSize,
@@ -239,10 +231,10 @@ jQuery( document ).ready(function( $ ) {
                 spriteLine: 5,
                 numberOfFrames: 1
             });
-            ground.render(index);
 
-            groundTiles[index] = ground;
+            groundTiles[index] = groundTile;
         }
+        groundTile.render(index, borderSize);
     }
 
     function indexToCoordinates(index) {
@@ -280,14 +272,14 @@ jQuery( document ).ready(function( $ ) {
             var y = coords.y;
             // Clear the canvas
             that.context.clearRect(x*groundTileSize-((that.width-groundTileSize)/2), y*groundTileSize-(that.height-groundTileSize), that.width, that.height);
-            //redraw the ground for this tile
-            renderGround(tileIndex);
         }
 
-        that.render = function (tileIndex, clear) {
+        that.render = function (tileIndex, shift) {
             var coords = indexToCoordinates(tileIndex);
             var x = coords.x;
             var y = coords.y;
+            
+            shift = typeof shift !== 'undefined' ? shift : true;
 
             // Draw the sprite
             that.context.drawImage(
@@ -301,9 +293,9 @@ jQuery( document ).ready(function( $ ) {
                 //Source height
                 that.height,
                 //Destination x
-                x*groundTileSize-((that.width-groundTileSize)/2),
+                shift + x*groundTileSize-((that.width-groundTileSize)/2),
                 //Destination y
-                y*groundTileSize-(that.height-groundTileSize),
+                shift + y*groundTileSize-(that.height-groundTileSize),
                 //Destination width
                 that.width,
                 //Destination height
