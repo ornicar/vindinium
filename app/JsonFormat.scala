@@ -30,5 +30,6 @@ object JsonFormat {
     "name" -> h.name,
     "pos" -> List(h.pos.x, h.pos.y),
     "life" -> h.life,
-    "gold" -> h.gold)
+    "gold" -> h.gold,
+    "crashed" -> h.crashed)
 }

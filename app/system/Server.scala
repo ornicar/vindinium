@@ -39,6 +39,7 @@ final class Server extends Actor with ActorLogging {
     }
 
     case Start(game: Game) => {
+      context.system.eventStream publish game
       val pov = Pov(game.id, game.hero.token)
       clients get pov match {
         case None         => throw UtterFailException(s"Game ${game.id} started without a hero client")
@@ -52,6 +53,7 @@ final class Server extends Actor with ActorLogging {
         case None => replyTo ! notFound(s"No client for $pov")
         case Some(client) => {
           Pool.actor ? Pool.Play(pov, Dir(dir)) mapTo manifest[Game] foreach { game =>
+            context.system.eventStream publish game
             client ! Client.WorkDone(inputPromise(replyTo))
             clients get Pov(game.id, game.hero.token) foreach (_ ! game)
           }
