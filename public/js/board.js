@@ -33,7 +33,7 @@ jQuery( document ).ready(function( $ ) {
     playerImage.src = assets + "img/hero.png";
 
     var player1Image = new Image();
-    player1Image.src = assets + "img/fireheart/player1.png";
+    player1Image.src = assets + "img/fireheart/player1_life.png";
 
     var goblinPlayer1Image = new Image();
     goblinPlayer1Image.src = assets + "img/goblin2_red.png";
@@ -71,7 +71,6 @@ jQuery( document ).ready(function( $ ) {
     }
 
     function drawBorders() {
-
 
         //Draw the corners
 
@@ -243,6 +242,11 @@ jQuery( document ).ready(function( $ ) {
                 break;
 
             case '@1':
+                renderLifeBar(index, {
+                    context: canvas.getContext("2d"),
+                    player: 1,
+                    fillStyle: "rgb(200,0,0)"
+                });
                 renderObject(index, {
                     context: canvas.getContext("2d"),
                     width: objectTileSize,
@@ -298,6 +302,32 @@ jQuery( document ).ready(function( $ ) {
                 break;
 
         }
+    }
+
+    function renderLifeBar(index, options) {
+        if(index < 0 || index > game.board.tiles) return;
+
+        var coords = indexToCoordinates(index);
+        var x = coords.x;
+        var y = coords.y;
+
+        var that = {};
+        that.context = options.context;
+
+        //Destination x
+        var xPixels = borderSize + x*groundTileSize-((objectTileSize-groundTileSize)/2);
+        //Destination y
+        var yPixels = borderSize + y*groundTileSize-(objectTileSize-groundTileSize);
+
+        that.context.fillStyle = options.fillStyle;
+        that.context.fillRect (xPixels, yPixels, 4, 32);
+
+        that.context.fillStyle = "rgb(50,50,50)";
+        that.context.fillRect (xPixels, yPixels, 1, 32);
+        that.context.fillRect (xPixels+4, yPixels, 1, 32);
+        that.context.fillRect (xPixels, yPixels, 5, 1);
+        that.context.fillRect (xPixels, yPixels+31, 5, 1);
+
     }
 
     function renderObject(index, options) {
