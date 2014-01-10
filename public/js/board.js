@@ -55,11 +55,17 @@ jQuery( document ).ready(function( $ ) {
     // preload tiles parsing
     game.board.tilesArray = game.board.tiles.match(/.{2}/g);
 
+    updateGold();
 
     $(window).load(function() {
         drawMap();
     });
 
+    function updateGold() {
+        for(i=0; i<game.heroes.length; i++) {
+            $("#player" + (i+1) +" span").text(game.heroes[i].gold);
+        }
+    }
 
     function drawMap() {
         drawBorders();
@@ -79,7 +85,6 @@ jQuery( document ).ready(function( $ ) {
     function drawBorders() {
 
         //Draw the corners
-
         var topLeftCornerTile = sprite({
             context: canvas.getContext("2d"),
             width: groundTileSize,
@@ -90,7 +95,6 @@ jQuery( document ).ready(function( $ ) {
         });
 
         topLeftCornerTile.renderAtPosition(0, 0);
-
 
         var bottomLeftCornerTile = sprite({
             context: canvas.getContext("2d"),
@@ -103,7 +107,6 @@ jQuery( document ).ready(function( $ ) {
 
         bottomLeftCornerTile.renderAtPosition(0, boardSize+1);
 
-
         var bottomRightCornerTile = sprite({
             context: canvas.getContext("2d"),
             width: groundTileSize,
@@ -115,7 +118,6 @@ jQuery( document ).ready(function( $ ) {
         });
 
         bottomRightCornerTile.renderAtPosition(boardSize+1, boardSize+1);
-
 
         var topRightCornerTile = sprite({
             context: canvas.getContext("2d"),
