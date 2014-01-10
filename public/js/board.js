@@ -19,6 +19,12 @@ jQuery( document ).ready(function( $ ) {
     var grassImage = new Image();
     grassImage.src = assets + "img/tilesets/tallgrass_24.png";
 
+    var farmingImage = new Image();
+    farmingImage.src = assets + "img/tilesets/farming_fishing_24.png";
+
+    var plantsImage = new Image();
+    plantsImage.src = assets + "img/tilesets/plants_24.png";
+
     var goblinImage = new Image();
     goblinImage.src = assets + "img/goblin.png";
 
@@ -51,6 +57,7 @@ jQuery( document ).ready(function( $ ) {
 
     var goblinPlayer4Image = new Image();
     goblinPlayer4Image.src = assets + "img/goblin2_white.png";
+
 
     // preload tiles parsing
     game.board.tilesArray = game.board.tiles.match(/.{2}/g);
@@ -185,15 +192,7 @@ jQuery( document ).ready(function( $ ) {
 
         switch (value) {
             case '##':
-                renderObject(index, {
-                    context: canvas.getContext("2d"),
-                    width: groundTileSize,
-                    height: groundTileSize,
-                    image: grassImage,
-                    spriteLine: 5,
-                    spriteColumn: 2,
-                    numberOfFrames: 1
-                });
+                renderWall(index);
 
                 break;
 
@@ -356,6 +355,57 @@ jQuery( document ).ready(function( $ ) {
 
     }
 
+    function renderWall(index) {
+
+        if(index < 0 || index > game.board.tilesArray) return;
+
+        var neighbors = neighborsAtIndex(index);
+        var neighborsArray = [neighbors.top, neighbors.left, neighbors.bottom, neighbors.right];
+
+        var alone = true;
+
+        for(i=0; i<neighborsArray.length; i++) {
+            if(neighborsArray[i] == '##') alone = false;
+        }
+
+
+        var options = {
+            context: canvas.getContext("2d"),
+            width: groundTileSize,
+            height: groundTileSize,
+            image: grassImage,
+            spriteLine: 5,
+            spriteColumn: 2,
+            numberOfFrames: 1
+        };
+
+        var possibleSprites = [
+            {img: grassImage, line: 5, column: 2}, 
+            {img: farmingImage, line: 1, column: 1}, 
+            {img: farmingImage, line: 3, column: 1},
+            {img: farmingImage, line: 1, column: 5},
+            {img: plantsImage, line: 9, column: 4}
+        ];
+
+        if(alone) { 
+            var randomSprite = Math.floor((Math.random()*possibleSprites.length)); 
+            options.image = possibleSprites[randomSprite].img;
+            options.spriteLine = possibleSprites[randomSprite].line;
+            options.spriteColumn = possibleSprites[randomSprite].column;
+        }
+
+        var objectTile;
+        if(objectTiles[index]) {
+            objectTile = objectTiles[index];
+        } else {
+            objectTile = sprite(options);
+            objectTiles[index] = objectTile;
+        }
+
+        objectTile.render(index, borderSize);
+
+    }
+
     function renderObject(index, options) {
 
         if(index < 0 || index > game.board.tilesArray) return;
@@ -402,6 +452,35 @@ jQuery( document ).ready(function( $ ) {
         var yValue = Math.floor(index / boardSize);
 
         return {x: xValue, y: yValue};
+    }
+
+    function neighborsAtIndex(index) {
+        if(index < 0 || index > game.board.tilesArray) return;
+
+        var coords = indexToCoordinates(index);
+        var x = coords.x;
+        var y = coords.y;
+
+        var topNeighbor, leftNeighbor, bottomNeighbor, rightNeighbor;
+
+        if(y==0) topNeighbor = null;
+        else topNeighbor = game.board.tilesArray[coordinatesToIndex(x,y-1)];
+
+        if(y==boardSize-1) bottomNeighbor = null;
+        else bottomNeighbor = game.board.tilesArray[coordinatesToIndex(x,y+1)];
+
+        if(x==0) leftNeighbor = null;
+        else leftNeighbor = game.board.tilesArray[coordinatesToIndex(x-1,y)];
+
+        if(x==boardSize-1) rightNeighbor = null;
+        else rightNeighbor = game.board.tilesArray[coordinatesToIndex(x+1,y)];
+
+        return {top: topNeighbor, left: leftNeighbor, bottom: bottomNeighbor, right: rightNeighbor};
+
+    }
+
+    function coordinatesToIndex(x, y) {
+        return y*boardSize+x;
     }
 
     function gameLoop () {
