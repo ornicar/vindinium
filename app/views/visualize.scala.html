@@ -13,12 +13,9 @@
 
         <canvas id="board"></canvas>
 
+        <div id="nav"><span id="prev">&lt;</span>&nbsp;&nbsp;&nbsp;<span id="next">&gt;</span></div>
+
         <script language="javascript">
-            $(function() {
-                $(window).load(function() {
-                    var replay = window.replay = @Html(Json.stringify(JsonFormat(replay)));
-                    drawPosition(replay.games[0]);
-                });
-            });
+            replay = @Html(Json.stringify(JsonFormat(replay)));
         </script>
 }

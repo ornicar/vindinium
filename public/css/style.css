@@ -3,6 +3,15 @@ body {
   color: #d0d0d0;
   text-align: center;
 }
+
+#nav {
+    display: none;
+}
+
+#nav span {
+    cursor: pointer;
+}
+
 #board {
     padding-top: 10px;
 }
