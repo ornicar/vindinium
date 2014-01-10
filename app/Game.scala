@@ -10,15 +10,22 @@ case class Game(
     hero2: Hero,
     hero3: Hero,
     hero4: Hero,
-    turn: Int = 0) {
+    turn: Int = 0,
+    status: Status) {
 
   def heroes = List(hero1, hero2, hero3, hero4)
+  def activeHeroes = heroes filterNot (_.crashed)
 
-  def hero: Hero = hero(turn % 4)
+  // TODO fixme, this will break if all heroes have crashed
+  def hero: Hero = activeHeroes(turn % activeHeroes.size)
   def hero(id: Int): Hero = heroes lift id getOrElse hero1
   def hero(pos: Pos): Option[Hero] = heroes find (_.pos == pos)
 
-  def step(update: Game => Game) = update(this).copy(turn = turn + 1)
+  def step(update: Game => Game) = {
+    val g = update(this).copy(turn = turn + 1)
+    // TODO detect endgame
+    g
+  }
 
   def withHero(f: Hero => Hero): Game = withHero(hero.id, f)
   def withHero(hero: Hero): Game = withHero(hero.id, _ => hero)
@@ -30,6 +37,8 @@ case class Game(
     hero4 = if (id == 4) f(hero4) else hero4)
 
   def withBoard(f: Board => Board) = copy(board = f(board))
+
+  def finished = status.finished
 
   override def toString = {
 

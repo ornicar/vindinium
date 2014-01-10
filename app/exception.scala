@@ -8,6 +8,6 @@ trait GameException extends Exception {
 
 case class RuleViolationException(message: String) extends GameException
 
-case class GameFinishedException(reason: Finish) extends GameException {
+case class GameFinishedException(reason: Status.Finish) extends GameException {
   val message = reason.toString
 }

@@ -7,7 +7,9 @@ case class Hero(
     name: String,
     pos: Pos,
     life: Int,
-    gold: Int) {
+    gold: Int,
+    driver: Driver,
+    crash: Option[Crash]) {
 
   def moveTo(p: Pos) = copy(pos = p)
 
@@ -25,6 +27,9 @@ case class Hero(
 
   def reSpawn(p: Pos) = copy(life = Hero.maxLife, pos = p)
 
+  def setCrash(c: Crash) = copy(crash = Some(c))
+  def crashed = crash.isDefined
+
   def isAlive = life > 0
   def isDead = !isAlive
 
@@ -39,7 +44,9 @@ object Hero {
     name = name,
     pos = pos,
     life = maxLife,
-    gold = 0)
+    gold = 0,
+    driver = Driver.Http,
+    crash = None)
 
   val maxLife = 100
   val beerLife = 30

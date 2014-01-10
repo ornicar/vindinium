@@ -40,8 +40,8 @@ object Generator {
     hero1 = Hero(1, "Alaric", heroPos),
     hero2 = Hero(2, "Luther", board mirrorX heroPos),
     hero3 = Hero(3, "Thorfinn", board mirrorXY heroPos),
-    hero4 = Hero(4, "York", board mirrorY heroPos)
-  )
+    hero4 = Hero(4, "York", board mirrorY heroPos),
+    status = Status.Created)
 
   private def placeTaverns(board: Board, heroPos: Pos, config: Config): Try[Board] = {
 

@@ -8,7 +8,7 @@ import play.api.Play.current
 import scala.concurrent.Future
 import scala.util.{ Try, Success, Failure }
 
-final class GameActor(initialGame: Game) extends Actor {
+final class GameActor(initialGame: Game) extends Actor with ActorLogging {
 
   import GameActor._
 
@@ -18,12 +18,16 @@ final class GameActor(initialGame: Game) extends Actor {
 
     case Get => sender ! game
 
-    case Move(token, dir) => Arbiter.move(game, token, dir) match {
-      case Success(g) => {
-        game = g
-        sender ! game
+    case Play(token, dir) => {
+      Arbiter.move(game, token, dir) match {
+        case Success(g) => game = g
+        case Failure(e) => game = {
+          val crash = Crash.Rule(e.getMessage)
+          log.warning(s"${game.hero} crashed: $crash")
+          Arbiter.crash(game, crash)
+        }
       }
-      case Failure(e) => sender ! (Status Failure e)
+      sender ! game
     }
   }
 }
@@ -31,5 +35,5 @@ final class GameActor(initialGame: Game) extends Actor {
 object GameActor {
 
   case object Get
-  case class Move(token: String, dir: Dir)
+  case class Play(token: String, dir: Dir)
 }

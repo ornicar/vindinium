@@ -5,11 +5,16 @@ import scala.util.{ Random, Try, Success, Failure }
 
 object Arbiter {
 
+  // crashes the current player and forwards one turn
+  def crash(game: Game, c: Crash): Game = game.step(_.withHero(_ setCrash c))
+
   def move(game: Game, token: String, dir: Dir): Try[Game] =
     if (game.hero.token != token) fail(s"Not hero $token turn to move")
-    else doMove(game, game.hero.id, dir)
+    else doMove(game, dir)
 
-  private def doMove(game: Game, id: Int, dir: Dir) = {
+  private def doMove(game: Game, dir: Dir) = {
+
+    val id = game.hero.id
 
     def reach(destPos: Pos) = game.board get destPos match {
       case None => stay

@@ -26,8 +26,16 @@ case object Dir {
   case object Stay extends Dir
   case object North extends Dir
   case object South extends Dir
-  case object West extends Dir
   case object East extends Dir
+  case object West extends Dir
+
+  def apply(str: String): Dir = str.toLowerCase.trim match {
+    case "north" => North
+    case "south" => South
+    case "east"  => East
+    case "west"  => West
+    case _       => Stay
+  }
 }
 
 sealed abstract class Tile(char1: Char, char2: Char) {
@@ -40,8 +48,29 @@ object Tile {
   case class Mine(owner: Option[Int]) extends Tile('$', owner.fold('-')(_.toString.head))
 }
 
-sealed trait Finish
-object Finish {
+sealed trait Status {
+  def finished = false
+}
+object Status {
+  sealed trait Finish extends Status {
+    override def finished = true
+  }
+  case object Created extends Status
+  case object Started extends Status
+  case object AllCrashed extends Finish
   case object TurnMax extends Finish
   case class GoldWin(hero: Hero) extends Finish
+}
+
+sealed abstract class Crash(reason: String)
+object Crash {
+  case object Timeout extends Crash("Timed out")
+  case class Rule(r: String) extends Crash(r)
+}
+
+sealed trait Driver
+object Driver {
+  case object Http extends Driver
+  case class Auto(play: Game => String) extends Driver
+  val Immobile = Auto(_ => "stay")
 }

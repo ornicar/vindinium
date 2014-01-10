@@ -2,48 +2,61 @@ package org.jousse.bot
 package system
 
 import akka.actor._
+import akka.actor.OneForOneStrategy
+import akka.actor.SupervisorStrategy._
 import akka.pattern.{ ask, pipe }
 import akka.util.Timeout
-import play.api.libs.concurrent.Akka
-import play.api.Play.current
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.{ Try, Success, Failure }
 
-final class Pool extends ActorMap[GameActor] {
+final class Pool extends Actor with ActorLogging {
 
   import Pool._
 
   implicit val timeout = Timeout(1.second)
 
-  val gameActors = scala.collection.mutable.Map[String, ActorRef]()
+  val actors = scala.collection.mutable.Map[String, ActorRef]()
 
-  def mkActor
+  override val supervisorStrategy =
+    OneForOneStrategy() {
+      case _: RuleViolationException ⇒ Resume
+      case _: Exception              ⇒ Escalate
+    }
 
   def receive = {
 
-    case Play(id: String, token: String, dir: Dir) => gameActors get id match {
-      case None     => sender ! Status.Failure(new Exception(s"No such game: $id"))
-      case Some(ga) => ga forward GameActor.Move(token, dir)
+    case Play(pov: Pov, dir: Dir) => actors get pov.gameId match {
+      case None     => log.warning(s"No game for $pov")
+      case Some(ga) => ga forward GameActor.Play(pov.token, dir)
     }
 
-    case Get(id) => gameActors get id match {
-      case None     => sender ! Status.Failure(new Exception(s"No such game: $id"))
+    case Get(id) => actors get id match {
+      case None     => sender ! Status.Failure(new Exception(s"No game for id $id"))
       case Some(ga) => ga forward GameActor.Get
     }
 
     case Create(config) => Generator(config) match {
       case Failure(e) => sender ! Status.Failure(e)
       case Success(game) => {
-        gameActors += (game.id -> context.actorOf(Props(new GameActor(game))))
+        val actor = context.actorOf(Props(new GameActor(game)), name = s"game-${game.id}")
+        actors += (game.id -> actor)
+        context watch actor
         sender ! game
       }
     }
 
-    case GetOrCreate => gameActors.headOption map (_._2) match {
+    case GetOrCreate => actors.headOption map (_._2) match {
       case Some(ga) => ga ? GameActor.Get pipeTo sender
       case None     => self.tell(Create(Config.random), sender)
+    }
+
+    case Terminated(actor) ⇒ {
+      context unwatch actor
+      actors filter (_._2 == actor) foreach {
+        case (id, _) ⇒ actors -= id
+      }
     }
   }
 }
@@ -56,10 +69,12 @@ object Pool {
   def create(config: Config): Future[Game] = actor ? Create(config) mapTo manifest[Game]
   def getOrCreate: Future[Game] = actor ? GetOrCreate mapTo manifest[Game]
 
-  val actor = Akka.system.actorOf(Props[Pool])
+  import play.api.libs.concurrent.Akka
+  import play.api.Play.current
+  val actor = Akka.system.actorOf(Props[Pool], name = "pool")
 
   case class Get(id: String)
   case class Create(config: Config)
   case object GetOrCreate
-  case class Play(id: String, token: String, dir: Dir)
+  case class Play(pov: Pov, dir: Dir)
 }
