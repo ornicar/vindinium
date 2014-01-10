@@ -1,0 +1,15 @@
+@(replay: system.Replay)
+
+@import play.api.libs.json.Json
+
+@main("24hCodeBot") {
+
+
+        <canvas id="board"></canvas>
+
+
+        <script language="javascript">
+        var assets = "/assets/";
+        var replay = @Html(Json.stringify(JsonFormat(replay)));
+        </script>
+}

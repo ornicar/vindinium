@@ -3,6 +3,7 @@ package bot
 
 import controllers.routes
 import play.api.libs.json._
+import system.Replay
 
 object JsonFormat {
 
@@ -32,4 +33,9 @@ object JsonFormat {
     "life" -> h.life,
     "gold" -> h.gold,
     "crashed" -> h.crashed)
+
+  def apply(r: Replay): JsObject = Json.obj(
+    "id" -> r.id,
+    "games" -> JsArray(r.games)
+  )
 }
