@@ -4,12 +4,21 @@
 
 @main("24hCodeBot") {
 
+        <ul id="gold">
+            <li id="player1" class="first"><img class="player" src="@routes.Assets.at("img/fireheart/player1.png")"/> <span>100</span><img src="@routes.Assets.at("img/coin.png")" class="coin"/></li>
+            <li id="player2"><img class="player" src="@routes.Assets.at("img/fireheart/player2.png")"/> <span>100</span><img src="@routes.Assets.at("img/coin.png")" class="coin"/></li>
+            <li id="player3"><img class="player" src="@routes.Assets.at("img/fireheart/player3.png")"/> <span>100</span><img src="@routes.Assets.at("img/coin.png")" class="coin"/></li>
+            <li id="player4"><img class="player" src="@routes.Assets.at("img/fireheart/player4.png")"/> <span>100</span><img src="@routes.Assets.at("img/coin.png")" class="coin"/></li>
+        </ul>
 
         <canvas id="board"></canvas>
 
-
         <script language="javascript">
-        var assets = "/assets/";
-        var replay = @Html(Json.stringify(JsonFormat(replay)));
+            $(function() {
+                $(window).load(function() {
+                    var replay = window.replay = @Html(Json.stringify(JsonFormat(replay)));
+                    drawPosition(replay.games[0]);
+                });
+            });
         </script>
 }

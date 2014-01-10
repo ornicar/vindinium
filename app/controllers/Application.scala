@@ -15,7 +15,7 @@ object Application extends Controller {
     }
   }
 
-  def replay(id: String) = Action.async {
+  def visualization(id: String) = Action.async {
     Storage.get(id) map {
       case Some(replay) => Ok(views.html.visualize(replay))
       case None => NotFound

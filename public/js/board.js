@@ -1,6 +1,46 @@
 //Thanks to http://www.williammalone.com/articles/create-html5-canvas-javascript-sprite-animation/
-jQuery( document ).ready(function( $ ) {
 
+var assets = "/assets/";
+
+var groundImage = new Image();
+groundImage.src = assets + "img/tilesets/plowed_soil_24.png";
+
+var grassImage = new Image();
+grassImage.src = assets + "img/tilesets/tallgrass_24.png";
+
+var goblinImage = new Image();
+goblinImage.src = assets + "img/goblin.png";
+
+var beerImage = new Image();
+beerImage.src = assets + "img/barrel.png";
+var playerImage = new Image();
+playerImage.src = assets + "img/hero.png";
+
+var player1Image = new Image();
+player1Image.src = assets + "img/fireheart/player1_life.png";
+
+var goblinPlayer1Image = new Image();
+goblinPlayer1Image.src = assets + "img/goblin2_red.png";
+
+var player2Image = new Image();
+player2Image.src = assets + "img/fireheart/player2_life.png";
+
+var goblinPlayer2Image = new Image();
+goblinPlayer2Image.src = assets + "img/goblin2_blue.png";
+
+var player3Image = new Image();
+player3Image.src = assets + "img/fireheart/player3_life.png";
+
+var goblinPlayer3Image = new Image();
+goblinPlayer3Image.src = assets + "img/goblin2_purple.png";
+
+var player4Image = new Image();
+player4Image.src = assets + "img/fireheart/player4_life.png";
+
+var goblinPlayer4Image = new Image();
+goblinPlayer4Image.src = assets + "img/goblin2_white.png";
+
+window.drawPosition = function(game) {
     var groundTiles = [];
     var objectTiles = [];
 
@@ -10,61 +50,25 @@ jQuery( document ).ready(function( $ ) {
     var boardSize = game.board.size;
 
     var canvas = document.getElementById("board");
+    // clear canvas
+    canvas.width = canvas.width;
+
     canvas.width = groundTileSize * boardSize + borderSize * 2;
     canvas.height = groundTileSize * boardSize + borderSize * 2;
-
-    var groundImage = new Image();
-    groundImage.src = assets + "img/tilesets/plowed_soil_24.png";
-
-    var grassImage = new Image();
-    grassImage.src = assets + "img/tilesets/tallgrass_24.png";
-
-    var goblinImage = new Image();
-    goblinImage.src = assets + "img/goblin.png";
-
-    var beerImage = new Image();
-    beerImage.src = assets + "img/barrel.png";
-    var playerImage = new Image();
-    playerImage.src = assets + "img/hero.png";
-
-    var player1Image = new Image();
-    player1Image.src = assets + "img/fireheart/player1_life.png";
-
-    var goblinPlayer1Image = new Image();
-    goblinPlayer1Image.src = assets + "img/goblin2_red.png";
-
-    var player2Image = new Image();
-    player2Image.src = assets + "img/fireheart/player2_life.png";
-
-    var goblinPlayer2Image = new Image();
-    goblinPlayer2Image.src = assets + "img/goblin2_blue.png";
-
-
-    var player3Image = new Image();
-    player3Image.src = assets + "img/fireheart/player3_life.png";
-
-    var goblinPlayer3Image = new Image();
-    goblinPlayer3Image.src = assets + "img/goblin2_purple.png";
-
-    var player4Image = new Image();
-    player4Image.src = assets + "img/fireheart/player4_life.png";
-
-    var goblinPlayer4Image = new Image();
-    goblinPlayer4Image.src = assets + "img/goblin2_white.png";
 
     // preload tiles parsing
     game.board.tilesArray = game.board.tiles.match(/.{2}/g);
 
     updateGold();
 
-    $(window).load(function() {
-        drawMap();
-    });
+    // draw state
+    drawMap();
 
     function updateGold() {
         for(i=0; i<game.heroes.length; i++) {
             $("#player" + (i+1) +" span").text(game.heroes[i].gold);
         }
+        $('#gold').show();
     }
 
     function drawMap() {
@@ -79,7 +83,7 @@ jQuery( document ).ready(function( $ ) {
 
 
     function drawObjects() {
-      $(game.board.tilesArray).each(renderTile);
+        $(game.board.tilesArray).each(renderTile);
     }
 
     function drawBorders() {
@@ -412,10 +416,10 @@ jQuery( document ).ready(function( $ ) {
     function sprite (options) {
 
         var that = {},
-            frameIndex = 0,
-            tickCount = 0,
-            ticksPerFrame = options.ticksPerFrame || 0,
-            numberOfFrames = options.numberOfFrames || 1;
+        frameIndex = 0,
+        tickCount = 0,
+        ticksPerFrame = options.ticksPerFrame || 0,
+        numberOfFrames = options.numberOfFrames || 1;
 
         that.context = options.context;
         that.width = options.width;
@@ -458,7 +462,7 @@ jQuery( document ).ready(function( $ ) {
                 //Destination width
                 that.width,
                 //Destination height
-                that.height);
+            that.height);
         };
 
         that.render = function (tileIndex, shift) {
@@ -491,4 +495,4 @@ jQuery( document ).ready(function( $ ) {
     }
 
 
-});
+}
