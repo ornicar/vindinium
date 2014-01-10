@@ -15,10 +15,6 @@ jQuery( document ).ready(function( $ ) {
 
     var groundImage = new Image();
     groundImage.src = assets + "img/tilesets/plowed_soil_24.png";
-    // Start the game loop as soon as the sprite sheet is loaded
-    groundImage.addEventListener("load", gameLoop);
-    groundImage.addEventListener("load", drawBorders);
-    groundImage.addEventListener("load", drawGround);
 
     var grassImage = new Image();
     grassImage.src = assets + "img/tilesets/tallgrass_24.png";
@@ -57,7 +53,16 @@ jQuery( document ).ready(function( $ ) {
     goblinPlayer4Image.src = assets + "img/goblin2_white.png";
 
 
-    player4Image.addEventListener("load", drawObjects);
+    $(window).load(function() {
+        drawMap();
+    });
+
+
+    function drawMap() {
+        drawBorders();
+        drawGround();
+        drawObjects();
+    }
 
     function drawGround() {
         $(game.board.tiles).each(function( index ) {
