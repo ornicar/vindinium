@@ -15,22 +15,17 @@ object Api extends Controller {
 
   implicit val timeout = Timeout(10.second)
 
-  def trainingAlone = Action.async {
-    (Server.actor ? Server.RequestToPlayAlone).thenPp map {
-      case Server.Welcome(game, token) => Ok(Json.obj(
-        "game" -> JsonFormat(game),
-        "token" -> token,
-        "playUrl" -> routes.Api.move(game.id, token, "dir").url
-      )) as JSON
+  def trainingAlone = Action.async { req =>
+    (Server.actor ? Server.RequestToPlayAlone) map {
+      case input: PlayerInput => Ok(JsonFormat(input, req.domain)) as JSON
     }
   }
 
-  def move(gameId: String, token: String, dir: String) = Action.async {
+  def move(gameId: String, token: String, dir: String) = Action.async { req =>
     Server.actor ? Server.Play(Pov(gameId, token), dir) map {
-      case game: Game => Ok(Json.obj(
-        "game" -> JsonFormat(game),
-        "debug" -> game.toString
-      )) as JSON
+      case input: PlayerInput => Ok(JsonFormat(input, req.domain)) as JSON
+    } recover {
+      case e: NotFoundException => NotFound(e.getMessage)
     }
   }
 }

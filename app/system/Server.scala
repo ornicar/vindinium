@@ -6,7 +6,7 @@ import akka.pattern.{ ask, pipe }
 import akka.util.Timeout
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.{ Future, promise }
+import scala.concurrent.{ Future, Promise, promise }
 import scala.util.{ Try, Success, Failure }
 
 final class Server extends Actor with ActorLogging {
@@ -17,30 +17,44 @@ final class Server extends Actor with ActorLogging {
 
   val clients = scala.collection.mutable.Map[Pov, ActorRef]()
 
-  def receive = {
+  def receive = akka.event.LoggingReceive {
 
-    case RequestToPlayAlone => Pool create Config.random map { game =>
-      self ! AddClient(Pov(game.id, game.hero1.token), Driver.Http)
-      game.heroes drop 1 foreach { hero =>
-        self ! AddClient(Pov(game.id, hero.token), Driver.Immobile)
+    case RequestToPlayAlone => {
+      val replyTo = sender
+      Pool create Config.random foreach { game =>
+        self ! AddClient(Pov(game.id, game.hero1.token), Driver.Http, inputPromise(replyTo))
+        game.heroes drop 1 foreach { hero =>
+          self ! AddClient(Pov(game.id, hero.token), Driver.Immobile, inputPromise(replyTo))
+        }
+        self ! Start(game)
       }
-      Welcome(game, game.hero1.token)
-    } pipeTo sender
+    }
 
-    case AddClient(pov, driver) => {
-      val client = context.actorOf(Props(new Client(pov, driver)), name = s"client-${pov.gameId}-${pov.token}")
+    case AddClient(pov, driver, promise) => {
+      val client = context.actorOf(
+        Props(new Client(pov, driver, promise)),
+        name = s"client-${pov.gameId}-${pov.token}")
       clients += (pov -> client)
       context watch client
     }
 
-    case Play(pov, dir) => clients get pov match {
-      case None => log.warning(s"No client for $pov")
-      case Some(client) => {
-        Pool.actor ? Pool.Play(pov, Dir(dir)) mapTo manifest[Game] foreach { game =>
-          val answerPromise = promise[Game]
-          answerPromise.future onSuccess { case game => sender ! game }
-          client ! Client.WorkDone(answerPromise)
-          clients get Pov(game.id, game.hero.token) foreach (_ ! game)
+    case Start(game: Game) => {
+      val pov = Pov(game.id, game.hero.token)
+      clients get pov match {
+        case None         => throw UtterFailException(s"Game ${game.id} started without a hero client")
+        case Some(client) => client ! game
+      }
+    }
+
+    case Play(pov, dir) => {
+      val replyTo = sender
+      clients get pov match {
+        case None => replyTo ! notFound(s"No client for $pov")
+        case Some(client) => {
+          Pool.actor ? Pool.Play(pov, Dir(dir)) mapTo manifest[Game] foreach { game =>
+            client ! Client.WorkDone(inputPromise(replyTo))
+            clients get Pov(game.id, game.hero.token) foreach (_ ! game)
+          }
         }
       }
     }
@@ -53,6 +67,14 @@ final class Server extends Actor with ActorLogging {
     }
   }
 
+  def inputPromise(to: ActorRef) = {
+    val p = promise[PlayerInput]
+    p.future onSuccess {
+      case x => to ! x
+    }
+    p
+  }
+
   def opponents(pov: Pov) = clients collect {
     case (Pov(id, token), client) if id == pov.gameId && token != pov.token => client
   }
@@ -61,11 +83,11 @@ final class Server extends Actor with ActorLogging {
 object Server {
 
   case object RequestToPlayAlone
-  case class Welcome(game: Game, token: String)
 
   case class Play(pov: Pov, dir: String)
 
-  private case class AddClient(pov: Pov, driver: Driver)
+  private case class AddClient(pov: Pov, driver: Driver, promise: Promise[PlayerInput])
+  private case class Start(game: Game)
 
   import play.api.libs.concurrent.Akka
   import play.api.Play.current

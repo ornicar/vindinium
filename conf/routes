@@ -1,6 +1,6 @@
 GET     /                               controllers.Application.index
 
 GET     /api/training/alone             controllers.Api.trainingAlone
-GET     /api/:gameId/:token/play/:dir   controllers.Api.move(gameId: String, token: String, dir: String)
+POST    /api/:gameId/:token/play/:dir   controllers.Api.move(gameId: String, token: String, dir: String)
 
 GET     /assets/*file                   controllers.Assets.at(path="/public", file)

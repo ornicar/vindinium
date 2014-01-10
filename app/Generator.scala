@@ -108,4 +108,6 @@ object Generator {
 
     replicate(sector(config.size / 2))
   }
+
+  private def fail(err: String) = scala.util.Failure(bot.GeneratorException(err))
 }

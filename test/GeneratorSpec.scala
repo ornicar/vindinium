@@ -9,7 +9,7 @@ class GeneratorSpec extends Specification {
       val wallP = scala.util.Random.nextInt(30) + 13
       Generator(Config.random) must beSuccessfulTry.like {
           case game => {
-            println(game)
+            println(game.render)
             success
           }
         }

@@ -9,7 +9,7 @@ object Arbiter {
   def crash(game: Game, c: Crash): Game = game.step(_.withHero(_ setCrash c))
 
   def move(game: Game, token: String, dir: Dir): Try[Game] =
-    if (game.hero.token != token) fail(s"Not hero $token turn to move")
+    if (game.hero.token != token) Failure(RuleViolationException(s"Not hero $token turn to move"))
     else doMove(game, dir)
 
   private def doMove(game: Game, dir: Dir) = {

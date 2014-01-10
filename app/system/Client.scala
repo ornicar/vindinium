@@ -9,22 +9,29 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ Future, Promise, promise }
 import scala.util.{ Try, Success, Failure }
 
-final class Client(pov: Pov, driver: Driver) extends Actor with LoggingFSM[Client.State, Client.Data] {
+final class Client(
+    pov: Pov,
+    driver: Driver,
+    initialPromise: Promise[PlayerInput]) extends Actor with LoggingFSM[Client.State, Client.Data] {
 
   import Client._
 
-  startWith(Waiting, newResponse)
+  startWith(Waiting, Response(initialPromise))
 
-  when(Waiting) {
+  driver match {
 
-    case Event(game: Game, Response(promise)) => {
-      promise success game
-      if (game.finished) goto(Closed) using Nothing
-      else {
-        driver match {
-          case Driver.Http       =>
-          case Driver.Auto(play) => sender ! Server.Play(pov, play(game))
-        }
+    case Driver.Http => when(Waiting) {
+
+      case Event(game: Game, Response(promise)) => {
+        promise success PlayerInput(game, pov.token)
+        if (game.finished) goto(Closed) using Nothing
+        else goto(Working) using Nothing
+      }
+    }
+    case Driver.Auto(play) => when(Waiting) {
+
+      case Event(game: Game, _) => {
+        context.system.scheduler.scheduleOnce(500.millis, sender, Server.Play(pov, play(game)))
         goto(Working) using Nothing
       }
     }
@@ -38,7 +45,7 @@ final class Client(pov: Pov, driver: Driver) extends Actor with LoggingFSM[Clien
 
 object Client {
 
-  case class WorkDone(promise: Promise[Game])
+  case class WorkDone(promise: Promise[PlayerInput])
 
   sealed trait State
   case object Waiting extends State
@@ -47,7 +54,5 @@ object Client {
 
   sealed trait Data
   case object Nothing extends Data
-  case class Response(promise: Promise[Game]) extends Data
-
-  def newResponse = Response(promise[Game])
+  case class Response(promise: Promise[PlayerInput]) extends Data
 }

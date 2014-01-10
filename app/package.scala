@@ -2,8 +2,6 @@ package org.jousse
 
 package object bot {
 
-  def fail(err: String) = scala.util.Failure(bot.RuleViolationException(err))
-
   implicit final class debugKCombinatorAny[A](a: A) {
     def pp: A = { println(s"*DEBUG* $a"); a }
   }

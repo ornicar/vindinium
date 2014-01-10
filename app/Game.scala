@@ -40,7 +40,9 @@ case class Game(
 
   def finished = status.finished
 
-  override def toString = {
+  override def toString = s"Game[$id]: $status, turn $turn"
+
+  def render = {
 
     val stringVector = board.tiles.zipWithIndex flatMap {
       case (xs, x) => xs.zipWithIndex map {
