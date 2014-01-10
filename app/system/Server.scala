@@ -25,7 +25,7 @@ final class Server extends Actor with ActorLogging {
         context.system.eventStream publish game
         self ! AddClient(Pov(game.id, game.hero1.token), Driver.Http, inputPromise(replyTo))
         game.heroes drop 1 foreach { hero =>
-          self ! AddClient(Pov(game.id, hero.token), Driver.Immobile, inputPromise(replyTo))
+          self ! AddClient(Pov(game.id, hero.token), Driver.Random, inputPromise(replyTo))
         }
         self ! Start(game)
       }
