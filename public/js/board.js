@@ -44,20 +44,20 @@ jQuery( document ).ready(function( $ ) {
     goblinPlayer1Image.src = assets + "img/goblin2_red.png";
 
     var player2Image = new Image();
-    player2Image.src = assets + "img/player_blue.png";
+    player2Image.src = assets + "img/fireheart/player2.png";
 
     var goblinPlayer2Image = new Image();
     goblinPlayer2Image.src = assets + "img/goblin2_blue.png";
 
 
     var player3Image = new Image();
-    player3Image.src = assets + "img/player_purple.png";
+    player3Image.src = assets + "img/fireheart/player3.png";
 
     var goblinPlayer3Image = new Image();
     goblinPlayer3Image.src = assets + "img/goblin2_purple.png";
 
     var player4Image = new Image();
-    player4Image.src = assets + "img/player_white.png";
+    player4Image.src = assets + "img/fireheart/player4.png";
 
     var goblinPlayer4Image = new Image();
     goblinPlayer4Image.src = assets + "img/goblin2_white.png";
