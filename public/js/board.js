@@ -218,9 +218,6 @@ jQuery( document ).ready(function( $ ) {
             objectTiles[index] = objectTile;
         }
 
-        objectTile.update();
-        objectTile.clear(index);
-        //renderGround(index);
         objectTile.render(index, clear);
 
     }
@@ -258,7 +255,6 @@ jQuery( document ).ready(function( $ ) {
     function gameLoop () {
 
         window.requestAnimationFrame(gameLoop);
-        drawObjects();
     }
 
     function sprite (options) {
