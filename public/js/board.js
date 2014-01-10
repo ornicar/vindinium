@@ -10,6 +10,7 @@ jQuery( document ).ready(function( $ ) {
 
 
     var groundTiles = [];
+    var objectTiles = [];
 
     var groundTileSize = 24;
     var objectTileSize = 32;
@@ -24,6 +25,7 @@ jQuery( document ).ready(function( $ ) {
     // Start the game loop as soon as the sprite sheet is loaded
     groundImage.addEventListener("load", gameLoop);
     groundImage.addEventListener("load", drawGround);
+    groundImage.addEventListener("load", drawObjects);
 
     var grassImage = new Image();
     grassImage.src = assets + "img/tilesets/tallgrass_24.png";
@@ -64,14 +66,19 @@ jQuery( document ).ready(function( $ ) {
 
     function drawGround() {
         $(game.board.tiles).each(function( index ) {
+            renderGround(index);
+        });
+    }
+
+
+    function drawObjects() {
+        $(game.board.tiles).each(function( index ) {
             renderTile(index);
         });
     }
 
     function renderTile(index) {
         value = game.board.tiles[index];
-
-        renderGround(index);
 
         switch (value) {
             case '##':
@@ -140,13 +147,15 @@ jQuery( document ).ready(function( $ ) {
                 break;
 
             case '@1':
-                sprite({
+                renderObject(index, {
                     context: canvas.getContext("2d"),
                     width: objectTileSize,
                     height: objectTileSize,
                     image: player1Image,
-                    numberOfFrames: 1
-                }).render(index, false);
+                    numberOfFrames: 3,
+                    loop: true,
+                    ticksPerFrame: 15
+                });
                 break;
 
             case '@2':
@@ -195,8 +204,30 @@ jQuery( document ).ready(function( $ ) {
         }
     }
 
+    function renderObject(index, options, clear) {
+
+        if(index < 0 || index > game.board.tiles) return;
+
+        var objectTile;
+        clear = typeof clear !== 'undefined' ? clear : true;
+
+        if(objectTiles[index]) {
+            objectTile = objectTiles[index];
+        } else {
+            objectTile = sprite(options);
+            objectTiles[index] = objectTile;
+        }
+
+        objectTile.update();
+        objectTile.clear(index);
+        //renderGround(index);
+        objectTile.render(index, clear);
+
+    }
 
     function renderGround(index) {
+
+        if(index < 0 || index > game.board.tiles) return;
 
         if(groundTiles[index]) {
             var tile = groundTiles[index];
@@ -227,6 +258,7 @@ jQuery( document ).ready(function( $ ) {
     function gameLoop () {
 
         window.requestAnimationFrame(gameLoop);
+        drawObjects();
     }
 
     function sprite (options) {
@@ -245,17 +277,21 @@ jQuery( document ).ready(function( $ ) {
         that.spriteLine = options.spriteLine || 0;
         that.spriteColumn = options.spriteColumn || 0;
 
+        that.clear = function(tileIndex) {
+
+            var coords = indexToCoordinates(tileIndex);
+            var x = coords.x;
+            var y = coords.y;
+            // Clear the canvas
+            that.context.clearRect(x*groundTileSize-((that.width-groundTileSize)/2), y*groundTileSize-(that.height-groundTileSize), that.width, that.height);
+            //redraw the ground for this tile
+            renderGround(tileIndex);
+        }
+
         that.render = function (tileIndex, clear) {
             var coords = indexToCoordinates(tileIndex);
             var x = coords.x;
             var y = coords.y;
-
-            clear = typeof clear !== 'undefined' ? clear : true;
-
-            if(clear) {
-                // Clear the canvas
-                that.context.clearRect(x*that.width, y*that.width, that.width, that.height);
-            }
 
             // Draw the sprite
             that.context.drawImage(
