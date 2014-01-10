@@ -34,7 +34,7 @@ object Generator {
   }
 
   private def generateGame(board: Board, config: Config, heroPos: Pos) = Game(
-    id = RandomString(6),
+    id = RandomString(8),
     board = board,
     config = config,
     hero1 = Hero(1, "Alaric", heroPos),
@@ -107,14 +107,5 @@ object Generator {
     }
 
     replicate(sector(config.size / 2))
-  }
-
-  private object RandomString {
-
-    def apply(len: Int) = List.fill(len)(nextChar) mkString
-
-    private val chars: IndexedSeq[Char] = (('0' to '9') ++ ('a' to 'z'))
-    private val nbChars = chars.size
-    private def nextChar = chars(Random nextInt nbChars)
   }
 }

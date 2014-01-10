@@ -5,7 +5,11 @@ import scala.util.{ Random, Try, Success, Failure }
 
 object Arbiter {
 
-  def move(game: Game, id: Int, dir: Dir): Try[Game] = {
+  def move(game: Game, token: String, dir: Dir): Try[Game] =
+    if (game.hero.token != token) fail(s"Not hero $token turn to move")
+    else doMove(game, game.hero.id, dir)
+
+  private def doMove(game: Game, id: Int, dir: Dir) = {
 
     def reach(destPos: Pos) = game.board get destPos match {
       case None => stay
@@ -61,7 +65,6 @@ object Arbiter {
 
     def finalize(g: Game) = g.withHero(id, _.day withGold g.board.countMines(id))
 
-    if (game.hero.id != id) fail(s"Not hero $id turn to move")
-    else reach(game.hero.pos to dir) map fights map finalize
+    reach(game.hero.pos to dir) map fights map finalize
   }
 }

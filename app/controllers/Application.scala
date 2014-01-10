@@ -9,7 +9,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 object Application extends Controller {
 
   def index = Action.async {
-    Manager create Config.random map { game =>
+    system.Pool create Config.random map { game =>
       Ok(views.html.index(game))
     }
   }

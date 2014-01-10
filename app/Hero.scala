@@ -3,10 +3,11 @@ package bot
 
 case class Hero(
     id: Int,
+    token: String,
     name: String,
     pos: Pos,
-    life: Int = Hero.maxLife,
-    gold: Int = 0) {
+    life: Int,
+    gold: Int) {
 
   def moveTo(p: Pos) = copy(pos = p)
 
@@ -24,13 +25,21 @@ case class Hero(
 
   def reSpawn(p: Pos) = copy(life = Hero.maxLife, pos = p)
 
-  def isAlive = life >0
+  def isAlive = life > 0
   def isDead = !isAlive
 
   def render = s"@$id"
 }
 
 object Hero {
+
+  def apply(id: Int, name: String, pos: Pos): Hero = Hero(
+    id = id,
+    token = RandomString(4),
+    name = name,
+    pos = pos,
+    life = maxLife,
+    gold = 0)
 
   val maxLife = 100
   val beerLife = 30
