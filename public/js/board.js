@@ -19,26 +19,38 @@ var goblinPlayer4Image = makeImage("img/goblin2_white.png");
 
 function makeImage(src) {
   var img = new Image();
-  img.src = assets + "img/goblin2_white.png";
+  img.src = assets + src;
   return img;
 }
 
-window.drawPosition = function(game) {
-    var groundTiles = [];
-    var objectTiles = [];
+function cloneCanvas(oldCanvas) {
+    //create a new canvas
+    var newCanvas = document.createElement('canvas');
+    var context = newCanvas.getContext('2d');
+    //set dimensions
+    newCanvas.width = oldCanvas.width;
+    newCanvas.height = oldCanvas.height;
+    //apply the old canvas to the new one
+    context.drawImage(oldCanvas, 0, 0);
+    //return the new canvas
+    return newCanvas;
+}
 
-    var groundTileSize = 24;
-    var objectTileSize = 32;
-    var borderSize = 24;
-    var boardSize = game.board.size;
+var groundTileSize = 24;
+var objectTileSize = 32;
+var borderSize = 24;
+var firstRender = true;
+var background; // canvas with static elements, drawn only once
+
+function drawPosition(game) {
 
     var canvas = document.getElementById("board");
-    // clear canvas
-    canvas.width = canvas.width;
+    var boardSize = game.board.size;
 
-    canvas.width = groundTileSize * boardSize + borderSize * 2;
-    canvas.height = groundTileSize * boardSize + borderSize * 2;
-
+    if (firstRender) {
+      canvas.width = groundTileSize * boardSize + borderSize * 2;
+      canvas.height = groundTileSize * boardSize + borderSize * 2;
+    }
 
     // preload tiles parsing
     game.board.tilesArray = game.board.tiles.match(/.{2}/g);
@@ -46,7 +58,15 @@ window.drawPosition = function(game) {
     updateGold();
 
     // draw state
-    drawMap();
+    if (firstRender) {
+      drawBackground();
+      background = cloneCanvas(canvas);
+      firstRender = false;
+    }
+    canvas.width = canvas.width;
+    var context = canvas.getContext('2d');
+    context.drawImage(background, 0, 0);
+    drawState();
 
     function updateGold() {
         for(i=0; i<game.heroes.length; i++) {
@@ -55,18 +75,23 @@ window.drawPosition = function(game) {
         $('#gold').show();
     }
 
-    function drawMap() {
+    function drawBackground() {
         drawBorders();
-        drawGround();
-        drawObjects();
+        $(game.board.tilesArray).each(function(index) {
+          renderGround(index);
+          var tile = game.board.tilesArray[index];
+            if (tile == '##') renderWall(index);
+            else if (tile == '[]') renderObject(index, {
+                context: canvas.getContext("2d"),
+                width: objectTileSize,
+                height: objectTileSize,
+                image: beerImage,
+                numberOfFrames: 1
+            });
+        });
     }
 
-    function drawGround() {
-        $(game.board.tilesArray).each(renderGround);
-    }
-
-
-    function drawObjects() {
+    function drawState() {
         $(game.board.tilesArray).each(renderTile);
     }
 
@@ -169,14 +194,9 @@ window.drawPosition = function(game) {
     }
 
     function renderTile(index) {
-        value = game.board.tilesArray[index];
+        var value = game.board.tilesArray[index];
 
         switch (value) {
-            case '##':
-                renderWall(index);
-
-                break;
-
 
             case '$-':
                 renderObject(index, {
@@ -285,17 +305,6 @@ window.drawPosition = function(game) {
                     numberOfFrames: 1
                 });
                 break;
-
-            case '[]':
-                renderObject(index, {
-                    context: canvas.getContext("2d"),
-                    width: objectTileSize,
-                    height: objectTileSize,
-                    image: beerImage,
-                    numberOfFrames: 1
-                });
-
-                break;
             default:
 
                 break;
@@ -328,17 +337,12 @@ window.drawPosition = function(game) {
             options.context.fillStyle = red;
         }
 
-        options.context.fillRect (xPixels, yPixels+objectTileSize, 3, -(objectTileSize*options.life/100));
-
-        //Lifebar shadow
-        options.context.fillStyle = "rgba(0,0,0,0.4)";
-        options.context.fillRect (xPixels+3, yPixels+objectTileSize+1, 1, -(objectTileSize*options.life/100));
-
+        options.context.fillRect(xPixels, yPixels+objectTileSize, 3, -(objectTileSize*options.life/100));
     }
 
     function renderWall(index) {
 
-        if(index < 0 || index > game.board.tilesArray) return;
+        if(!firstRender || index < 0 || index > game.board.tilesArray) return;
 
         var alone = false;
 
@@ -355,15 +359,15 @@ window.drawPosition = function(game) {
         };
 
         var possibleSprites = [
-            {img: grassImage, line: 5, column: 2}, 
-            {img: farmingImage, line: 1, column: 1}, 
+            {img: grassImage, line: 5, column: 2},
+            {img: farmingImage, line: 1, column: 1},
             {img: farmingImage, line: 3, column: 1},
             {img: farmingImage, line: 1, column: 5},
             {img: plantsImage, line: 9, column: 4}
         ];
 
-        if(wallPosition == 'alone') { 
-            var randomSprite = index % possibleSprites.length; 
+        if(wallPosition == 'alone') {
+            var randomSprite = index % possibleSprites.length;
             options.image = possibleSprites[randomSprite].img;
             options.spriteLine = possibleSprites[randomSprite].line;
             options.spriteColumn = possibleSprites[randomSprite].column;
@@ -374,16 +378,7 @@ window.drawPosition = function(game) {
 
         }
 
-        var objectTile;
-        if(objectTiles[index]) {
-            objectTile = objectTiles[index];
-        } else {
-            objectTile = sprite(options);
-            objectTiles[index] = objectTile;
-        }
-
-        objectTile.render(index, borderSize);
-
+        sprite(options).render(index, borderSize);
     }
 
     function getWallPosition(index) {
@@ -412,58 +407,32 @@ window.drawPosition = function(game) {
     }
 
     function renderObject(index, options) {
-
         if(index < 0 || index > game.board.tilesArray) return;
-
-        var objectTile;
-
-        if(objectTiles[index]) {
-            objectTile = objectTiles[index];
-        } else {
-            objectTile = sprite(options);
-            objectTiles[index] = objectTile;
-        }
-
-        objectTile.render(index, borderSize);
-
+        sprite(options).render(index, borderSize);
     }
 
     function renderGround(index) {
 
         if(index < 0 || index > game.board.tilesgrray) return;
 
-        var groundTile;
-
-        if(groundTiles[index]) {
-            groundTile = groundTiles[index];
-        } else {
-
-            groundTile = sprite({
-                context: canvas.getContext("2d"),
-                width: groundTileSize,
-                height: groundTileSize,
-                image: groundImage,
-                spriteLine: 5,
-                numberOfFrames: 1
-            });
-
-            groundTiles[index] = groundTile;
-        }
-        groundTile.render(index, borderSize);
-
-
-        var grassTile = sprite({
+        sprite({
             context: canvas.getContext("2d"),
             width: groundTileSize,
             height: groundTileSize,
-            image: grassImage,
+            image: groundImage,
             spriteLine: 5,
             numberOfFrames: 1
-        });
-
+        }).render(index, borderSize);
 
         if((index % 10) == 1) {
-            grassTile.render(index, borderSize);
+          sprite({
+              context: canvas.getContext("2d"),
+              width: groundTileSize,
+              height: groundTileSize,
+              image: grassImage,
+              spriteLine: 5,
+              numberOfFrames: 1
+          }).render(index, borderSize);
         }
 
     }
@@ -498,7 +467,7 @@ window.drawPosition = function(game) {
         }
 
         if(x===0) leftNeighbor = null;
-        else { 
+        else {
             leftNeighbor = game.board.tilesArray[coordinatesToIndex(x-1,y)];
             nbNeighbors++;
         }
@@ -537,17 +506,6 @@ window.drawPosition = function(game) {
         that.loop = options.loop || true;
         that.spriteLine = options.spriteLine || 0;
         that.spriteColumn = options.spriteColumn || 0;
-
-        that.clear = function(tileIndex) {
-
-            var coords = indexToCoordinates(tileIndex);
-            var x = coords.x;
-            var y = coords.y;
-            // Clear the canvas
-            that.context.clearRect(x*groundTileSize-((that.width-groundTileSize)/2), y*groundTileSize-(that.height-groundTileSize), that.width, that.height);
-        };
-
-
 
         that.renderAtPosition = function (x, y, shift) {
 
@@ -604,4 +562,4 @@ window.drawPosition = function(game) {
     }
 
 
-};
+}
