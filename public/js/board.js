@@ -19,6 +19,8 @@ var goblinPlayer3Image = makeImage("img/mine_3.png");
 var player4Image = makeImage("img/fireheart/player4_life.png");
 var goblinPlayer4Image = makeImage("img/mine_4.png");
 
+var zeldaTree1Image = makeImage("img/zelda/tree.png");
+
 var playerImages = [player1Image, player2Image, player3Image, player4Image];
 
 function makeImage(src) {
@@ -233,8 +235,7 @@ function drawPosition(game) {
 
             case '$2':
                 renderObject(index, {
-                    context: canvas.getContext("2d"),
-                    width: 27,
+                    context: canvas.getContext("2d"), width: 27,
                     height: 38,
                     image: goblinPlayer2Image,
                     numberOfFrames: 1
@@ -357,37 +358,11 @@ function drawPosition(game) {
             options.image = possibleSprites[randomSprite].img;
             options.spriteLine = possibleSprites[randomSprite].line;
             options.spriteColumn = possibleSprites[randomSprite].column;
-        } else if(wallPosition == 'middle') {
-            options.image = grassImage;
-            options.spriteLine = 3;
-            options.spriteColumn = 1;
-
-        } else if(wallPosition == 'topBorder') {
-            options.image = grassImage;
-            options.spriteLine = 2;
-            options.spriteColumn = 1;
-        } else if(wallPosition == 'bottomBorder') {
-            options.image = grassImage;
-            options.spriteLine = 4;
-            options.spriteColumn = 1;
-        } else if(wallPosition == 'leftBorder') {
-            options.image = grassImage;
-            options.spriteLine = 3;
-            options.spriteColumn = 0;
-        } else if(wallPosition == 'rightBorder') {
-            options.image = grassImage;
-            options.spriteLine = 3;
-            options.spriteColumn = 2;
-        } else if(wallPosition == 'bottomRightCorner') {
-            options.image = grassImage;
-            options.spriteLine = 4;
-            options.spriteColumn = 2;
-        } else if(wallPosition == 'bottomLeftCorner') {
-            options.image = grassImage;
-            options.spriteLine = 4;
+        } else {
+            options.image = zeldaTree1Image;
+            options.spriteLine = 0;
             options.spriteColumn = 0;
         }
-
 
 
         sprite(options).render(index, borderSize);
