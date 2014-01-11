@@ -51,7 +51,13 @@ object Arbiter {
 
     @annotation.tailrec
     def reSpawn(h: Hero): Hero = {
-      val pos = Pos(Random nextInt (game.board.size / 2 - 2), Random nextInt (game.board.size / 2 - 2))
+      val p1 = Pos(Random nextInt (game.board.size / 2 - 2), Random nextInt (game.board.size / 2 - 2))
+      val pos = h.id match {
+        case 1 => p1
+        case 2 => game.board mirrorX p1
+        case 3 => game.board mirrorXY p1
+        case 4 => game.board mirrorY p1
+      }
       if (Validator.heroPos(game, pos)) h reSpawn pos
       else reSpawn(h)
     }
