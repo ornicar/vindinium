@@ -9,6 +9,7 @@ $(function() {
         }
 
         // game
+        currentPos = replay.games.length -1;
         updateGame(currentPos);
 
         // nav
@@ -39,9 +40,11 @@ $(function() {
         source.addEventListener('message', function(e) {
             var data = JSON.parse(e.data);
             replay.games.push(data);
-            // update nav pos
-            currentPos = replay.games.length - 1;
-            updateGame(currentPos);
+            // update nav pos only if game was on last turn before new frame
+            if (currentPos == replay.games.length - 2) {
+                currentPos = replay.games.length - 1;
+                updateGame(currentPos);
+            }
         });
         source.addEventListener('open', function(e) {
             // Connection was opened.
