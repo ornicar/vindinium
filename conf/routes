@@ -1,7 +1,7 @@
 GET     /                               controllers.Application.index
 
 GET     /api/training/alone             controllers.Api.trainingAlone
-POST    /api/:gameId/:token/play/:dir   controllers.Api.move(gameId: String, token: String, dir: String)
+POST    /api/:gameId/:token/play        controllers.Api.move(gameId: String, token: String)
 
 GET     /test                           controllers.Application.test
 

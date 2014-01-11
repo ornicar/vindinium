@@ -45,7 +45,7 @@ final class Client(
 
 object Client {
 
-  private val botDelay = 5.millis
+  private val botDelay = 0.millis
 
   case class WorkDone(promise: Promise[PlayerInput])
 

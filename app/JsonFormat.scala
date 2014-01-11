@@ -11,25 +11,27 @@ object JsonFormat {
     "game" -> apply(i.game),
     "hero" -> i.hero.map(apply),
     "token" -> i.token,
-    "playUrl" -> (domain + routes.Api.move(i.game.id, i.token, "dir").url)
+    "playUrl" -> ("http://" + domain + routes.Api.move(i.game.id, i.token).url)
   )
 
   def apply(g: Game): JsObject = Json.obj(
     "id" -> g.id,
     "turn" -> g.turn,
+    "maxTurns" -> g.config.maxTurns,
     "heroes" -> JsArray(g.heroes map apply),
     "board" -> Json.obj(
       "size" -> g.board.size,
       "tiles" -> (g.board.posTiles map {
         case (pos, tile) => (g hero pos).fold(tile.render)(_.render)
       }).mkString
-    )
+    ),
+    "finished" -> g.finished
   )
 
   def apply(h: Hero): JsObject = Json.obj(
     "id" -> h.id,
     "name" -> h.name,
-    "pos" -> List(h.pos.x, h.pos.y),
+    "pos" -> Json.obj("x" -> h.pos.x, "y" -> h.pos.y),
     "life" -> h.life,
     "gold" -> h.gold,
     "crashed" -> h.crashed)
