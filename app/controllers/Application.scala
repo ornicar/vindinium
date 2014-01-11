@@ -21,7 +21,8 @@ object Application extends Controller {
 
   def index = Action.async {
     system.Pool create Config.random map { game ⇒
-      val replay = system.Replay(game.id, List(JsonFormat(game)))
+      val g2 = game.copy(status = org.jousse.bot.Status.AllCrashed)
+      val replay = system.Replay(g2.id, List(JsonFormat(g2)))
       Ok(views.html.visualize(replay))
     }
   }
