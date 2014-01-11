@@ -69,7 +69,11 @@ object Arbiter {
       }
     }
 
-    def finalize(g: Game) = g.withHero(id, _.day withGold g.board.countMines(id))
+    def finalize(g: Game) = {
+      val h = (g hero id).day withGold g.board.countMines(id)
+      if (h.isDead) g.withHero(reSpawn(h)).withBoard(_.transferMines(id, None))
+      else g.withHero(h)
+    }
 
     reach(game.hero.pos to dir) map fights map finalize
   }
