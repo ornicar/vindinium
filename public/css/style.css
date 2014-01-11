@@ -12,6 +12,10 @@ body {
     cursor: pointer;
 }
 
+#turn {
+    list-style-type: none;
+}
+
 #board {
     padding-top: 10px;
 }
