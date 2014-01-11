@@ -8,5 +8,6 @@ object Global extends GlobalSettings {
 
   override def onStart(app: Application) {
     Storage.actor ! Storage.Init
+    Visualization.actor ! Visualization.Init
   }
 }

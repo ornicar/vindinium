@@ -18,30 +18,36 @@ final class Visualization extends Actor {
 
   context.system.eventStream.subscribe(self, classOf[Game])
 
+  val channels: Map[String, (Enumerator[Game], Channel[Game])] = Map()
+
   def receive = {
 
-    case Connect(id) ⇒ {
-      channels(id) = Concurrent.broadcast[Game]
+    case Init ⇒
+
+    case GetStream(id) ⇒ {
+      sender ! channels.get(id).map(_._1)
     }
 
     case game: Game ⇒ {
-      channels.get(game.id) map {
-        case (enum, chan) ⇒ chan.push(game)
+      channels.get(game.id) match {
+        case Some((enum, chan)) ⇒ chan.push(game)
+
+        case None               ⇒ channels += (game.id -> Concurrent.broadcast[Game])
       }
     }
+
   }
 }
 
 object Visualization {
 
+  case object Init
   case class Connect(id: String)
+  case class GetStream(id: String)
 
   import play.api.libs.concurrent.Akka
   import play.api.Play.current
 
   val actor = Akka.system.actorOf(Props[Visualization], name = "visualization")
-
-  val channels: Map[String, (Enumerator[Game], Channel[Game])] = Map()
-
   val asJson: Enumeratee[Game, JsValue] = Enumeratee.map[Game](game ⇒ JsonFormat(game))
 }

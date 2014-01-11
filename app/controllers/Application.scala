@@ -2,19 +2,24 @@ package controllers
 
 import org.jousse.bot._
 
+import akka.actor._
+import akka.pattern.{ ask, pipe }
+import akka.util.Timeout
 import play.api._
+import play.api.libs.EventSource
 import play.api.libs.json._
+import play.api.libs.iteratee._
 import play.api.mvc._
+import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
 import system.Storage
 import system.Visualization
 import system.Visualization._
-import libs.EventSource
 
 object Application extends Controller {
 
   def index = Action.async {
-    system.Pool create Config.random map { game =>
+    system.Pool create Config.random map { game ⇒
       val replay = system.Replay(game.id, List(JsonFormat(game)))
       Ok(views.html.visualize(replay))
     }
@@ -22,16 +27,23 @@ object Application extends Controller {
 
   def visualization(id: String) = Action.async {
     Storage.get(id) map {
-      case Some(replay) => Ok(views.html.visualize(replay))
-      case None => NotFound
+      case Some(replay) ⇒ Ok(views.html.visualize(replay))
+      case None         ⇒ NotFound
     }
   }
 
-  def gameEvents(id: String) = Action {
+
+  def gameEvents(id: String) = Action.async {
+
+    implicit val timeout = Timeout(1.second)
     val actor = Visualization.actor
-    actor ! Connect(id)
-    val (enum, chan) = Visualization.channels(id)
-    Ok.chunked(enum &> asJson &> EventSource()).as("text/event-stream")
+
+    actor ? GetStream(id) mapTo manifest[Option[Enumerator[Game]]] map {
+      case Some(stream) ⇒
+        Ok.chunked(stream &> asJson &> EventSource()).as("text/event-stream")
+
+      case None ⇒ NotFound
+    }
   }
 
   def test = Action {
