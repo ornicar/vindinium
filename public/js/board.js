@@ -7,6 +7,7 @@ var grassImage = makeImage("img/tilesets/tallgrass_24.png");
 var beerImage = makeImage("img/barrel.png");
 var farmingImage = makeImage("img/tilesets/farming_fishing_24.png");
 var plantsImage = makeImage("img/tilesets/plants_24.png");
+var stuffImage = makeImage("img/tilesets/stuff.png");
 var goblinImage = makeImage("img/mine_neutral.png");
 var player1Image = makeImage("img/fireheart/player1_life.png");
 var goblinPlayer1Image = makeImage("img/goblin2_red.png");
@@ -69,9 +70,17 @@ function drawPosition(game) {
     drawState();
 
     function updateGold() {
+        var maxGold = 0;
+        var firstPlayer;
         for(i=0; i<game.heroes.length; i++) {
             $("#player" + (i+1) +" span").text(game.heroes[i].gold);
+            if(game.heroes[i].gold > maxGold) {
+                maxGold = game.heroes[i].gold;
+                firstPlayer = "#player" + (i+1);
+            }
         }
+        $('#gold>li').removeClass('first');
+        $(firstPlayer).addClass('first');
         $('#gold').show();
     }
 
@@ -363,7 +372,10 @@ function drawPosition(game) {
             {img: farmingImage, line: 1, column: 1},
             {img: farmingImage, line: 3, column: 1},
             {img: farmingImage, line: 1, column: 5},
-            {img: plantsImage, line: 9, column: 4}
+            {img: plantsImage, line: 9, column: 4},
+            {img: stuffImage, line: 0, column: 0},
+            {img: stuffImage, line: 1, column: 0},
+            {img: stuffImage, line: 2, column: 0},
         ];
 
         if(wallPosition == 'alone') {
