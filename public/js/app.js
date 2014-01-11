@@ -38,7 +38,10 @@ $(function() {
         var source = new EventSource("/events/" + replay.id);
         source.addEventListener('message', function(e) {
             var data = JSON.parse(e.data);
-            console.log(data);
+            replay.games.push(data);
+            // update nav pos
+            currentPos = replay.games.length - 1;
+            updateGame(currentPos);
         });
         source.addEventListener('open', function(e) {
             // Connection was opened.
