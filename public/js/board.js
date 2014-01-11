@@ -10,13 +10,13 @@ var plantsImage = makeImage("img/tilesets/plants_24.png");
 var stuffImage = makeImage("img/tilesets/stuff.png");
 var goblinImage = makeImage("img/mine_neutral.png");
 var player1Image = makeImage("img/fireheart/player1_life.png");
-var goblinPlayer1Image = makeImage("img/goblin2_red.png");
+var goblinPlayer1Image = makeImage("img/mine_1.png");
 var player2Image = makeImage("img/fireheart/player2_life.png");
-var goblinPlayer2Image = makeImage("img/goblin2_blue.png");
+var goblinPlayer2Image = makeImage("img/mine_2.png");
 var player3Image = makeImage("img/fireheart/player3_life.png");
-var goblinPlayer3Image = makeImage("img/goblin2_purple.png");
+var goblinPlayer3Image = makeImage("img/mine_3.png");
 var player4Image = makeImage("img/fireheart/player4_life.png");
-var goblinPlayer4Image = makeImage("img/goblin2_white.png");
+var goblinPlayer4Image = makeImage("img/mine_4.png");
 
 function makeImage(src) {
   var img = new Image();
@@ -214,8 +214,8 @@ function drawPosition(game) {
             case '$1':
                 renderObject(index, {
                     context: canvas.getContext("2d"),
-                    width: objectTileSize,
-                    height: objectTileSize,
+                    width: 27,
+                    height: 38,
                     image: goblinPlayer1Image,
                     numberOfFrames: 1
                 });
@@ -224,8 +224,8 @@ function drawPosition(game) {
             case '$2':
                 renderObject(index, {
                     context: canvas.getContext("2d"),
-                    width: objectTileSize,
-                    height: objectTileSize,
+                    width: 27,
+                    height: 38,
                     image: goblinPlayer2Image,
                     numberOfFrames: 1
                 });
@@ -234,8 +234,8 @@ function drawPosition(game) {
             case '$3':
                 renderObject(index, {
                     context: canvas.getContext("2d"),
-                    width: objectTileSize,
-                    height: objectTileSize,
+                    width: 27,
+                    height: 38,
                     image: goblinPlayer3Image,
                     numberOfFrames: 1
                 });
@@ -243,8 +243,8 @@ function drawPosition(game) {
             case '$4':
                 renderObject(index, {
                     context: canvas.getContext("2d"),
-                    width: objectTileSize,
-                    height: objectTileSize,
+                    width: 27,
+                    height: 38,
                     image: goblinPlayer4Image,
                     numberOfFrames: 1
                 });
