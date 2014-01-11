@@ -19,6 +19,13 @@
         <div id="nav"><span id="prev">&lt;</span>&nbsp;&nbsp;&nbsp;<span id="next">&gt;</span></div>
 
         <script language="javascript">
-            replay = @Html(Json.stringify(JsonFormat(replay)));
+            var replay, gameId;
+
+            @if(replay.finished) {
+                replay = @Html(Json.stringify(JsonFormat(replay)));
+                gameId = "@replay.id"
+            } else {
+                gameId = "@replay.id"
+            }
         </script>
 }
