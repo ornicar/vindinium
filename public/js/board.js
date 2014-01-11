@@ -4,7 +4,7 @@ var assets = "/assets/";
 
 var groundImage = makeImage("img/tilesets/plowed_soil_24.png");
 var grassImage = makeImage("img/tilesets/tallgrass_24.png");
-var beerImage = makeImage("img/barrel.png");
+var beerImage = makeImage("img/beer2.png");
 var farmingImage = makeImage("img/tilesets/farming_fishing_24.png");
 var plantsImage = makeImage("img/tilesets/plants_24.png");
 var stuffImage = makeImage("img/tilesets/stuff.png");
@@ -97,8 +97,8 @@ function drawPosition(game) {
             if (tile == '##') renderWall(index);
             else if (tile == '[]') renderObject(index, {
                 context: canvas.getContext("2d"),
-                width: objectTileSize,
-                height: objectTileSize,
+                width: 24,
+                height: 32,
                 image: beerImage,
                 numberOfFrames: 1
             });
