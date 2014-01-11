@@ -7,7 +7,7 @@ var grassImage = makeImage("img/tilesets/tallgrass_24.png");
 var beerImage = makeImage("img/barrel.png");
 var farmingImage = makeImage("img/tilesets/farming_fishing_24.png");
 var plantsImage = makeImage("img/tilesets/plants_24.png");
-var holeImage = makeImage("img/hole.png");
+var stuffImage = makeImage("img/tilesets/stuff.png");
 var goblinImage = makeImage("img/mine_neutral.png");
 var player1Image = makeImage("img/fireheart/player1_life.png");
 var goblinPlayer1Image = makeImage("img/goblin2_red.png");
@@ -365,7 +365,9 @@ function drawPosition(game) {
             {img: farmingImage, line: 3, column: 1},
             {img: farmingImage, line: 1, column: 5},
             {img: plantsImage, line: 9, column: 4},
-            {img: holeImage, line: 0, column: 0}
+            {img: stuffImage, line: 0, column: 0},
+            {img: stuffImage, line: 1, column: 0},
+            {img: stuffImage, line: 2, column: 0},
         ];
 
         if(wallPosition == 'alone') {
