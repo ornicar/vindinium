@@ -221,7 +221,6 @@ function drawPosition(game) {
 
                 break;
 
-
             case '$1':
                 renderObject(index, {
                     context: canvas.getContext("2d"),
@@ -330,8 +329,6 @@ function drawPosition(game) {
 
         if(!firstRender || index < 0 || index > game.board.tilesArray) return;
 
-        var alone = false;
-
         var wallPosition = getWallPosition(index);
 
         var options = {
@@ -345,7 +342,7 @@ function drawPosition(game) {
         };
 
         var possibleSprites = [
-            {img: grassImage, line: 5, column: 2},
+            /**{img: grassImage, line: 5, column: 2},**/
             {img: farmingImage, line: 1, column: 1},
             {img: farmingImage, line: 3, column: 1},
             {img: farmingImage, line: 1, column: 5},
@@ -365,7 +362,33 @@ function drawPosition(game) {
             options.spriteLine = 3;
             options.spriteColumn = 1;
 
+        } else if(wallPosition == 'topBorder') {
+            options.image = grassImage;
+            options.spriteLine = 2;
+            options.spriteColumn = 1;
+        } else if(wallPosition == 'bottomBorder') {
+            options.image = grassImage;
+            options.spriteLine = 4;
+            options.spriteColumn = 1;
+        } else if(wallPosition == 'leftBorder') {
+            options.image = grassImage;
+            options.spriteLine = 3;
+            options.spriteColumn = 0;
+        } else if(wallPosition == 'rightBorder') {
+            options.image = grassImage;
+            options.spriteLine = 3;
+            options.spriteColumn = 2;
+        } else if(wallPosition == 'bottomRightCorner') {
+            options.image = grassImage;
+            options.spriteLine = 4;
+            options.spriteColumn = 2;
+        } else if(wallPosition == 'bottomLeftCorner') {
+            options.image = grassImage;
+            options.spriteLine = 4;
+            options.spriteColumn = 0;
         }
+
+
 
         sprite(options).render(index, borderSize);
     }
@@ -376,11 +399,15 @@ function drawPosition(game) {
 
         var neighbors = neighborsAtIndex(index);
         var neighborsArray = [neighbors.top, neighbors.left, neighbors.bottom, neighbors.right];
+        var nbWallNeighbors = 0;
 
         var alone = true;
 
         for(i=0; i<neighborsArray.length; i++) {
-            if(neighborsArray[i] == '##') alone = false;
+            if(neighborsArray[i] == '##') {
+                alone = false;
+                nbWallNeighbors++;
+            }
         }
 
         if (alone) return 'alone';
@@ -393,6 +420,24 @@ function drawPosition(game) {
 
         if (middle) return 'middle';
 
+        if(nbWallNeighbors == 1) {
+            if(neighbors.top == '##') return 'bottomAlone';
+            if(neighbors.bottom == '##') return 'topAlone';
+            if(neighbors.left == '##') return 'rightAlone';
+            if(neighbors.right == '##') return 'leftAlone';
+        }
+
+        if(nbWallNeighbors == 3) {
+            if(neighbors.top != '##') return 'topBorder';
+            if(neighbors.bottom != '##') return 'bottomBorder';
+            if(neighbors.left != '##') return 'leftBorder';
+            if(neighbors.right != '##') return 'rightBorder';
+        }
+
+        if(nbWallNeighbors == 2) {
+            if(neighbors.top == '##' && neighbors.left == '##') return 'bottomRightCorner';
+            if(neighbors.top == '##' && neighbors.right == '##') return 'bottomLeftCorner';
+        }
     }
 
     function renderObject(index, options) {
