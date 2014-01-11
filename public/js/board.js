@@ -9,6 +9,7 @@ var farmingImage = makeImage("img/tilesets/farming_fishing_24.png");
 var plantsImage = makeImage("img/tilesets/plants_24.png");
 var stuffImage = makeImage("img/tilesets/stuff.png");
 var goblinImage = makeImage("img/mine_neutral.png");
+
 var player1Image = makeImage("img/fireheart/player1_life.png");
 var goblinPlayer1Image = makeImage("img/mine_1.png");
 var player2Image = makeImage("img/fireheart/player2_life.png");
@@ -17,6 +18,10 @@ var player3Image = makeImage("img/fireheart/player3_life.png");
 var goblinPlayer3Image = makeImage("img/mine_3.png");
 var player4Image = makeImage("img/fireheart/player4_life.png");
 var goblinPlayer4Image = makeImage("img/mine_4.png");
+
+var zeldaTree1Image = makeImage("img/zelda/tree.png");
+
+var playerImages = [player1Image, player2Image, player3Image, player4Image];
 
 function makeImage(src) {
   var img = new Image();
@@ -218,7 +223,6 @@ function drawPosition(game) {
 
                 break;
 
-
             case '$1':
                 renderObject(index, {
                     context: canvas.getContext("2d"),
@@ -231,8 +235,7 @@ function drawPosition(game) {
 
             case '$2':
                 renderObject(index, {
-                    context: canvas.getContext("2d"),
-                    width: 27,
+                    context: canvas.getContext("2d"), width: 27,
                     height: 38,
                     image: goblinPlayer2Image,
                     numberOfFrames: 1
@@ -259,66 +262,40 @@ function drawPosition(game) {
                 break;
 
             case '@1':
-                renderLifeBar(index, {
-                    context: canvas.getContext("2d"),
-                    life: game.heroes[0].life
-                });
-                renderObject(index, {
-                    context: canvas.getContext("2d"),
-                    width: objectTileSize,
-                    height: objectTileSize,
-                    image: player1Image,
-                    numberOfFrames: 3,
-                    loop: true,
-                    ticksPerFrame: 15
-                });
+                renderPlayer(index, 0);
                 break;
 
             case '@2':
-                renderLifeBar(index, {
-                    context: canvas.getContext("2d"),
-                    life: game.heroes[1].life
-                });
-                renderObject(index, {
-                    context: canvas.getContext("2d"),
-                    width: objectTileSize,
-                    height: objectTileSize,
-                    image: player2Image,
-                    numberOfFrames: 1
-                });
+                renderPlayer(index, 1);
                 break;
 
             case '@3':
-                renderLifeBar(index, {
-                    context: canvas.getContext("2d"),
-                    life: game.heroes[2].life
-                });
-                renderObject(index, {
-                    context: canvas.getContext("2d"),
-                    width: objectTileSize,
-                    height: objectTileSize,
-                    image: player3Image,
-                    numberOfFrames: 1
-                });
+                renderPlayer(index, 2);
                 break;
-            case '@4':
-                renderLifeBar(index, {
-                    context: canvas.getContext("2d"),
-                    life: game.heroes[3].life
-                });
-                renderObject(index, {
-                    context: canvas.getContext("2d"),
-                    width: objectTileSize,
-                    height: objectTileSize,
-                    image: player4Image,
-                    numberOfFrames: 1
-                });
-                break;
-            default:
 
+            case '@4':
+                renderPlayer(index, 3);
+                break;
+
+            default:
                 break;
 
         }
+    }
+
+    function renderPlayer(tileIndex, playerIndex) {
+        renderLifeBar(tileIndex, {
+            context: canvas.getContext("2d"),
+            life: game.heroes[playerIndex].life
+        });
+        renderObject(tileIndex, {
+            context: canvas.getContext("2d"),
+            width: objectTileSize,
+            height: objectTileSize,
+            image: playerImages[playerIndex],
+            numberOfFrames: 1
+        });
+
     }
 
     function renderLifeBar(index, options) {
@@ -353,8 +330,6 @@ function drawPosition(game) {
 
         if(!firstRender || index < 0 || index > game.board.tilesArray) return;
 
-        var alone = false;
-
         var wallPosition = getWallPosition(index);
 
         var options = {
@@ -368,7 +343,7 @@ function drawPosition(game) {
         };
 
         var possibleSprites = [
-            {img: grassImage, line: 5, column: 2},
+            /**{img: grassImage, line: 5, column: 2},**/
             {img: farmingImage, line: 1, column: 1},
             {img: farmingImage, line: 3, column: 1},
             {img: farmingImage, line: 1, column: 5},
@@ -383,12 +358,12 @@ function drawPosition(game) {
             options.image = possibleSprites[randomSprite].img;
             options.spriteLine = possibleSprites[randomSprite].line;
             options.spriteColumn = possibleSprites[randomSprite].column;
-        } else if(wallPosition == 'middle') {
-            options.image = grassImage;
-            options.spriteLine = 3;
-            options.spriteColumn = 1;
-
+        } else {
+            options.image = zeldaTree1Image;
+            options.spriteLine = 0;
+            options.spriteColumn = 0;
         }
+
 
         sprite(options).render(index, borderSize);
     }
@@ -399,11 +374,15 @@ function drawPosition(game) {
 
         var neighbors = neighborsAtIndex(index);
         var neighborsArray = [neighbors.top, neighbors.left, neighbors.bottom, neighbors.right];
+        var nbWallNeighbors = 0;
 
         var alone = true;
 
         for(i=0; i<neighborsArray.length; i++) {
-            if(neighborsArray[i] == '##') alone = false;
+            if(neighborsArray[i] == '##') {
+                alone = false;
+                nbWallNeighbors++;
+            }
         }
 
         if (alone) return 'alone';
@@ -416,6 +395,24 @@ function drawPosition(game) {
 
         if (middle) return 'middle';
 
+        if(nbWallNeighbors == 1) {
+            if(neighbors.top == '##') return 'bottomAlone';
+            if(neighbors.bottom == '##') return 'topAlone';
+            if(neighbors.left == '##') return 'rightAlone';
+            if(neighbors.right == '##') return 'leftAlone';
+        }
+
+        if(nbWallNeighbors == 3) {
+            if(neighbors.top != '##') return 'topBorder';
+            if(neighbors.bottom != '##') return 'bottomBorder';
+            if(neighbors.left != '##') return 'leftBorder';
+            if(neighbors.right != '##') return 'rightBorder';
+        }
+
+        if(nbWallNeighbors == 2) {
+            if(neighbors.top == '##' && neighbors.left == '##') return 'bottomRightCorner';
+            if(neighbors.top == '##' && neighbors.right == '##') return 'bottomLeftCorner';
+        }
     }
 
     function renderObject(index, options) {
@@ -496,11 +493,6 @@ function drawPosition(game) {
 
     function coordinatesToIndex(x, y) {
         return y*boardSize+x;
-    }
-
-    function gameLoop () {
-
-        window.requestAnimationFrame(gameLoop);
     }
 
     function sprite (options) {
