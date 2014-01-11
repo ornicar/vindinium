@@ -45,7 +45,11 @@ final class Client(
 
 object Client {
 
-  private val botDelay = 200.millis
+  import play.api.Play.current
+  private val botDelay = play.api.Play.configuration
+    .getMilliseconds("vindinium.auto-client-delay")
+    .getOrElse(0l)
+    .milliseconds
 
   case class WorkDone(promise: Promise[PlayerInput])
 
