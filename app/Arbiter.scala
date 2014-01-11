@@ -6,20 +6,23 @@ import scala.util.{ Random, Try, Success, Failure }
 object Arbiter {
 
   // crashes the current player and forwards one turn
-  def crash(game: Game, c: Crash): Game = game.withHero(_ setCrash c).step
+  def crash(game: Game, c: Crash): Game = game.hero.fold(game) { h =>
+    game.withHero(h setCrash c).step
+  }
 
-  def move(game: Game, token: String, dir: Dir): Try[Game] =
-    if (game.hero.token != token) Failure(RuleViolationException(s"Not hero $token turn to move"))
-    else if (game.finished) Failure(RuleViolationException(s"Game $game is finished"))
-    else Success(doMove(game, dir))
+  def move(game: Game, token: String, dir: Dir): Try[Game] = game.hero match {
+    case None => Failure(RuleViolationException(s"No hero can play"))
+    case Some(hero) =>
+      if (hero.token != token) Failure(RuleViolationException(s"Not hero $token turn to move"))
+      else if (game.finished) Failure(RuleViolationException(s"Game $game is finished"))
+      else Success(doMove(game, hero.id, dir))
+  }
 
-  private def doMove(game: Game, dir: Dir) = {
+  private def doMove(game: Game, id: Int, dir: Dir) = {
 
-    val id = game.hero.id.pp
-
-    def reach(destPos: Pos) = (game.board get destPos).pp match {
+    def reach(destPos: Pos) = (game.board get destPos) match {
       case None => game
-      case Some(tile) => (game hero destPos).pp match {
+      case Some(tile) => (game hero destPos) match {
         case Some(_) => game
         case None => tile match {
           case Tile.Air                      => walk(destPos)
@@ -31,9 +34,9 @@ object Arbiter {
       }
     }
 
-    def walk(pos: Pos) = game.withHero(_ moveTo pos)
+    def walk(pos: Pos) = game.withHero(id, _ moveTo pos)
 
-    def drink = game.withHero(_.drinkBeer)
+    def drink = game.withHero(id, _.drinkBeer)
 
     def mine(pos: Pos) = {
       val h = game.hero(id).fightMine
@@ -73,6 +76,6 @@ object Arbiter {
       else g.withHero(h)
     }
 
-    finalize(fights(reach(game.hero.pos to dir))).step
+    finalize(fights(reach(game.hero(id).pos to dir))).step
   }
 }

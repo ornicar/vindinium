@@ -41,8 +41,7 @@ final class Server extends Actor with ActorLogging {
 
     case Start(game: Game) => {
       context.system.eventStream publish game
-      val pov = Pov(game.id, game.hero.token)
-      clients get pov match {
+      game.hero map { h => Pov(game.id, h.token) } flatMap clients.get match {
         case None         => throw UtterFailException(s"Game ${game.id} started without a hero client")
         case Some(client) => client ! game
       }
@@ -56,7 +55,10 @@ final class Server extends Actor with ActorLogging {
           Pool.actor ? Pool.Play(pov, Dir(dir)) mapTo manifest[Game] foreach { game =>
             context.system.eventStream publish game
             client ! Client.WorkDone(inputPromise(replyTo))
-            clients get Pov(game.id, game.hero.token) foreach (_ ! game)
+            game.hero match {
+              case None => gameClients(game.id) foreach (_ ! game)
+              case Some(h) => clients get Pov(game.id, h.token) foreach (_ ! game)
+            }
           }
         }
       }
@@ -78,8 +80,8 @@ final class Server extends Actor with ActorLogging {
     p
   }
 
-  def opponents(pov: Pov) = clients collect {
-    case (Pov(id, token), client) if id == pov.gameId && token != pov.token => client
+  def gameClients(gameId: String) = clients collect {
+    case (Pov(id, _), client) if id == gameId => client
   }
 }
 
