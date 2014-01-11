@@ -34,7 +34,6 @@ object Api extends Controller {
       err => Future successful BadRequest,
       dir => Server.actor ? Server.Play(Pov(gameId, token), dir) map {
         case input: PlayerInput => {
-          println(input.game.render)
           Ok(JsonFormat(input, req.host)) as JSON
         }
       } recover {

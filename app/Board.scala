@@ -9,10 +9,7 @@ case class Board(tiles: Vector[Vector[Tile]]) {
 
   def update(pos: Pos, tile: Tile): Board = Try {
     tiles.updated(pos.x, tiles(pos.x).updated(pos.y, tile))
-  } map Board.apply getOrElse {
-    println(pos)
-    this
-  }
+  } map Board.apply getOrElse this
 
   def remove(pos: Pos): Board = update(pos, Tile.Air)
 

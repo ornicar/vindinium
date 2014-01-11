@@ -13,7 +13,9 @@ case class Hero(
 
   def moveTo(p: Pos) = copy(pos = p)
 
-  def drinkBeer = if (gold >= -Hero.beerGold) withGold(Hero.beerGold).withLife(Hero.beerLife) else this
+  def drinkBeer =
+    if (gold >= -Hero.beerGold) withGold(Hero.beerGold).withLife(Hero.beerLife)
+    else this
 
   def attack(enemy: Hero) = withLife(Hero.attackLife) -> enemy.withLife(Hero.defendLife)
 

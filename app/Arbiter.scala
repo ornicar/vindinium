@@ -6,47 +6,39 @@ import scala.util.{ Random, Try, Success, Failure }
 object Arbiter {
 
   // crashes the current player and forwards one turn
-  def crash(game: Game, c: Crash): Game = game.step(_.withHero(_ setCrash c))
+  def crash(game: Game, c: Crash): Game = game.withHero(_ setCrash c).step
 
   def move(game: Game, token: String, dir: Dir): Try[Game] =
     if (game.hero.token != token) Failure(RuleViolationException(s"Not hero $token turn to move"))
     else if (game.finished) Failure(RuleViolationException(s"Game $game is finished"))
-    else doMove(game, dir)
+    else Success(doMove(game, dir))
 
   private def doMove(game: Game, dir: Dir) = {
 
-    val id = game.hero.id
+    val id = game.hero.id.pp
 
-    def reach(destPos: Pos) = game.board get destPos match {
-      case None => stay
-      case Some(tile) => game hero destPos match {
-        case Some(_) => stay
+    def reach(destPos: Pos) = (game.board get destPos).pp match {
+      case None => game
+      case Some(tile) => (game hero destPos).pp match {
+        case Some(_) => game
         case None => tile match {
           case Tile.Air                      => walk(destPos)
           case Tile.Tavern                   => drink
           case Tile.Mine(n) if n != Some(id) => mine(destPos)
-          case Tile.Mine(n)                  => stay
-          case Tile.Wall                     => stay
+          case Tile.Mine(n)                  => game
+          case Tile.Wall                     => game
         }
       }
     }
 
-    def stay = Success {
-      game.step(identity)
-    }
+    def walk(pos: Pos) = game.withHero(_ moveTo pos)
 
-    def walk(pos: Pos) = Success {
-      game.step(_.withHero(_ moveTo pos))
-    }
+    def drink = game.withHero(_.drinkBeer)
 
-    def drink = stay map {
-      _.withHero(_.drinkBeer)
-    }
-
-    def mine(pos: Pos) = stay map { g =>
-      val h = g.hero(id).fightMine
-      if (h.isAlive) g.withHero(h).withBoard(_.transferMine(pos, Some(h.id)))
-      else g.withHero(reSpawn(h)).withBoard(_.transferMines(h.id, None))
+    def mine(pos: Pos) = {
+      val h = game.hero(id).fightMine
+      if (h.isAlive) game.withHero(h).withBoard(_.transferMine(pos, Some(h.id)))
+      else game.withHero(reSpawn(h)).withBoard(_.transferMines(h.id, None))
     }
 
     @annotation.tailrec
@@ -81,6 +73,6 @@ object Arbiter {
       else g.withHero(h)
     }
 
-    reach(game.hero.pos to dir) map fights map finalize
+    finalize(fights(reach(game.hero.pos to dir))).step
   }
 }
