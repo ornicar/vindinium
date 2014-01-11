@@ -13,17 +13,17 @@ case class Hero(
 
   def moveTo(p: Pos) = copy(pos = p)
 
-  def drinkBeer = if (gold >= -Hero.beerGold) withGold(Hero.beerGold).withLife(life + Hero.beerLife) else this
+  def drinkBeer = if (gold >= -Hero.beerGold) withGold(Hero.beerGold).withLife(Hero.beerLife) else this
 
-  def attack(enemy: Hero) = withLife(-Hero.attackLife) -> enemy.withLife(-Hero.defendLife)
+  def attack(enemy: Hero) = withLife(Hero.attackLife) -> enemy.withLife(Hero.defendLife)
 
-  def fightMine = withLife(-Hero.mineLife)
+  def fightMine = withLife(Hero.mineLife)
 
   def withLife(diff: Int) = copy(life = math.max(0, math.min(Hero.maxLife, life + diff)))
 
   def withGold(diff: Int) = copy(gold = math.max(0, gold + diff))
 
-  def day = copy(life = math.max(1, life + Hero.dayLife))
+  def day = withLife(Hero.dayLife)
 
   def reSpawn(p: Pos) = copy(life = Hero.maxLife, pos = p)
 
