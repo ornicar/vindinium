@@ -95,13 +95,6 @@ function drawPosition(game) {
           renderGround(index);
           var tile = game.board.tilesArray[index];
             if (tile == '##') renderWall(index);
-            else if (tile == '[]') renderObject(index, {
-                context: canvas.getContext("2d"),
-                width: 24,
-                height: 32,
-                image: beerImage,
-                numberOfFrames: 1
-            });
         });
     }
 
@@ -211,6 +204,16 @@ function drawPosition(game) {
         var value = game.board.tilesArray[index];
 
         switch (value) {
+
+            case '[]':
+                  renderObject(index, {
+                    context: canvas.getContext("2d"),
+                    width: 24,
+                    height: 32,
+                    image: beerImage,
+                    numberOfFrames: 1
+                });
+                break;
 
             case '$-':
                 renderObject(index, {

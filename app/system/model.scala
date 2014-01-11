@@ -11,7 +11,9 @@ case class PlayerInput(game: Game, token: String) {
 }
 
 case class Replay(id: String, games: List[JsValue]) {
-  def finished: Boolean = games.lastOption flatMap { game =>
-    Some((game \ "finished").as[Boolean])
-  } getOrElse false
+
+  def finished: Boolean = games.lastOption.fold(false) { game =>
+    (game \ "finished").as[Boolean]
+  }
+
 }
