@@ -12,6 +12,7 @@ import play.api.libs.iteratee._
 import play.api.mvc._
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 import system.Storage
 import system.Visualization
 import system.Visualization._
@@ -20,7 +21,8 @@ object Application extends Controller {
 
   def index = Action.async {
     system.Pool create Config.random map { game ⇒
-      val replay = system.Replay(game.id, List(JsonFormat(game)))
+      val g2 = game.copy(status = org.jousse.bot.Status.AllCrashed)
+      val replay = system.Replay(g2.id, List(JsonFormat(g2)))
       Ok(views.html.visualize(replay))
     }
   }
@@ -32,18 +34,28 @@ object Application extends Controller {
     }
   }
 
-
   def gameEvents(id: String) = Action.async {
 
     implicit val timeout = Timeout(1.second)
     val actor = Visualization.actor
 
-    actor ? GetStream(id) mapTo manifest[Option[Enumerator[Game]]] map {
-      case Some(stream) ⇒
-        Ok.chunked(stream &> asJson &> EventSource()).as("text/event-stream")
+    Storage.get(id) flatMap {
+      case None => Future.successful(NotFound)
 
-      case None ⇒ NotFound
-    }
+      case Some(replay) =>
+        actor ? GetStream(id) mapTo manifest[Option[Enumerator[Game]]] map {
+          case None => NotFound
+
+          case Some(stream) ⇒
+            if (replay.finished) {
+              NotFound
+            } else {
+              val played = Enumerator.enumerate(replay.games)
+              Ok.chunked(played >>> (stream &> asJson) &> EventSource()).as("text/event-stream")
+            }
+
+        }
+      }
   }
 
   def test = Action {

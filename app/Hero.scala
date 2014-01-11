@@ -13,7 +13,9 @@ case class Hero(
 
   def moveTo(p: Pos) = copy(pos = p)
 
-  def drinkBeer = if (gold >= -Hero.beerGold) withGold(Hero.beerGold).withLife(Hero.beerLife) else this
+  def drinkBeer =
+    if (gold >= -Hero.beerGold) withGold(Hero.beerGold).withLife(Hero.beerLife)
+    else this
 
   def attack(enemy: Hero) = withLife(Hero.attackLife) -> enemy.withLife(Hero.defendLife)
 
@@ -23,7 +25,10 @@ case class Hero(
 
   def withGold(diff: Int) = copy(gold = math.max(0, gold + diff))
 
-  def day = withLife(Hero.dayLife)
+  def day = {
+    val h = withLife(Hero.dayLife)
+    if (h.isDead) h.withLife(1) else h
+  }
 
   def reSpawn(p: Pos) = copy(life = Hero.maxLife, pos = p)
 
@@ -49,10 +54,10 @@ object Hero {
     crash = None)
 
   val maxLife = 100
-  val beerLife = 30
+  val beerLife = 50
   val beerGold = -1
   val dayLife = -1
-  val mineLife = -40
+  val mineLife = -30
   val attackLife = -10
   val defendLife = -15
 }

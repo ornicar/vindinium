@@ -28,7 +28,6 @@ object Generator {
     }
   } recoverWith {
     case err if attempts < maxAttempts => {
-      println(s"$err, attempt $attempts/$maxAttempts")
       attempt(config, attempts + 1)
     }
   }

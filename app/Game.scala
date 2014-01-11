@@ -17,19 +17,18 @@ case class Game(
   def activeHeroes = heroes filterNot (_.crashed)
 
   // TODO fixme, this will break if all heroes have crashed
-  def hero: Hero = activeHeroes(turn % activeHeroes.size)
-  def hero(id: Int): Hero = heroes lift id getOrElse hero1
+  def hero: Option[Hero] = activeHeroes lift (turn % activeHeroes.size)
+  def hero(id: Int): Hero = heroes find (_.id == id) getOrElse hero1
   def hero(pos: Pos): Option[Hero] = heroes find (_.pos == pos)
 
-  def step(update: Game => Game) = {
-    val next = update(this).copy(turn = turn + 1)
+  def step = {
+    val next = copy(turn = turn + 1)
     next.copy(
       status = if (next.turn > config.maxTurns) Status.TurnMax
       else if (next.activeHeroes.isEmpty) Status.AllCrashed
       else Status.Started)
   }
 
-  def withHero(f: Hero => Hero): Game = withHero(hero.id, f)
   def withHero(hero: Hero): Game = withHero(hero.id, _ => hero)
 
   def withHero(id: Int, f: Hero => Hero): Game = copy(

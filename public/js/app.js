@@ -1,29 +1,26 @@
 $(function() {
     $(window).load(function() {
 
-        var currentPos = 0;
+        var CURRENTPOS = 0;
+        var POSITIONS = [];
 
         function updateGame(pos) {
-            drawPosition(replay.games[pos]);
+            drawPosition(POSITIONS[pos]);
             $('#turn > span').text(Math.floor(pos / 4));
         }
-
-        // game
-        currentPos = replay.games.length -1;
-        updateGame(currentPos);
 
         // nav
         $('#nav').show();
         $('#prev').click(function(e) {
-            if (currentPos > 0) {
-                currentPos--;
-                updateGame(currentPos);
+            if (CURRENTPOS > 0) {
+                CURRENTPOS--;
+                updateGame(CURRENTPOS);
             }
         });
         $('#next').click(function(e) {
-            if (currentPos < replay.games.length - 1) {
-                currentPos++;
-                updateGame(currentPos);
+            if (CURRENTPOS < POSITIONS.length - 1) {
+                CURRENTPOS++;
+                updateGame(CURRENTPOS);
             }
         });
         $('#board').mousewheel(function(event) {
@@ -36,25 +33,33 @@ $(function() {
             return false;
         });
 
-        var source = new EventSource("/events/" + replay.id);
-        source.addEventListener('message', function(e) {
-            var data = JSON.parse(e.data);
-            replay.games.push(data);
-            // update nav pos only if game was on last turn before new frame
-            if (currentPos == replay.games.length - 2) {
-                currentPos = replay.games.length - 1;
-                updateGame(currentPos);
-            }
-        });
-        source.addEventListener('open', function(e) {
-            // Connection was opened.
-            console.log("connection opened");
-        }, false);
-        source.addEventListener('error', function(e) {
-            if (e.readyState == EventSource.CLOSED) {
-                // Connection was closed.
-                console.log("connection closed");
-            }
-        }, false);
+        // if replay is loaded in global object it means game is over
+        // else let's receive events and play them
+        if (replay) {
+            POSITIONS = replay.games
+            updateGame(CURRENTPOS);
+        } else {
+            var source = new EventSource("/events/" + gameId);
+            source.addEventListener('message', function(e) {
+                var game = JSON.parse(e.data);
+                POSITIONS.push(game);
+
+                updateGame(CURRENTPOS);
+                CURRENTPOS++;
+
+                console.log(CURRENTPOS);
+
+            });
+            source.addEventListener('open', function(e) {
+                // Connection was opened.
+                console.log("connection opened");
+            }, false);
+            source.addEventListener('error', function(e) {
+                if (e.readyState == EventSource.CLOSED) {
+                    // Connection was closed.
+                    console.log("connection closed");
+                }
+            }, false);
+        }
     });
 });
