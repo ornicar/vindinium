@@ -2,47 +2,26 @@
 
 var assets = "/assets/";
 
-var groundImage = new Image();
-groundImage.src = assets + "img/tilesets/plowed_soil_24.png";
+var groundImage = makeImage("img/tilesets/plowed_soil_24.png");
+var grassImage = makeImage("img/tilesets/tallgrass_24.png");
+var beerImage = makeImage("img/barrel.png");
+var farmingImage = makeImage("img/tilesets/farming_fishing_24.png");
+var plantsImage = makeImage("img/tilesets/plants_24.png");
+var goblinImage = makeImage("img/goblin.png");
+var player1Image = makeImage("img/fireheart/player1_life.png");
+var goblinPlayer1Image = makeImage("img/goblin2_red.png");
+var player2Image = makeImage("img/fireheart/player2_life.png");
+var goblinPlayer2Image = makeImage("img/goblin2_blue.png");
+var player3Image = makeImage("img/fireheart/player3_life.png");
+var goblinPlayer3Image = makeImage("img/goblin2_purple.png");
+var player4Image = makeImage("img/fireheart/player4_life.png");
+var goblinPlayer4Image = makeImage("img/goblin2_white.png");
 
-var grassImage = new Image();
-grassImage.src = assets + "img/tilesets/tallgrass_24.png";
-
-var beerImage = new Image();
-beerImage.src = assets + "img/barrel.png";
-
-var farmingImage = new Image();
-farmingImage.src = assets + "img/tilesets/farming_fishing_24.png";
-
-var plantsImage = new Image();
-plantsImage.src = assets + "img/tilesets/plants_24.png";
-
-var goblinImage = new Image();
-goblinImage.src = assets + "img/goblin.png";
-
-var player1Image = new Image();
-player1Image.src = assets + "img/fireheart/player1_life.png";
-
-var goblinPlayer1Image = new Image();
-goblinPlayer1Image.src = assets + "img/goblin2_red.png";
-
-var player2Image = new Image();
-player2Image.src = assets + "img/fireheart/player2_life.png";
-
-var goblinPlayer2Image = new Image();
-goblinPlayer2Image.src = assets + "img/goblin2_blue.png";
-
-var player3Image = new Image();
-player3Image.src = assets + "img/fireheart/player3_life.png";
-
-var goblinPlayer3Image = new Image();
-goblinPlayer3Image.src = assets + "img/goblin2_purple.png";
-
-var player4Image = new Image();
-player4Image.src = assets + "img/fireheart/player4_life.png";
-
-var goblinPlayer4Image = new Image();
-goblinPlayer4Image.src = assets + "img/goblin2_white.png";
+function makeImage(src) {
+  var img = new Image();
+  img.src = assets + "img/goblin2_white.png";
+  return img;
+}
 
 window.drawPosition = function(game) {
     var groundTiles = [];
@@ -506,7 +485,7 @@ window.drawPosition = function(game) {
 
         var topNeighbor, leftNeighbor, bottomNeighbor, rightNeighbor;
 
-        if(y==0) topNeighbor = null;
+        if(y===0) topNeighbor = null;
         else {
             topNeighbor = game.board.tilesArray[coordinatesToIndex(x,y-1)];
             nbNeighbors++;
@@ -518,7 +497,7 @@ window.drawPosition = function(game) {
             nbNeighbors++;
         }
 
-        if(x==0) leftNeighbor = null;
+        if(x===0) leftNeighbor = null;
         else { 
             leftNeighbor = game.board.tilesArray[coordinatesToIndex(x-1,y)];
             nbNeighbors++;
@@ -625,4 +604,4 @@ window.drawPosition = function(game) {
     }
 
 
-}
+};
