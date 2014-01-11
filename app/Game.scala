@@ -18,7 +18,7 @@ case class Game(
 
   // TODO fixme, this will break if all heroes have crashed
   def hero: Hero = activeHeroes(turn % activeHeroes.size)
-  def hero(id: Int): Hero = heroes lift id getOrElse hero1
+  def hero(id: Int): Hero = heroes lift (id - 1) getOrElse hero1
   def hero(pos: Pos): Option[Hero] = heroes find (_.pos == pos)
 
   def step(update: Game => Game) = {

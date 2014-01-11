@@ -44,9 +44,9 @@ object Arbiter {
     }
 
     def mine(pos: Pos) = stay map { g =>
-      val h1 = g.hero(id).fightMine
-      if (h1.isAlive) g.withHero(h1).withBoard(_.transferMine(pos, Some(h1.id)))
-      else g.withHero(reSpawn(h1)).withBoard(_.transferMines(h1.id, None))
+      val h = g.hero(id).fightMine
+      if (h.isAlive) g.withHero(h).withBoard(_.transferMine(pos, Some(h.id)))
+      else g.withHero(reSpawn(h)).withBoard(_.transferMines(h.id, None))
     }
 
     @annotation.tailrec

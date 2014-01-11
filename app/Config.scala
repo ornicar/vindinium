@@ -14,7 +14,7 @@ object Config {
 
   val default = Config(
   goldToWin = 1000,
-  maxTurns = 400,
+  maxTurns = 1200,
   size = 30,
   wallPercent = 40,
   minePercent = 4)
