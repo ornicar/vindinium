@@ -349,6 +349,7 @@ function drawPosition(game) {
             {img: stuffImage, line: 0, column: 0},
             {img: stuffImage, line: 1, column: 0},
             {img: stuffImage, line: 2, column: 0},
+            {img: stuffImage, line: 3, column: 0},
         ];
 
         if(wallPosition == 'alone') {
