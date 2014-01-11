@@ -22,7 +22,7 @@ object Api extends Controller {
     (Server.actor ? Server.RequestToPlayAlone) map {
       case input: PlayerInput => {
         println(input.game.render)
-        Ok(JsonFormat(input, req.domain)) as JSON
+        Ok(JsonFormat(input, req.host)) as JSON
       }
     }
   }
@@ -35,7 +35,7 @@ object Api extends Controller {
       dir => Server.actor ? Server.Play(Pov(gameId, token), dir) map {
         case input: PlayerInput => {
           println(input.game.render)
-          Ok(JsonFormat(input, req.domain)) as JSON
+          Ok(JsonFormat(input, req.host)) as JSON
         }
       } recover {
         case e: NotFoundException => NotFound(e.getMessage)
