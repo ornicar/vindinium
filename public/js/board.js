@@ -475,11 +475,6 @@ function drawPosition(game) {
         return y*boardSize+x;
     }
 
-    function gameLoop () {
-
-        window.requestAnimationFrame(gameLoop);
-    }
-
     function sprite (options) {
 
         var that = {},
