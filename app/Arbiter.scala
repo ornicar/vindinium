@@ -5,17 +5,18 @@ import scala.util.{ Random, Try, Success, Failure }
 
 object Arbiter {
 
-  // crashes the current player and forwards one turn
-  def crash(game: Game, c: Crash): Game = game.hero.fold(game) { h =>
-    game.withHero(h setCrash c).step
-  }
-
-  def move(game: Game, token: String, dir: Dir): Try[Game] = game.hero match {
+  def move(game: Game, token: String, dir: Dir): Game = (game.hero match {
     case None => Failure(RuleViolationException(s"No hero can play"))
     case Some(hero) =>
       if (hero.token != token) Failure(RuleViolationException(s"Not hero $token turn to move"))
       else if (game.finished) Failure(RuleViolationException(s"Game $game is finished"))
       else Success(doMove(game, hero.id, dir))
+  }) match {
+    case Success(g) => g
+    case Failure(e) => {
+      play.api.Logger("arbiter").warn(e.toString)
+      game
+    }
   }
 
   private def doMove(game: Game, id: Int, dir: Dir) = {
