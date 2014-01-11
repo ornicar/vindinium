@@ -7,12 +7,12 @@ import system.Replay
 
 object JsonFormat {
 
-  def apply(i: system.PlayerInput, domain: String): JsObject = Json.obj(
+  def apply(i: system.PlayerInput, host: String): JsObject = Json.obj(
     "game" -> apply(i.game),
     "hero" -> i.hero.map(apply),
     "token" -> i.token,
-    "viewUrl" -> ("http://" + domain + routes.Application.visualization(i.game.id).url),
-    "playUrl" -> ("http://" + domain + routes.Api.move(i.game.id, i.token).url)
+    "viewUrl" -> ("http://" + host + routes.Application.visualization(i.game.id).url),
+    "playUrl" -> ("http://" + host + routes.Api.move(i.game.id, i.token).url)
   )
 
   def apply(g: Game): JsObject = Json.obj(
