@@ -429,6 +429,7 @@ window.drawPosition = function(game) {
         }
 
         if (middle) return 'middle';
+
     }
 
     function renderObject(index, options) {
@@ -501,20 +502,33 @@ window.drawPosition = function(game) {
         var coords = indexToCoordinates(index);
         var x = coords.x;
         var y = coords.y;
+        var nbNeighbors = 0;
 
         var topNeighbor, leftNeighbor, bottomNeighbor, rightNeighbor;
 
         if(y==0) topNeighbor = null;
-        else topNeighbor = game.board.tilesArray[coordinatesToIndex(x,y-1)];
+        else {
+            topNeighbor = game.board.tilesArray[coordinatesToIndex(x,y-1)];
+            nbNeighbors++;
+        }
 
         if(y==boardSize-1) bottomNeighbor = null;
-        else bottomNeighbor = game.board.tilesArray[coordinatesToIndex(x,y+1)];
+        else {
+            bottomNeighbor = game.board.tilesArray[coordinatesToIndex(x,y+1)];
+            nbNeighbors++;
+        }
 
         if(x==0) leftNeighbor = null;
-        else leftNeighbor = game.board.tilesArray[coordinatesToIndex(x-1,y)];
+        else { 
+            leftNeighbor = game.board.tilesArray[coordinatesToIndex(x-1,y)];
+            nbNeighbors++;
+        }
 
         if(x==boardSize-1) rightNeighbor = null;
-        else rightNeighbor = game.board.tilesArray[coordinatesToIndex(x+1,y)];
+        else {
+            rightNeighbor = game.board.tilesArray[coordinatesToIndex(x+1,y)];
+            nbNeighbors++;
+        }
 
         return {top: topNeighbor, left: leftNeighbor, bottom: bottomNeighbor, right: rightNeighbor};
 
