@@ -227,7 +227,7 @@ function drawPosition(game) {
                 renderObject(index, {
                     context: canvas.getContext("2d"),
                     width: 27,
-                    height: 38,
+                    height: 28,
                     image: goblinPlayer1Image,
                     numberOfFrames: 1
                 });
@@ -235,8 +235,9 @@ function drawPosition(game) {
 
             case '$2':
                 renderObject(index, {
-                    context: canvas.getContext("2d"), width: 27,
-                    height: 38,
+                    context: canvas.getContext("2d"), 
+                    width: 27,
+                    height: 28,
                     image: goblinPlayer2Image,
                     numberOfFrames: 1
                 });
@@ -246,7 +247,7 @@ function drawPosition(game) {
                 renderObject(index, {
                     context: canvas.getContext("2d"),
                     width: 27,
-                    height: 38,
+                    height: 28,
                     image: goblinPlayer3Image,
                     numberOfFrames: 1
                 });
@@ -255,7 +256,7 @@ function drawPosition(game) {
                 renderObject(index, {
                     context: canvas.getContext("2d"),
                     width: 27,
-                    height: 38,
+                    height: 28,
                     image: goblinPlayer4Image,
                     numberOfFrames: 1
                 });
@@ -343,11 +344,8 @@ function drawPosition(game) {
         };
 
         var possibleSprites = [
-            /**{img: grassImage, line: 5, column: 2},**/
             {img: farmingImage, line: 1, column: 1},
-            {img: farmingImage, line: 3, column: 1},
             {img: farmingImage, line: 1, column: 5},
-            {img: plantsImage, line: 9, column: 4},
             {img: stuffImage, line: 0, column: 0},
             {img: stuffImage, line: 1, column: 0},
             {img: stuffImage, line: 2, column: 0},
@@ -387,32 +385,6 @@ function drawPosition(game) {
 
         if (alone) return 'alone';
 
-        var middle = true;
-
-        for(i=0; i<neighborsArray.length; i++) {
-            if(neighborsArray[i] != '##') middle = false;
-        }
-
-        if (middle) return 'middle';
-
-        if(nbWallNeighbors == 1) {
-            if(neighbors.top == '##') return 'bottomAlone';
-            if(neighbors.bottom == '##') return 'topAlone';
-            if(neighbors.left == '##') return 'rightAlone';
-            if(neighbors.right == '##') return 'leftAlone';
-        }
-
-        if(nbWallNeighbors == 3) {
-            if(neighbors.top != '##') return 'topBorder';
-            if(neighbors.bottom != '##') return 'bottomBorder';
-            if(neighbors.left != '##') return 'leftBorder';
-            if(neighbors.right != '##') return 'rightBorder';
-        }
-
-        if(nbWallNeighbors == 2) {
-            if(neighbors.top == '##' && neighbors.left == '##') return 'bottomRightCorner';
-            if(neighbors.top == '##' && neighbors.right == '##') return 'bottomLeftCorner';
-        }
     }
 
     function renderObject(index, options) {
