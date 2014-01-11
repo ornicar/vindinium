@@ -20,7 +20,7 @@ $(function() {
   var url = getParameterByName('playUrl');
   if (!url) return;
 
-  $(document).keypress(function(e) {
+  $(document).on('keypress keydown', function(e) {
     if (e.keyCode == 37) move('west');
     if (e.keyCode == 38) move('north');
     if (e.keyCode == 39) move('east');
