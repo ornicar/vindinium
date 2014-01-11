@@ -34,7 +34,7 @@ case class Board(tiles: Vector[Vector[Tile]]) {
 
   def transferMines(from: Int, to: Option[Int]): Board = allPos.foldLeft(this) {
     case (b, pos) => b get pos match {
-      case Some(Tile.Mine(Some(owner))) if owner == from => transferMine(pos, to)
+      case Some(Tile.Mine(Some(owner))) if owner == from => b.transferMine(pos, to)
       case _ => b
     }
   }
