@@ -30,6 +30,10 @@ final class Client(
     }
     case Driver.Auto(play) => when(Waiting) {
 
+      case Event(game: Game, _) if game.finished => {
+        self ! PoisonPill
+        stay
+      }
       case Event(game: Game, _) => {
         context.system.scheduler.scheduleOnce(botDelay, sender, Server.Play(pov, play(game)))
         goto(Working) using Nothing

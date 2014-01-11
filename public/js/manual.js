@@ -26,14 +26,20 @@ $(function() {
   var lock = false;
 
   function move(dir) {
-    if (!lock) $.ajax({
-      url: url,
-      method: 'post',
-      data: { dir: dir },
-      success: function() {
-        lock = false;
-      }
-    });
+    if (lock) {
+      console.debug("Ignored move while locked");
+    } else {
+      $.ajax({
+        url: url,
+        method: 'post',
+        data: {
+          dir: dir
+        },
+        success: function() {
+          lock = false;
+        }
+      });
+    }
     lock = true;
   }
 
