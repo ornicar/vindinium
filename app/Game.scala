@@ -22,9 +22,11 @@ case class Game(
   def hero(pos: Pos): Option[Hero] = heroes find (_.pos == pos)
 
   def step(update: Game => Game) = {
-    val g = update(this).copy(turn = turn + 1)
-    // TODO detect endgame
-    g
+    val next = update(this).copy(turn = turn + 1)
+    next.copy(
+      status = if (next.turn > config.maxTurns) Status.TurnMax
+      else if (next.activeHeroes.isEmpty) Status.AllCrashed
+      else Status.Started)
   }
 
   def withHero(f: Hero => Hero): Game = withHero(hero.id, f)

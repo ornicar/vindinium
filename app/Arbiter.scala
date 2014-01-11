@@ -10,6 +10,7 @@ object Arbiter {
 
   def move(game: Game, token: String, dir: Dir): Try[Game] =
     if (game.hero.token != token) Failure(RuleViolationException(s"Not hero $token turn to move"))
+    else if (game.finished) Failure(RuleViolationException(s"Game $game is finished"))
     else doMove(game, dir)
 
   private def doMove(game: Game, dir: Dir) = {
