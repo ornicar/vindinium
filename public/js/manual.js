@@ -2,7 +2,7 @@ $(function() {
 
   $('#manual').click(function() {
     $.get('/api/training/alone', function(data) {
-      location.href = "/" + data.game.id + '&playUrl=' + encodeURIComponent(data.playUrl);
+      location.href = "/" + data.game.id + '?playUrl=' + encodeURIComponent(data.playUrl);
     });
   });
 
