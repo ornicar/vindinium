@@ -7,7 +7,7 @@ var grassImage = makeImage("img/tilesets/tallgrass_24.png");
 var beerImage = makeImage("img/barrel.png");
 var farmingImage = makeImage("img/tilesets/farming_fishing_24.png");
 var plantsImage = makeImage("img/tilesets/plants_24.png");
-var goblinImage = makeImage("img/goblin.png");
+var goblinImage = makeImage("img/mine_neutral.png");
 var player1Image = makeImage("img/fireheart/player1_life.png");
 var goblinPlayer1Image = makeImage("img/goblin2_red.png");
 var player2Image = makeImage("img/fireheart/player2_life.png");
@@ -202,7 +202,7 @@ function drawPosition(game) {
                 renderObject(index, {
                     context: canvas.getContext("2d"),
                     width: objectTileSize,
-                    height: objectTileSize,
+                    height: 49,
                     image: goblinImage,
                     numberOfFrames: 1
                 });
