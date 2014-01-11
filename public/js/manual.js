@@ -23,12 +23,18 @@ $(function() {
     e.preventDefault();
   });
 
+  var lock = false;
+
   function move(dir) {
-    $.ajax({
+    if (!lock) $.ajax({
       url: url,
       method: 'post',
       data: { dir: dir },
+      success: function() {
+        lock = false;
+      }
     });
+    lock = true;
   }
 
 });
