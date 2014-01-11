@@ -70,9 +70,17 @@ function drawPosition(game) {
     drawState();
 
     function updateGold() {
+        var maxGold = 0;
+        var firstPlayer;
         for(i=0; i<game.heroes.length; i++) {
             $("#player" + (i+1) +" span").text(game.heroes[i].gold);
+            if(game.heroes[i].gold > maxGold) {
+                maxGold = game.heroes[i].gold;
+                firstPlayer = "#player" + (i+1);
+            }
         }
+        $('#gold>li').removeClass('first');
+        $(firstPlayer).addClass('first');
         $('#gold').show();
     }
 
