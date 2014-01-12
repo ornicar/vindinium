@@ -20,6 +20,7 @@ var player4Image = makeImage("img/fireheart/player4_life.png");
 var goblinPlayer4Image = makeImage("img/mine_4.png");
 
 var zeldaTree1Image = makeImage("img/zelda/tree.png");
+var winnerParchmentImage = makeImage("img/winner_parchment.png");
 
 var playerImages = [player1Image, player2Image, player3Image, player4Image];
 
@@ -53,6 +54,8 @@ function drawPosition(game) {
     var canvas = document.getElementById("board");
     var boardSize = game.board.size;
 
+    var boardWidth = borderSize*2 + groundTileSize * boardSize;
+
     if (firstRender) {
       canvas.width = groundTileSize * boardSize + borderSize * 2;
       canvas.height = groundTileSize * boardSize + borderSize * 2;
@@ -75,18 +78,30 @@ function drawPosition(game) {
     drawState();
 
     function updateGold() {
-        var maxGold = 0;
-        var firstPlayer;
         for(i=0; i<game.heroes.length; i++) {
             $("#player" + (i+1) +" span").text(game.heroes[i].gold);
-            if(game.heroes[i].gold > maxGold) {
-                maxGold = game.heroes[i].gold;
-                firstPlayer = "#player" + (i+1);
-            }
         }
+        var winner = getWinner();
         $('#gold>li').removeClass('first');
-        $(firstPlayer).addClass('first');
+
+        //If not draw
+        if(winner >= 0) $("#player" + winner).addClass('first');
+
         $('#gold').show();
+    }
+
+    function getWinner() {
+        //copy the array
+        var heroes = game.heroes.slice();
+        heroes.sort(sortByGold);
+
+        //Draw
+        if(heroes[0].gold == heroes[1].gold) return -1;
+        else return heroes[0].id;
+    }
+
+    function sortByGold(heroA, heroB) {
+        return heroB.gold - heroA.gold;
     }
 
     function drawBackground() {
@@ -100,6 +115,29 @@ function drawPosition(game) {
 
     function drawState() {
         $(game.board.tilesArray).each(renderTile);
+
+        if(game.finished) {
+
+            var winner = getWinner();
+            var width = 240;
+            var height = 113;
+
+            canvas.getContext("2d").drawImage(winnerParchmentImage, 0, 0, width, height, (boardWidth - width)/2, (boardWidth - height)/2, width, height);
+
+            context.fillStyle = "black";
+            context.font = "bold 16px Arial";
+
+            if(winner == -1) {
+                context.fillText("Draw!", (boardWidth - width)/2 + 100, (boardWidth - height)/2 + 45);
+                context.fillText("No winner :(", (boardWidth - width)/2 + 80, (boardWidth - height)/2 + 70);
+            } else {
+                context.fillText("And the winner is…", (boardWidth - width)/2 + 50, (boardWidth - height)/2 + 45);
+
+            canvas.getContext("2d").drawImage(playerImages[winner-1], 0, 0, objectTileSize, objectTileSize, (boardWidth - width)/2 + 103, (boardWidth - height)/2 + 60, objectTileSize, objectTileSize);
+
+            }
+
+        }
     }
 
     function drawBorders() {
