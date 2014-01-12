@@ -116,10 +116,9 @@ function drawPosition(game) {
     function drawState() {
         $(game.board.tilesArray).each(renderTile);
 
-        if(game.finished == true) {
+        if(game.finished) {
 
             var winner = getWinner();
-
             var width = 240;
             var height = 113;
 
