@@ -64,6 +64,7 @@ function drawPosition(game) {
     // preload tiles parsing
     game.board.tilesArray = game.board.tiles.match(/.{2}/g);
 
+    var totalGold = getTotalGold();
     updateGold();
 
     // draw state
@@ -98,6 +99,10 @@ function drawPosition(game) {
         //Draw
         if(heroes[0].gold == heroes[1].gold) return -1;
         else return heroes[0].id;
+    }
+
+    function getGoldPercentage(playerIndex) {
+        return Math.floor(game.heroes[playerIndex].gold*100/totalGold);
     }
 
     function getTotalGold() {
