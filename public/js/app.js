@@ -46,9 +46,6 @@ $(function() {
 
                 updateGame(CURRENTPOS);
                 CURRENTPOS++;
-
-                console.log(CURRENTPOS);
-
             });
             source.addEventListener('open', function(e) {
                 // Connection was opened.
