@@ -65,11 +65,14 @@ li.first span {
 #scoreBar {
     width: 20px;
     height: 240px;
-    border: 2px solid #777777;
+    border-right: 2px solid #2f8136;
+    border-top: 2px solid #2f8136;
+    border-bottom: 2px solid #2f8136;
     position: absolute;
     top: 10px;
-    right: -30px;
-    border-radius: 5px;
+    right: -22px;
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
 }
 
 #scoreBar div {
@@ -79,7 +82,6 @@ li.first span {
 }
 
 #scoreBarPlayer1 {
-   border-top-left-radius: 3px;
    border-top-right-radius: 3px;
    background-color: #ca0000;
 }
@@ -95,6 +97,5 @@ li.first span {
 
 #scoreBarPlayer4 {
    background-color: #caca00;
-   border-bottom-left-radius: 3px;
    border-bottom-right-radius: 3px;
 }
