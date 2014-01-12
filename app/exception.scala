@@ -16,4 +16,6 @@ case class GameFinishedException(reason: Status.Finish) extends GameException {
   val message = reason.toString
 }
 
+case class MapParseException(message: String) extends GameException
+
 case class UtterFailException(message: String) extends GameException

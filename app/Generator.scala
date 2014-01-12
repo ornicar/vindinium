@@ -7,13 +7,13 @@ object Generator {
 
   val maxAttempts = 100
 
-  def apply(config: Config): Try[Game] = config.size match {
+  def apply(config: Config.GenMap, turns: Int): Try[Game] = config.size match {
     case s if s < 8      ⇒ fail("Board is too small")
     case s if s % 2 != 0 ⇒ fail("Board size is odd")
-    case _               ⇒ attempt(config)
+    case _               ⇒ attempt(config, turns)
   }
 
-  private def attempt(config: Config, attempts: Int = 1): Try[Game] = {
+  private def attempt(config: Config.GenMap, turns: Int, attempts: Int = 1): Try[Game] = {
 
     val boardDraft = generateBoard(config)
 
@@ -23,26 +23,26 @@ object Generator {
 
       if (board.countMines == 0) fail("Board has no mine")
       else placeTaverns(board, heroPos, config) map { finalBoard =>
-        generateGame(finalBoard, config, heroPos)
+        generateGame(finalBoard, config, turns, heroPos)
       }
     }
   } recoverWith {
     case err if attempts < maxAttempts => {
-      attempt(config, attempts + 1)
+      attempt(config, turns, attempts + 1)
     }
   }
 
-  private def generateGame(board: Board, config: Config, heroPos: Pos) = Game(
+  private def generateGame(board: Board, config: Config.GenMap, turns: Int, heroPos: Pos) = Game(
     id = RandomString(8),
     board = board,
-    config = config,
     hero1 = Hero(1, "Alaric", heroPos),
     hero2 = Hero(2, "Luther", board mirrorX heroPos),
     hero3 = Hero(3, "Thorfinn", board mirrorXY heroPos),
     hero4 = Hero(4, "York", board mirrorY heroPos),
+    maxTurns = turns,
     status = Status.Created)
 
-  private def placeTaverns(board: Board, heroPos: Pos, config: Config): Try[Board] = {
+  private def placeTaverns(board: Board, heroPos: Pos, config: Config.GenMap): Try[Board] = {
 
     def nbReachableMines(b: Board) = b.posTiles count {
       case (p, Tile.Mine(_)) => p.neighbors map b.get exists (Some(Tile.Air)==)
@@ -86,7 +86,7 @@ object Generator {
     }
   }
 
-  private def generateBoard(config: Config): Board = {
+  private def generateBoard(config: Config.GenMap): Board = {
 
     def sector(size: Int) = Board {
       (1 to size).toVector map { _ =>

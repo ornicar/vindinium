@@ -3,24 +3,26 @@ package bot
 
 import scala.util.{ Random, Try, Success, Failure }
 
-object Predefined {
+object StringMapParser {
 
-  def first: Try[Game] = parse(firstBoard) map {
-    case (board, heroes) => Game(
+  case class Parsed(board: Board, pos1: Pos, pos2: Pos, pos3: Pos, pos4: Pos) {
+
+    def game(turns: Int) = Game(
       id = RandomString(8),
       board = board,
-      config = Config.random,
-      hero1 = Hero(1, "Alaric", heroes(1)),
-      hero2 = Hero(2, "Luther", heroes(2)),
-      hero3 = Hero(3, "Thorfinn", heroes(3)),
-      hero4 = Hero(4, "York", heroes(4)),
+      hero1 = Hero(1, "Alaric", pos1),
+      hero2 = Hero(2, "Luther", pos2),
+      hero3 = Hero(3, "Thorfinn", pos3),
+      hero4 = Hero(4, "York", pos4),
+      maxTurns = turns,
       status = Status.Created)
   }
 
-  def parse(str: String): Try[(Board, Map[Int, Pos])] = Try {
+  def apply(strOrName: String): Try[Parsed] = Try {
     import Tile._
+    val str = Maps get strOrName getOrElse strOrName
     val heroes = collection.mutable.Map[Int, Pos]()
-    val tiles = str.lines.zipWithIndex map {
+    val tiles = str.lines.filter(_.nonEmpty).zipWithIndex map {
       case (line, i) => ((line grouped 2 map (_.toList)).zipWithIndex map {
         case (List(' ', ' '), _) ⇒ Air
         case (List('#', '#'), _) ⇒ Wall
@@ -34,19 +36,13 @@ object Predefined {
         case (_, _) ⇒ sys error s"Can't parse $str"
       }).toList
     }
-    Board(tiles.map(_.toVector).toVector) -> heroes.toMap
+    (tiles, heroes.toList.sortBy(_._1).map(_._2)) match {
+      case (tiles, List(h1, h2, h3, h4)) => Parsed(
+        board = Board(tiles.map(_.toVector).toVector),
+        h1, h2, h3, h4)
+      case _ => throw MapParseException(str)
+    }
   }
-
-  val firstBoard = """##@1    ####    @4##
-      ########      
-        ####        
-    []        []    
-$-    ##    ##    $-
-$-    ##    ##    $-
-    []        []    
-        ####  @3    
-      ########      
-##@2    ####      ##"""
 
   private def int(c: Char): Option[Int] = Try(java.lang.Integer.parseInt(c.toString)).toOption
 }
