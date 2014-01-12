@@ -26,9 +26,18 @@ body {
     position: relative;
 }
 
+#boardBox {
+    display: inline-block;
+}
+
+#infos {
+    vertical-align:top;
+    display: inline-block;
+}
+
 #gold {
     margin: 0;
-    padding: 0;
+    padding: 10px 0 0 0;
     list-style-type: none;
     color: #474747;
     font-size:12px;
@@ -37,13 +46,28 @@ body {
 
 
 #gold li {
-    display: inline-block;
     width: 90px;
     height: 37px;
+    margin-bottom: 7px;
     background-image: url('../img/parchment.png');
 }
 
-.player {
+#legend {
+    margin:0;
+    padding:10px 0 0 0;
+    text-align: left;
+}
+
+#legend li {
+    width: 90px;
+    height: 27px;
+    background-image: url('../img/parchment.png');
+    color: #474747;
+    padding-top: 10px;
+    text-align: center;
+}
+
+#gold .player {
     padding-top: 8px;
     width: 20px;
     height: 20px;
@@ -63,24 +87,34 @@ li.first span {
 }
 
 #scoreBar {
+    display: inline-block;
+    vertical-align: top;
+    margin-top: 10px;
+}
+
+#scoreBarCoin {
+    background-color: #777777;
+    width: 24px;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+}
+
+#scoreBarCoin img {
+    padding: 2px 0 2px 0;
+    margin: 0;
+}
+#bars {
     width: 20px;
     height: 240px;
     border: 2px solid #777777;
-    position: absolute;
-    top: 10px;
-    right: -30px;
-    border-radius: 5px;
-}
-
-#scoreBar div {
-   position: relative;
-   width: 20px;
-
+    position: relative;
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+    display: inline-block;
+    vertical-align: top;
 }
 
 #scoreBarPlayer1 {
-   border-top-left-radius: 3px;
-   border-top-right-radius: 3px;
    background-color: #ca0000;
 }
 

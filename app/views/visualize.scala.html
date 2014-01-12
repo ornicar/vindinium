@@ -4,32 +4,45 @@
 
 @main("24hCodeBot") {
 
-<ul id="legend">
-  <li id="turn">Turn: <span></span></li>
-</ul>
-<ul id="gold">
-  <li id="player1" class="first"><img class="player" src="@routes.Assets.at("img/fireheart/player1.png")"/> <span>100</span><img src="@routes.Assets.at("img/coin.png")" class="coin"/></li>
-  <li id="player2"><img class="player" src="@routes.Assets.at("img/fireheart/player2.png")"/> <span>100</span><img src="@routes.Assets.at("img/coin.png")" class="coin"/></li>
-  <li id="player3"><img class="player" src="@routes.Assets.at("img/fireheart/player3.png")"/> <span>100</span><img src="@routes.Assets.at("img/coin.png")" class="coin"/></li>
-  <li id="player4"><img class="player" src="@routes.Assets.at("img/fireheart/player4.png")"/> <span>100</span><img src="@routes.Assets.at("img/coin.png")" class="coin"/></li>
-</ul>
 
 <div id="game">
-    <canvas id="board">
-    </canvas>
-    <div id="scoreBar">
-        <div id="scoreBarPlayer1"></div>
-        <div id="scoreBarPlayer2"></div>
-        <div id="scoreBarPlayer3"></div>
-        <div id="scoreBarPlayer4"></div>
+    <div id="boardBox">
+        <canvas id="board">
+        </canvas>
+
+        <div id="nav"><span id="prev">&lt;</span>&nbsp;&nbsp;&nbsp;<span id="next">&gt;</span></div>
+
+        <button id="manual-alone">PLAY - TRAINING</button>
+        <button id="manual-many">PLAY</button>
+        <div id="yourturn"></div>
     </div>
+
+    <div id="scoreBar">
+
+        <div id="scoreBarCoin"><img src="@routes.Assets.at("img/coin.png")" class="coin"/></div>
+        <div id="bars">
+            <div id="scoreBarPlayer1" class="player"></div>
+            <div id="scoreBarPlayer2" class="player"></div>
+            <div id="scoreBarPlayer3" class="player"></div>
+            <div id="scoreBarPlayer4" class="player"></div>
+        </div>
+    </div>
+    <div id="infos">
+        <ul id="legend">
+            <li id="turn"><strong>Turn:</strong> <span></span></li>
+        </ul>
+
+        <ul id="gold">
+            <li id="player1" class="first"><img class="player" src="@routes.Assets.at("img/fireheart/player1.png")"/> <span>100</span><img src="@routes.Assets.at("img/coin.png")" class="coin"/></li>
+            <li id="player2"><img class="player" src="@routes.Assets.at("img/fireheart/player2.png")"/> <span>100</span><img src="@routes.Assets.at("img/coin.png")" class="coin"/></li>
+            <li id="player3"><img class="player" src="@routes.Assets.at("img/fireheart/player3.png")"/> <span>100</span><img src="@routes.Assets.at("img/coin.png")" class="coin"/></li>
+            <li id="player4"><img class="player" src="@routes.Assets.at("img/fireheart/player4.png")"/> <span>100</span><img src="@routes.Assets.at("img/coin.png")" class="coin"/></li>
+        </ul>
+
+    </div>
+
 </div>
 
-<div id="nav"><span id="prev">&lt;</span>&nbsp;&nbsp;&nbsp;<span id="next">&gt;</span></div>
-
-<button id="manual-alone">PLAY - TRAINING</button>
-<button id="manual-many">PLAY</button>
-<div id="yourturn"></div>
 
 <script language="javascript">
   var replay, gameId;

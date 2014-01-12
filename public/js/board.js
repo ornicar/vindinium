@@ -56,7 +56,7 @@ function drawPosition(game) {
 
     var boardWidth = borderSize*2 + groundTileSize * boardSize;
 
-    $('#scoreBar').css('height', (boardWidth-4) + 'px');
+    $('#bars').css('height', (boardWidth-4-($('#scoreBarCoin').height())) + 'px');
 
     if (firstRender) {
       canvas.width = groundTileSize * boardSize + borderSize * 2;
@@ -90,12 +90,12 @@ function drawPosition(game) {
         //If not draw
         if(winner >= 0) $("#player" + winner).addClass('first');
 
-        $('#gold').show();
+        $('#gold').css('display', 'inline-block');
         
         var percentageSum=0;
 
         if (totalGold == 0) {
-            $("#scoreBar>div").css('height', '25%');
+            $("#scoreBar .player").css('height', '25%');
         } else {
 
             $(game.heroes).each(function(index, value) {
