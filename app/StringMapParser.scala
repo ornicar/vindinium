@@ -36,7 +36,7 @@ object StringMapParser {
         case (_, _) ⇒ sys error s"Can't parse $str"
       }).toList
     }
-    (tiles, heroes.toList.sortBy(_._1).map(_._2)) match {
+    (tiles.toList, heroes.toMap.toList.sortBy(_._1).map(_._2)) match {
       case (tiles, List(h1, h2, h3, h4)) => Parsed(
         board = Board(tiles.map(_.toVector).toVector),
         h1, h2, h3, h4)
