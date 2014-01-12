@@ -6,7 +6,7 @@ import akka.pattern.{ ask, pipe }
 import akka.util.Timeout
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.{ Future, Promise, promise }
+import scala.concurrent.{ Future, Await, Promise, promise }
 import scala.util.{ Try, Success, Failure }
 
 final class Server extends Actor with ActorLogging {
@@ -16,6 +16,8 @@ final class Server extends Actor with ActorLogging {
   implicit val timeout = Timeout(1.second)
 
   val clients = scala.collection.mutable.Map[Pov, ActorRef]()
+
+  var nextArenaGame: Option[Game] = None
 
   def receive = akka.event.LoggingReceive {
 
@@ -31,7 +33,31 @@ final class Server extends Actor with ActorLogging {
       }
     }
 
+    case RequestToPlayArena => {
+      val replyTo = sender
+      val game = nextArenaGame.pp match {
+        case None => {
+          val g = Await.result(Pool create Config.random, 1.second)
+          context.system.eventStream publish g
+          nextArenaGame = Some(g)
+          self ! AddClient(Pov(g.id, g.hero1.token), Driver.Http, inputPromise(replyTo))
+          self ! AddClient(Pov(g.id, g.hero2.token), Driver.Random, inputPromise(replyTo))
+          self ! AddClient(Pov(g.id, g.hero3.token), Driver.Random, inputPromise(replyTo))
+        }
+        case Some(g) => {
+          val id = gameClients(g.id).size + 1
+          println(id)
+          self ! AddClient(Pov(g.id, g.hero(id).token), Driver.Http, inputPromise(replyTo))
+          if (id == 4) {
+            self ! Start(g)
+            nextArenaGame = None
+          }
+        }
+      }
+    }
+
     case AddClient(pov, driver, promise) => {
+      println(pov)
       val client = context.actorOf(
         Props(new Client(pov, driver, promise)),
         name = s"client-${pov.gameId}-${pov.token}")
@@ -39,7 +65,7 @@ final class Server extends Actor with ActorLogging {
       context watch client
     }
 
-    case Start(game: Game) => {
+    case Start(game) => {
       context.system.eventStream publish game
       game.hero map { h => Pov(game.id, h.token) } flatMap clients.get match {
         case None         => throw UtterFailException(s"Game ${game.id} started without a hero client")
@@ -56,7 +82,7 @@ final class Server extends Actor with ActorLogging {
             context.system.eventStream publish game
             client ! Client.WorkDone(inputPromise(replyTo))
             game.hero match {
-              case None => gameClients(game.id) foreach (_ ! game)
+              case None    => gameClients(game.id) foreach (_ ! game)
               case Some(h) => clients get Pov(game.id, h.token) foreach (_ ! game)
             }
           }
@@ -88,6 +114,7 @@ final class Server extends Actor with ActorLogging {
 object Server {
 
   case object RequestToPlayAlone
+  case object RequestToPlayArena
 
   case class Play(pov: Pov, dir: String)
 

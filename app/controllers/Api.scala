@@ -16,10 +16,19 @@ import scala.concurrent.Future
 
 object Api extends Controller {
 
-  implicit val timeout = Timeout(10.second)
+  implicit val timeout = Timeout(60.second)
 
   def trainingAlone = Action.async { req =>
     (Server.actor ? Server.RequestToPlayAlone) map {
+      case input: PlayerInput => {
+        println(input.game.render)
+        Ok(JsonFormat(input, req.host)) as JSON
+      }
+    }
+  }
+
+  def arena = Action.async { req =>
+    (Server.actor ? Server.RequestToPlayArena) map {
       case input: PlayerInput => {
         println(input.game.render)
         Ok(JsonFormat(input, req.host)) as JSON
