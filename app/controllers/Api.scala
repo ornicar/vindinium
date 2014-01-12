@@ -18,13 +18,27 @@ object Api extends Controller {
 
   implicit val timeout = Timeout(60.second)
 
-  def trainingAlone = Action.async { req =>
-    (Server.actor ? Server.RequestToPlayAlone) map {
-      case input: PlayerInput => {
-        println(input.game.render)
-        Ok(JsonFormat(input, req.host)) as JSON
-      }
+  case class Training(turns: Option[Int]) {
+    def config = {
+      val c = Config.random
+      turns.fold(c)(t => c.copy(maxTurns = t * 4))
     }
+  }
+
+  val trainingForm = Form(mapping(
+    "turns" -> optional(number)
+  )(Training.apply)(Training.unapply))
+
+  def trainingAlone = Action.async { implicit req =>
+    trainingForm.bindFromRequest.fold(
+      err => Future successful BadRequest,
+      data => (Server.actor ? Server.RequestToPlayAlone(data.config)) map {
+        case input: PlayerInput => {
+          println(input.game.render)
+          Ok(JsonFormat(input, req.host)) as JSON
+        }
+      }
+    )
   }
 
   def arena = Action.async { req =>

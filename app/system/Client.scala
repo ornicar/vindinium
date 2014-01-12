@@ -45,6 +45,14 @@ final class Client(
 
     case Event(WorkDone(promise), Nothing) => goto(Waiting) using Response(promise)
   }
+
+  when(Closed) {
+
+    case e => {
+      log.warning(s"Received event $e while closed")
+      stay
+    }
+  }
 }
 
 object Client {

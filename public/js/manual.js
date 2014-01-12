@@ -1,7 +1,7 @@
 $(function() {
 
-  $('#manual').click(function() {
-    $.get('/api/training/alone', function(data) {
+  $('#manual-alone').click(function() {
+    $.post('/api/training/alone', function(data) {
       location.href = "/" + data.game.id + '?playUrl=' + encodeURIComponent(data.playUrl);
     });
   });

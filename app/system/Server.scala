@@ -21,9 +21,9 @@ final class Server extends Actor with ActorLogging {
 
   def receive = akka.event.LoggingReceive {
 
-    case RequestToPlayAlone => {
+    case RequestToPlayAlone(config) => {
       val replyTo = sender
-      Pool create Config.random foreach { game =>
+      Pool create config foreach { game =>
         context.system.eventStream publish game
         self ! AddClient(Pov(game.id, game.hero1.token), Driver.Http, inputPromise(replyTo))
         game.heroes drop 1 foreach { hero =>
@@ -35,7 +35,7 @@ final class Server extends Actor with ActorLogging {
 
     case RequestToPlayArena => {
       val replyTo = sender
-      val game = nextArenaGame.pp match {
+      val game = nextArenaGame match {
         case None => {
           val g = Await.result(Pool create Config.random, 1.second)
           context.system.eventStream publish g
@@ -81,7 +81,7 @@ final class Server extends Actor with ActorLogging {
           Pool.actor ? Pool.Play(pov, Dir(dir)) mapTo manifest[Game] foreach { game =>
             context.system.eventStream publish game
             client ! Client.WorkDone(inputPromise(replyTo))
-            game.hero match {
+            game.hero filterNot (_ => game.finished) match {
               case None    => gameClients(game.id) foreach (_ ! game)
               case Some(h) => clients get Pov(game.id, h.token) foreach (_ ! game)
             }
@@ -113,7 +113,7 @@ final class Server extends Actor with ActorLogging {
 
 object Server {
 
-  case object RequestToPlayAlone
+  case class RequestToPlayAlone(config: Config)
   case object RequestToPlayArena
 
   case class Play(pov: Pov, dir: String)
