@@ -151,7 +151,7 @@ function drawPosition(game) {
     function drawState() {
         $(game.board.tilesArray).each(renderTile);
 
-        if(game.finished) {
+        if(game.finished && game.turns > 0) {
 
             var winner = getWinner();
             var width = 240;

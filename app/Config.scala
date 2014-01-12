@@ -23,7 +23,7 @@ object Config {
       size = 30,
       wallPercent = 40,
       minePercent = 4),
-    turns = 200 * 4)
+    turns = 300 * 4)
 
   def random = Config.default.copy(
     map = GenMap(
