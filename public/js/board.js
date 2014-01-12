@@ -100,6 +100,15 @@ function drawPosition(game) {
         else return heroes[0].id;
     }
 
+    function getTotalGold() {
+
+        var totalGold = (game.heroes.reduce(function(pv, cv) { 
+            return {gold: pv.gold + cv.gold}; 
+        }, {gold:0})).gold;
+
+        return totalGold;
+    }
+
     function sortByGold(heroA, heroB) {
         return heroB.gold - heroA.gold;
     }
