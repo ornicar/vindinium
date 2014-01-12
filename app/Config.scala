@@ -14,13 +14,13 @@ object Config {
 
   val default = Config(
   goldToWin = 1000,
-  maxTurns = 1200,
+  maxTurns = 200 * 4,
   size = 30,
   wallPercent = 40,
   minePercent = 4)
 
   def random = Config.default.copy(
-    size = 10 + ((Random nextInt 15) * 2),
+    size = 10 + ((Random nextInt 10) * 2),
     wallPercent = 15 + (Random nextInt 28),
     minePercent = 1 + (Random nextInt 8))
 }
