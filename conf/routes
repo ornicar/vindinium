@@ -1,5 +1,6 @@
 GET     /                               controllers.Application.index
 
+GET     /api/arena                      controllers.Api.arena
 GET     /api/training/alone             controllers.Api.trainingAlone
 POST    /api/:gameId/:token/play        controllers.Api.move(gameId: String, token: String)
 

@@ -55,9 +55,9 @@ object Hero {
 
   val maxLife = 100
   val beerLife = 50
-  val beerGold = -1
+  val beerGold = -2
   val dayLife = -1
-  val mineLife = -30
+  val mineLife = -20
   val attackLife = -10
-  val defendLife = -15
+  val defendLife = -20
 }

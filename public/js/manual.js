@@ -5,6 +5,12 @@ $(function() {
       location.href = "/" + data.game.id + '?playUrl=' + encodeURIComponent(data.playUrl);
     });
   });
+  $('#manual-many').click(function() {
+    $.get('/api/arena', function(data) {
+      location.href = "/" + data.game.id + '?playUrl=' + encodeURIComponent(data.playUrl);
+    });
+    $(this).replaceWith('Waiting for other players...');
+  });
 
   function getParameterByName(name) {
     var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
@@ -29,6 +35,7 @@ $(function() {
     if (lock) {
       console.debug("Ignored move while locked");
     } else {
+      $('#yourturn').text("");
       $.ajax({
         url: url,
         method: 'post',
@@ -36,6 +43,7 @@ $(function() {
           dir: dir
         },
         success: function() {
+          $('#yourturn').text("A TON TOUR");
           lock = false;
         }
       });

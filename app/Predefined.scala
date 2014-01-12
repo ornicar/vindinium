@@ -32,7 +32,7 @@ object Predefined {
           Air
         }
         case (_, _) ⇒ sys error s"Can't parse $str"
-      }).toList.pp
+      }).toList
     }
     Board(tiles.map(_.toVector).toVector) -> heroes.toMap
   }
