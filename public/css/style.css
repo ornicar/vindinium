@@ -16,8 +16,14 @@ body {
     list-style-type: none;
 }
 
+#game {
+    position: relative;
+    display: inline-block;
+}
+
 #board {
     padding-top: 10px;
+    position: relative;
 }
 
 #gold {
@@ -54,4 +60,41 @@ body {
 li.first span {
     font-weight: bold;
     border-bottom: 2px solid black;
+}
+
+#scoreBar {
+    width: 20px;
+    height: 240px;
+    border: 2px solid #777777;
+    position: absolute;
+    top: 10px;
+    right: -30px;
+    border-radius: 5px;
+}
+
+#scoreBar div {
+   position: relative;
+   width: 20px;
+
+}
+
+#scoreBarPlayer1 {
+   border-top-left-radius: 3px;
+   border-top-right-radius: 3px;
+   background-color: #ca0000;
+}
+
+#scoreBarPlayer2 {
+   background-color: #0000ca;
+}
+
+#scoreBarPlayer3 {
+   background-color: #00b700;
+}
+
+
+#scoreBarPlayer4 {
+   background-color: #caca00;
+   border-bottom-left-radius: 3px;
+   border-bottom-right-radius: 3px;
 }

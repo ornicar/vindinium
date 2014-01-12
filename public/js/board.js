@@ -89,6 +89,27 @@ function drawPosition(game) {
         if(winner >= 0) $("#player" + winner).addClass('first');
 
         $('#gold').show();
+        
+        var percentageSum=0;
+
+        if (totalGold == 0) {
+            $("#scoreBar>div").css('height', '25%');
+        } else {
+
+            $(game.heroes).each(function(index, value) {
+
+                if(index!=3) {
+                    var goldPercentage = getGoldPercentage(index);
+                    percentageSum += goldPercentage;
+                    $("#scoreBarPlayer" + (index+1)).css('height', goldPercentage + '%');
+                } else {
+                    $("#scoreBarPlayer" + (index+1)).css('height', (100 - percentageSum) + '%');
+                }
+
+                console.log("gold percentage", index, getGoldPercentage(index));
+            });
+        }
+        
     }
 
     function getWinner() {

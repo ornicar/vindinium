@@ -12,20 +12,16 @@
         <li id="player3"><img class="player" src="assets/img/fireheart/player3.png"/> <span>2</span><img src="assets/img/coin.png" class="coin"/></li>
         <li id="player4"><img class="player" src="assets/img/fireheart/player4.png"/> <span>33</span><img src="assets/img/coin.png" class="coin"/></li>
     </ul>
-        <canvas id="board"></canvas>
-	<pre>+--------------------+
-|##@@1    ####    @@4##|
-|      ########      |
-|        ####        |
-|    []        []    |
-|$-    ##    ##    $-|
-|$-    ##    ##    $-|
-|    []        []    |
-|        ####        |
-|      ########      |
-|##@@2    ####    @@3##|
-+--------------------+
-</pre>
+    <div id="game">
+        <canvas id="board">
+        </canvas>
+        <div id="scoreBar">
+            <div id="scoreBarPlayer1"></div>
+            <div id="scoreBarPlayer2"></div>
+            <div id="scoreBarPlayer3"></div>
+            <div id="scoreBarPlayer4"></div>
+        </div>
+    </div>
         <script src="assets/js/jquery-2.0.3.min.js"></script>
 
         <script src="assets/js/board.js"></script>

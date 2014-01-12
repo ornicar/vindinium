@@ -14,7 +14,16 @@
   <li id="player4"><img class="player" src="@routes.Assets.at("img/fireheart/player4.png")"/> <span>100</span><img src="@routes.Assets.at("img/coin.png")" class="coin"/></li>
 </ul>
 
-<canvas id="board"></canvas>
+<div id="game">
+    <canvas id="board">
+    </canvas>
+    <div id="scoreBar">
+        <div id="scoreBarPlayer1"></div>
+        <div id="scoreBarPlayer2"></div>
+        <div id="scoreBarPlayer3"></div>
+        <div id="scoreBarPlayer4"></div>
+    </div>
+</div>
 
 <div id="nav"><span id="prev">&lt;</span>&nbsp;&nbsp;&nbsp;<span id="next">&gt;</span></div>
 
