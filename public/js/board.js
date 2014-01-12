@@ -56,6 +56,8 @@ function drawPosition(game) {
 
     var boardWidth = borderSize*2 + groundTileSize * boardSize;
 
+    $('#scoreBar').css('height', (boardWidth-4) + 'px');
+
     if (firstRender) {
       canvas.width = groundTileSize * boardSize + borderSize * 2;
       canvas.height = groundTileSize * boardSize + borderSize * 2;
