@@ -122,7 +122,7 @@ function drawPosition(game) {
             var width = 240;
             var height = 113;
 
-            canvas.getContext("2d").drawImage(winnerParchmentImage, 0, 0, width, height, (boardWidth - width)/2, (boardWidth - height)/2, width, height);
+            context.drawImage(winnerParchmentImage, 0, 0, width, height, (boardWidth - width)/2, (boardWidth - height)/2, width, height);
 
             context.fillStyle = "black";
             context.font = "bold 16px Arial";
@@ -131,9 +131,10 @@ function drawPosition(game) {
                 context.fillText("Draw!", (boardWidth - width)/2 + 100, (boardWidth - height)/2 + 45);
                 context.fillText("No winner :(", (boardWidth - width)/2 + 80, (boardWidth - height)/2 + 70);
             } else {
-                context.fillText("And the winner is…", (boardWidth - width)/2 + 50, (boardWidth - height)/2 + 45);
+                context.fillText("Game finished!", (boardWidth - width)/2 + 63, (boardWidth - height)/2 + 30);
+                context.fillText("And the winner is…", (boardWidth - width)/2 + 50, (boardWidth - height)/2 + 55);
 
-            canvas.getContext("2d").drawImage(playerImages[winner-1], 0, 0, objectTileSize, objectTileSize, (boardWidth - width)/2 + 103, (boardWidth - height)/2 + 60, objectTileSize, objectTileSize);
+                canvas.getContext("2d").drawImage(playerImages[winner-1], 0, 0, objectTileSize, objectTileSize, (boardWidth - width)/2 + 103, (boardWidth - height)/2 + 66, objectTileSize, objectTileSize);
 
             }
 
