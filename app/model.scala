@@ -59,7 +59,6 @@ object Status {
   case object Started extends Status
   case object AllCrashed extends Finish
   case object TurnMax extends Finish
-  case class GoldWin(hero: Hero) extends Finish
 }
 
 sealed abstract class Crash(reason: String)

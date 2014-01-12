@@ -37,7 +37,10 @@ final class Pool extends Actor with ActorLogging {
       case Some(ga) => ga forward GameActor.Get
     }
 
-    case Create(config) => Generator(config) match {
+    case Create(config) => (config.map match {
+      case m: Config.GenMap      => Generator(m, config.turns)
+      case Config.StringMap(str) => StringMapParser(str) map (_ game config.turns)
+    }) match {
       case Failure(e) => sender ! Status.Failure(e)
       case Success(game) => {
         val actor = context.actorOf(Props(new GameActor(game)), name = s"game-${game.id}")

@@ -5,12 +5,12 @@ import scala.util.{ Try, Success, Failure }
 case class Game(
     id: String,
     board: Board,
-    config: Config,
     hero1: Hero,
     hero2: Hero,
     hero3: Hero,
     hero4: Hero,
     turn: Int = 0,
+    maxTurns: Int,
     status: Status) {
 
   def heroes = List(hero1, hero2, hero3, hero4)
@@ -24,7 +24,7 @@ case class Game(
   def step = {
     val next = copy(turn = turn + 1)
     next.copy(
-      status = if (next.turn > config.maxTurns) Status.TurnMax
+      status = if (next.turn > maxTurns) Status.TurnMax
       else if (next.activeHeroes.isEmpty) Status.AllCrashed
       else Status.Started)
   }

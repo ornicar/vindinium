@@ -18,7 +18,7 @@ object JsonFormat {
   def apply(g: Game): JsObject = Json.obj(
     "id" -> g.id,
     "turn" -> g.turn,
-    "maxTurns" -> g.config.maxTurns,
+    "maxTurns" -> g.maxTurns,
     "heroes" -> JsArray(g.heroes map apply),
     "board" -> Json.obj(
       "size" -> g.board.size,

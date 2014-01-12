@@ -4,23 +4,31 @@ package bot
 import scala.util.Random
 
 case class Config(
-  goldToWin: Int,
-  maxTurns: Int,
-  size: Int,
-  wallPercent: Int,
-  minePercent: Int)
+  map: Config.Map,
+  turns: Int)
 
 object Config {
 
+  sealed trait Map
+  case class StringMap(str: String) extends Map
+  case class GenMap(
+    size: Int,
+    wallPercent: Int,
+    minePercent: Int) extends Map
+
+  def stringMap(str: String) = default.copy(map = StringMap(str))
+
   val default = Config(
-  goldToWin = 1000,
-  maxTurns = 200 * 4,
-  size = 30,
-  wallPercent = 40,
-  minePercent = 4)
+    map = GenMap(
+      size = 30,
+      wallPercent = 40,
+      minePercent = 4),
+    turns = 200 * 4)
 
   def random = Config.default.copy(
-    size = 10 + ((Random nextInt 10) * 2),
-    wallPercent = 15 + (Random nextInt 28),
-    minePercent = 1 + (Random nextInt 8))
+    map = GenMap(
+      size = 10 + ((Random nextInt 10) * 2),
+      wallPercent = 15 + (Random nextInt 28),
+      minePercent = 1 + (Random nextInt 8))
+  )
 }

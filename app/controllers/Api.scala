@@ -6,8 +6,6 @@ import org.jousse.bot.system._
 import akka.pattern.{ ask, pipe }
 import akka.util.Timeout
 import play.api._
-import play.api.data._
-import play.api.data.Forms._
 import play.api.libs.json.Json
 import play.api.mvc._
 import scala.concurrent.duration._
@@ -18,24 +16,18 @@ object Api extends Controller {
 
   implicit val timeout = Timeout(60.second)
 
-  case class Training(turns: Option[Int]) {
-    def config = {
-      val c = Config.random
-      turns.fold(c)(t => c.copy(maxTurns = t * 4))
-    }
-  }
-
-  val trainingForm = Form(mapping(
-    "turns" -> optional(number)
-  )(Training.apply)(Training.unapply))
-
   def trainingAlone = Action.async { implicit req =>
-    trainingForm.bindFromRequest.fold(
+    form.training.bindFromRequest.fold(
       err => Future successful BadRequest,
       data => (Server.actor ? Server.RequestToPlayAlone(data.config)) map {
         case input: PlayerInput => {
           println(input.game.render)
           Ok(JsonFormat(input, req.host)) as JSON
+        }
+      } recover {
+        case e: GameException => {
+          play.api.Logger("API").warn(e.toString)
+          BadRequest
         }
       }
     )
@@ -50,10 +42,8 @@ object Api extends Controller {
     }
   }
 
-  val moveForm = Form(single("dir" -> nonEmptyText))
-
   def move(gameId: String, token: String) = Action.async { implicit req =>
-    moveForm.bindFromRequest.fold(
+    form.move.bindFromRequest.fold(
       err => Future successful BadRequest,
       dir => Server.actor ? Server.Play(Pov(gameId, token), dir) map {
         case input: PlayerInput => {
