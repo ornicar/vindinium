@@ -16,8 +16,6 @@ final class Pool extends Actor with ActorLogging {
 
   import Pool._
 
-  implicit val timeout = Timeout(1.second)
-
   val actors = scala.collection.mutable.Map[String, ActorRef]()
 
   override val supervisorStrategy =
@@ -51,9 +49,12 @@ final class Pool extends Actor with ActorLogging {
       }
     }
 
-    case GetOrCreate => actors.headOption map (_._2) match {
-      case Some(ga) => ga ? GameActor.Get pipeTo sender
-      case None     => self.tell(Create(Config.random), sender)
+    case GetOrCreate => {
+      implicit val timeout = Timeout(1.second)
+      actors.headOption map (_._2) match {
+        case Some(ga) => ga ? GameActor.Get pipeTo sender
+        case None     => self.tell(Create(Config.random), sender)
+      }
     }
 
     case Terminated(actor) ⇒ {

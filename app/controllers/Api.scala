@@ -15,7 +15,7 @@ import user.{ User => U }
 
 object Api extends Controller {
 
-  implicit val timeout = Timeout(60.second)
+  implicit val timeout = Timeout(10.minutes)
 
   def training = Action.async { implicit req =>
     form.training.bindFromRequest.fold(

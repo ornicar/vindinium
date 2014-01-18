@@ -14,8 +14,6 @@ final class Server extends Actor with ActorLogging {
 
   import Server._
 
-  implicit val timeout = Timeout(1.second)
-
   val clients = scala.collection.mutable.Map[Pov, ActorRef]()
 
   var nextArenaGame: Option[Game] = None
@@ -63,7 +61,7 @@ final class Server extends Actor with ActorLogging {
     }
 
     case AddClient(pov, driver, promise) => {
-      println(pov)
+      println(s"[game ${pov.gameId}] add client")
       val client = context.actorOf(
         Props(new Client(pov, driver, promise)),
         name = s"client-${pov.gameId}-${pov.token}")
@@ -84,6 +82,7 @@ final class Server extends Actor with ActorLogging {
       clients get pov match {
         case None => replyTo ! notFound(s"No client for $pov")
         case Some(client) => {
+          implicit val timeout = Timeout(1.second)
           Pool.actor ? Pool.Play(pov, Dir(dir)) mapTo manifest[Game] foreach { game =>
             context.system.eventStream publish game
             client ! Client.WorkDone(inputPromise(replyTo))

@@ -4,7 +4,6 @@ import org.jousse.bot._
 import org.jousse.bot.user.{ User => U }
 
 import akka.pattern.{ ask, pipe }
-import akka.util.Timeout
 import play.api._
 import play.api.data._
 import play.api.data.Forms._

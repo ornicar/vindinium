@@ -5,7 +5,6 @@ import scala.collection.mutable.Map
 
 import akka.actor._
 import akka.pattern.{ ask, pipe }
-import akka.util.Timeout
 
 import play.api.libs.json._
 import play.api.libs.iteratee._
