@@ -10,6 +10,19 @@ a {
     color: white;
 }
 
+ul {
+    list-style-type: none;
+}
+
+button {
+    font-family: 'VT323', cursive;
+}
+
+#recent-games ul, #top-users ul {
+    margin: 0;
+    padding: 0;
+}
+
 #main-menu ul {
     list-style-type: none;
     font-size: 26px;
