@@ -27,11 +27,10 @@ final class Server extends Actor with ActorLogging {
         case Success(g) => {
           val game = g.withHero(1, _ withName user.name)
           context.system.eventStream publish game
-          self ! AddClient(Pov(game.id, game.hero1.token), Driver.Http, inputPromise(replyTo))
+          addClient(user.name, game, Driver.Http, inputPromise(replyTo))
           game.heroes drop 1 foreach { hero =>
-            self ! AddClient(Pov(game.id, hero.token), Driver.Random, inputPromise(replyTo))
+            addClient("random", game, Driver.Random, inputPromise(replyTo))
           }
-          self ! Start(game)
         }
       }
     }
@@ -41,40 +40,14 @@ final class Server extends Actor with ActorLogging {
       val game = nextArenaGame match {
         case None => {
           val g = Await.result(Pool create Config.arena, 1.second)
-          val game = g.withHero(1, _ withName user.name)
-          context.system.eventStream publish game
-          nextArenaGame = Some(game)
-          self ! AddClient(Pov(game.id, game.hero1.token), Driver.Http, inputPromise(replyTo))
-          // self ! AddClient(Pov(game.id, game.hero2.token), Driver.Random, inputPromise(replyTo))
-          // self ! AddClient(Pov(game.id, game.hero3.token), Driver.Random, inputPromise(replyTo))
+          context.system.eventStream publish g
+          nextArenaGame = Some(g)
+          log.info(s"[game ${g.id}] create")
+          g
         }
-        case Some(g) => {
-          val id = gameClients(g.id).size + 1
-          val game = g.withHero(id, _ withName user.name)
-          self ! AddClient(Pov(g.id, g.hero(id).token), Driver.Http, inputPromise(replyTo))
-          if (id == 4) {
-            self ! Start(g)
-            nextArenaGame = None
-          }
-        }
+        case Some(g) => g
       }
-    }
-
-    case AddClient(pov, driver, promise) => {
-      println(s"[game ${pov.gameId}] add client")
-      val client = context.actorOf(
-        Props(new Client(pov, driver, promise)),
-        name = s"client-${pov.gameId}-${pov.token}")
-      clients += (pov -> client)
-      context watch client
-    }
-
-    case Start(game) => {
-      context.system.eventStream publish game
-      game.hero map { h => Pov(game.id, h.token) } flatMap clients.get match {
-        case None         => throw UtterFailException(s"Game ${game.id} started without a hero client")
-        case Some(client) => client ! game
-      }
+      addClient(user.name, game, Driver.Http, inputPromise(replyTo))
     }
 
     case Play(pov, dir) => {
@@ -103,6 +76,40 @@ final class Server extends Actor with ActorLogging {
     }
   }
 
+  def addClient(
+    name: String,
+    game: Game,
+    driver: Driver,
+    promise: Promise[PlayerInput]) {
+    val id = gameClients(game.id).size + 1
+    val token = game.hero(id).token
+    val pov = Pov(game.id, token)
+    log.info(s"[game ${game.id}] add client $name ($token)")
+    try {
+      val client = context.actorOf(
+        Props(new Client(pov, driver, promise)),
+        name = s"client-${game.id}-$token")
+      clients += (pov -> client)
+      context watch client
+      val game2 = game.withHero(id, _ withName name)
+      Pool.actor ! Pool.Set(game.id, game2)
+      if (id == 4) start(game2)
+    }
+    catch {
+      case InvalidActorNameException(e) => log.warning(e)
+    }
+  }
+
+  def start(game: Game) {
+    if (game.arena) nextArenaGame = None
+    log.info(s"[game ${game.id}] start")
+    context.system.eventStream publish game
+    game.hero map { h => Pov(game.id, h.token) } flatMap clients.get match {
+      case None         => throw UtterFailException(s"Game ${game.id} started without a hero client")
+      case Some(client) => client ! game
+    }
+  }
+
   def inputPromise(to: ActorRef) = {
     val p = promise[PlayerInput]
     p.future onSuccess {
@@ -122,9 +129,6 @@ object Server {
   case class RequestToPlayArena(user: User)
 
   case class Play(pov: Pov, dir: String)
-
-  private case class AddClient(pov: Pov, driver: Driver, promise: Promise[PlayerInput])
-  private case class Start(game: Game)
 
   import play.api.libs.concurrent.Akka
   import play.api.Play.current

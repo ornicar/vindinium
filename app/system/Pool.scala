@@ -36,6 +36,8 @@ final class Pool extends Actor with ActorLogging {
       case Some(ga) => ga forward GameActor.Get
     }
 
+    case Set(id, game) => actors get id foreach { _ ! GameActor.Set(game) }
+
     case Create(config) => (config.map match {
       case m: Config.GenMap      => Generator(m, config.turns, config.training)
       case Config.StringMap(str) => StringMapParser(str) map (_ game config.turns)
@@ -81,5 +83,6 @@ object Pool {
   case class Get(id: String)
   case class Create(config: Config)
   case object GetOrCreate
+  case class Set(id: String, game: Game)
   case class Play(pov: Pov, dir: Dir)
 }

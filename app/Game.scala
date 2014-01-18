@@ -44,6 +44,8 @@ case class Game(
 
   def finished = status.finished
 
+  def arena = !training
+
   override def toString = s"Game[$id]: $status, turn $turn"
 
   def render = {
