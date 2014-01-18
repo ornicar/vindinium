@@ -10,6 +10,7 @@ import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.{ Try, Success, Failure }
+import user.User
 
 final class Pool extends Actor with ActorLogging {
 
@@ -27,7 +28,7 @@ final class Pool extends Actor with ActorLogging {
 
   def receive = {
 
-    case Play(pov: Pov, dir: Dir) => actors get pov.gameId match {
+    case Play(pov, dir) => actors get pov.gameId match {
       case None     => log.warning(s"No game for $pov")
       case Some(ga) => ga forward GameActor.Play(pov.token, dir)
     }
