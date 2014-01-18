@@ -83,8 +83,16 @@ function drawPosition(game) {
     function updatePlayers() {
         for(i=0; i<game.heroes.length; i++) {
             $("#player" + (i+1) +" span.gold").text(game.heroes[i].gold);
-            $("#player" + (i+1) +" span.name").text(game.heroes[i].name);
-            console.log(game.heroes[i].name);
+            var name = game.heroes[i].name;
+
+            $("#player" + (i+1) +" span.name").attr('title', name);
+
+            //Truncate the name if too long
+            if(name.length > 14) {
+                name = name.substring(0, 14) + "…";
+            }
+
+            $("#player" + (i+1) +" span.name").text(name);
         }
         var winner = getWinner();
         $('#gold>li').removeClass('first');
