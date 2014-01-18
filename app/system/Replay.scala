@@ -53,5 +53,5 @@ object Replay {
     upsert = true)
 
   private val db = play.modules.reactivemongo.ReactiveMongoPlugin.db
-  private val coll = db("user")
+  private val coll = db("replay")
 }

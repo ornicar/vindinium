@@ -29,9 +29,9 @@ object Config {
 
   def random = Config.default.copy(
     map = GenMap(
-      size = 10 + ((Random nextInt 10) * 2),
+      size = 8 + ((Random nextInt 8) * 2),
       wallPercent = 15 + (Random nextInt 28),
-      minePercent = 1 + (Random nextInt 8))
+      minePercent = 2 + (Random nextInt 6))
   )
 
   def arena = random.copy(training = false)
