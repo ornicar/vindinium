@@ -1,7 +1,29 @@
 body {
-  background: #383b32;
-  color: #d0d0d0;
-  text-align: center;
+    background: #383b32;
+    color: #d0d0d0;
+    text-align: center;
+    font-family: 'Bree Serif', serif;
+}
+
+a {
+    color: white;
+}
+
+#main-menu ul {
+    list-style-type: none;
+    font-size: 20px;
+}
+
+#main-menu ul li:first-child:before {
+    content: "";
+}
+
+#main-menu ul li:before {
+    content: " - ";
+}
+
+#main-menu ul li {
+    display: inline-block;
 }
 
 #nav {
