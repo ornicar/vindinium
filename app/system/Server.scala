@@ -119,7 +119,10 @@ final class Server extends Actor with ActorLogging {
     log.info(s"[game ${game.id}] start")
     game.hero map { h => Pov(game.id, h.token) } flatMap clients.get match {
       case None         => throw UtterFailException(s"Game ${game.id} started without a hero client")
-      case Some(client) => client ! game
+      case Some(client) => {
+        context.system.eventStream publish game
+        client ! game
+      }
     }
   }
 
