@@ -118,7 +118,6 @@ function drawPosition(game) {
                     $("#scoreBarPlayer" + (index+1)).css('height', (100 - percentageSum) + '%');
                 }
 
-                console.log("gold percentage", index, getGoldPercentage(index));
             });
         }
         

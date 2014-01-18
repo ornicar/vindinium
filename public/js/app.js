@@ -49,12 +49,10 @@ $(function() {
             });
             source.addEventListener('open', function(e) {
                 // Connection was opened.
-                console.log("connection opened");
             }, false);
             source.addEventListener('error', function(e) {
                 if (e.readyState == EventSource.CLOSED) {
                     // Connection was closed.
-                    console.log("connection closed");
                 }
             }, false);
         }
