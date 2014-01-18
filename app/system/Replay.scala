@@ -11,9 +11,12 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 case class Replay(
-    id: String,
+    _id: String,
+    training: Boolean,
     names: List[String],
     games: List[JsValue]) {
+
+  def id = _id
 
   lazy val finished: Boolean = games.lastOption.fold(false) { game =>
     (game \ "finished").as[Boolean]
@@ -31,7 +34,7 @@ object Replay {
     coll.find(BSONDocument("_id" -> id)).one[Replay]
 
   def recent(nb: Int): Future[List[Replay]] =
-    coll.find(BSONDocument())
+    coll.find(BSONDocument("training" -> false))
       .sort(BSONDocument("playedAt" -> -1))
       .cursor[Replay].collect[List](nb)
 
@@ -42,6 +45,7 @@ object Replay {
         "games" -> (Json stringify JsonFormat(game))
       ),
       "$set" -> BSONDocument(
+        "training" -> game.training,
         "names" -> game.heroes.map(_.name),
         "playedAt" -> DateTime.now
       )

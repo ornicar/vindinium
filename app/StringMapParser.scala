@@ -9,6 +9,7 @@ object StringMapParser {
 
     def game(turns: Int) = Game(
       id = RandomString(8),
+      training = true,
       board = board,
       hero1 = Hero(1, "Alaric", pos1),
       hero2 = Hero(2, "Luther", pos2),

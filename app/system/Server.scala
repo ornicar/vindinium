@@ -42,7 +42,7 @@ final class Server extends Actor with ActorLogging {
       val replyTo = sender
       val game = nextArenaGame match {
         case None => {
-          val g = Await.result(Pool create Config.random, 1.second)
+          val g = Await.result(Pool create Config.arena, 1.second)
           val game = g.withHero(1, _ withName user.name)
           context.system.eventStream publish g
           nextArenaGame = Some(g)

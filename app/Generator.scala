@@ -7,13 +7,13 @@ object Generator {
 
   val maxAttempts = 100
 
-  def apply(config: Config.GenMap, turns: Int): Try[Game] = config.size match {
+  def apply(config: Config.GenMap, turns: Int, training: Boolean): Try[Game] = config.size match {
     case s if s < 8      ⇒ fail("Board is too small")
     case s if s % 2 != 0 ⇒ fail("Board size is odd")
-    case _               ⇒ attempt(config, turns)
+    case _               ⇒ attempt(config, turns, training)
   }
 
-  private def attempt(config: Config.GenMap, turns: Int, attempts: Int = 1): Try[Game] = {
+  private def attempt(config: Config.GenMap, turns: Int, training: Boolean, attempts: Int = 1): Try[Game] = {
 
     val boardDraft = generateBoard(config)
 
@@ -23,17 +23,18 @@ object Generator {
 
       if (board.countMines == 0) fail("Board has no mine")
       else placeTaverns(board, heroPos, config) map { finalBoard =>
-        generateGame(finalBoard, config, turns, heroPos)
+        generateGame(finalBoard, config, turns, training, heroPos)
       }
     }
   } recoverWith {
     case err if attempts < maxAttempts => {
-      attempt(config, turns, attempts + 1)
+      attempt(config, turns, training, attempts + 1)
     }
   }
 
-  private def generateGame(board: Board, config: Config.GenMap, turns: Int, heroPos: Pos) = Game(
+  private def generateGame(board: Board, config: Config.GenMap, turns: Int, training: Boolean, heroPos: Pos) = Game(
     id = RandomString(8),
+    training = training,
     board = board,
     hero1 = Hero(1, "Alaric", heroPos),
     hero2 = Hero(2, "Luther", board mirrorX heroPos),

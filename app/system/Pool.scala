@@ -39,7 +39,7 @@ final class Pool extends Actor with ActorLogging {
     }
 
     case Create(config) => (config.map match {
-      case m: Config.GenMap      => Generator(m, config.turns)
+      case m: Config.GenMap      => Generator(m, config.turns, config.training)
       case Config.StringMap(str) => StringMapParser(str) map (_ game config.turns)
     }) match {
       case Failure(e) => sender ! Status.Failure(e)

@@ -5,7 +5,8 @@ import scala.util.Random
 
 case class Config(
   map: Config.Map,
-  turns: Int)
+  turns: Int,
+  training: Boolean)
 
 object Config {
 
@@ -23,7 +24,8 @@ object Config {
       size = 30,
       wallPercent = 40,
       minePercent = 4),
-    turns = 300 * 4)
+    turns = 300 * 4,
+    training = true)
 
   def random = Config.default.copy(
     map = GenMap(
@@ -31,4 +33,6 @@ object Config {
       wallPercent = 15 + (Random nextInt 28),
       minePercent = 1 + (Random nextInt 8))
   )
+
+  def arena = random.copy(training = false)
 }

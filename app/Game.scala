@@ -4,6 +4,7 @@ import scala.util.{ Try, Success, Failure }
 
 case class Game(
     id: String,
+    training: Boolean,
     board: Board,
     hero1: Hero,
     hero2: Hero,
@@ -36,6 +37,8 @@ case class Game(
     hero2 = if (id == 2) f(hero2) else hero2,
     hero3 = if (id == 3) f(hero3) else hero3,
     hero4 = if (id == 4) f(hero4) else hero4)
+
+  def withTraining(v: Boolean) = copy(training = v)
 
   def withBoard(f: Board => Board) = copy(board = f(board))
 
