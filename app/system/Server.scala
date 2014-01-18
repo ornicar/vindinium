@@ -44,11 +44,11 @@ final class Server extends Actor with ActorLogging {
         case None => {
           val g = Await.result(Pool create Config.arena, 1.second)
           val game = g.withHero(1, _ withName user.name)
-          context.system.eventStream publish g
-          nextArenaGame = Some(g)
-          self ! AddClient(Pov(g.id, g.hero1.token), Driver.Http, inputPromise(replyTo))
-          // self ! AddClient(Pov(g.id, g.hero2.token), Driver.Random, inputPromise(replyTo))
-          // self ! AddClient(Pov(g.id, g.hero3.token), Driver.Random, inputPromise(replyTo))
+          context.system.eventStream publish game
+          nextArenaGame = Some(game)
+          self ! AddClient(Pov(game.id, game.hero1.token), Driver.Http, inputPromise(replyTo))
+          // self ! AddClient(Pov(game.id, game.hero2.token), Driver.Random, inputPromise(replyTo))
+          // self ! AddClient(Pov(game.id, game.hero3.token), Driver.Random, inputPromise(replyTo))
         }
         case Some(g) => {
           val id = gameClients(g.id).size + 1
