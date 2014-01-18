@@ -14,8 +14,13 @@ ul {
     list-style-type: none;
 }
 
-button {
+button, input {
     font-family: 'VT323', cursive;
+}
+
+#logo {
+    font-size: 40px;
+    font-weight: bold;
 }
 
 #recent-games ul, #top-users ul {
@@ -26,7 +31,7 @@ button {
 #main-menu ul {
     list-style-type: none;
     font-size: 26px;
-    padding:0;
+    padding:0 0 40px 0;
     margin:0;
 }
 
