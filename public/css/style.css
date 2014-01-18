@@ -2,16 +2,32 @@ body {
     background: #383b32;
     color: #d0d0d0;
     text-align: center;
-    font-family: 'Bree Serif', serif;
+    font-family: 'VT323', cursive;
+    font-size: 18px;
 }
 
 a {
     color: white;
 }
 
+ul {
+    list-style-type: none;
+}
+
+button {
+    font-family: 'VT323', cursive;
+}
+
+#recent-games ul, #top-users ul {
+    margin: 0;
+    padding: 0;
+}
+
 #main-menu ul {
     list-style-type: none;
-    font-size: 20px;
+    font-size: 26px;
+    padding:0;
+    margin:0;
 }
 
 #main-menu ul li:first-child:before {
@@ -62,7 +78,7 @@ a {
     padding: 10px 0 0 0;
     list-style-type: none;
     color: #474747;
-    font-size:12px;
+    font-size:16px;
     display: none;
 }
 

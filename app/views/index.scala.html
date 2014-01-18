@@ -1,8 +1,11 @@
 @(replays: List[Replay], topUsers: List[User])
 
+
+@main("Home") {
+
 <h1>Vindinium</h1>
 
-<section>
+<section id="recent-games">
   <h2>Recent games</h2>
   <ul>
     @replays.map { replay =>
@@ -16,7 +19,7 @@
   </ul>
 </section>
 
-<section>
+<section id="top-users">
   <h2>Top users</h2>
   <ul>
     @topUsers.map { user =>
@@ -28,3 +31,4 @@
     }
   </ul>
 </section>
+}
