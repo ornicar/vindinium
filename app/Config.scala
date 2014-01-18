@@ -34,5 +34,8 @@ object Config {
       minePercent = 2 + (Random nextInt 6))
   )
 
-  def arena = random.copy(training = false)
+  def arena = random.copy(
+    training = false,
+    turns = 2 * 4
+  )
 }
