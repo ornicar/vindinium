@@ -14,8 +14,13 @@ ul {
     list-style-type: none;
 }
 
-button {
+button, input {
     font-family: 'VT323', cursive;
+}
+
+#logo {
+    font-size: 40px;
+    font-weight: bold;
 }
 
 #recent-games ul, #top-users ul {
@@ -26,7 +31,7 @@ button {
 #main-menu ul {
     list-style-type: none;
     font-size: 26px;
-    padding:0;
+    padding:0 0 40px 0;
     margin:0;
 }
 
@@ -73,6 +78,10 @@ button {
     display: inline-block;
 }
 
+#gold .name {
+    display: block;
+}
+
 #gold {
     margin: 0;
     padding: 10px 0 0 0;
@@ -84,8 +93,8 @@ button {
 
 
 #gold li {
-    width: 90px;
-    height: 37px;
+    width: 117px;
+    height: 55px;
     margin-bottom: 7px;
     background-image: url('../img/parchment.png');
 }
@@ -97,12 +106,15 @@ button {
 }
 
 #legend li {
-    width: 90px;
-    height: 27px;
+    width: 117px;
+    height: 55px;
     background-image: url('../img/parchment.png');
     color: #474747;
-    padding-top: 10px;
     text-align: center;
+}
+
+#legend p {
+    display: inline-block;
 }
 
 #gold .player {

@@ -1,5 +1,7 @@
 @(form: Form[_])
 
+@main("Register") {
+
 @helper.form(routes.User.register) {
 
 <label for="input-name">Name</label>
@@ -11,4 +13,6 @@
 }
 
 <input type="submit" value="Create new AI" />
+}
+
 }

@@ -67,7 +67,7 @@ function drawPosition(game) {
     game.board.tilesArray = game.board.tiles.match(/.{2}/g);
 
     var totalGold = getTotalGold();
-    updateGold();
+    updatePlayers();
 
     // draw state
     if (firstRender) {
@@ -80,9 +80,19 @@ function drawPosition(game) {
     context.drawImage(background, 0, 0);
     drawState();
 
-    function updateGold() {
+    function updatePlayers() {
         for(i=0; i<game.heroes.length; i++) {
-            $("#player" + (i+1) +" span").text(game.heroes[i].gold);
+            $("#player" + (i+1) +" span.gold").text(game.heroes[i].gold);
+            var name = game.heroes[i].name;
+
+            $("#player" + (i+1) +" span.name").attr('title', name);
+
+            //Truncate the name if too long
+            if(name.length > 14) {
+                name = name.substring(0, 14) + "…";
+            }
+
+            $("#player" + (i+1) +" span.name").text(name);
         }
         var winner = getWinner();
         $('#gold>li').removeClass('first');
