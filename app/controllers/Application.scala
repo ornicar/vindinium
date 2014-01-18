@@ -2,20 +2,18 @@ package controllers
 
 import org.jousse.bot._
 
-import akka.actor._
 import akka.pattern.{ ask, pipe }
 import akka.util.Timeout
 import play.api._
 import play.api.libs.EventSource
-import play.api.libs.json._
 import play.api.libs.iteratee._
+import play.api.libs.json._
 import play.api.mvc._
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import system.Storage
-import system.Visualization
 import system.Visualization._
+import system.{ Replay, Visualization }
 
 object Application extends Controller {
 
@@ -28,7 +26,7 @@ object Application extends Controller {
   }
 
   def visualization(id: String) = Action.async {
-    Storage.get(id) map {
+    Replay find id map {
       case Some(replay) ⇒ Ok(views.html.visualize(replay))
       case None         ⇒ NotFound
     }
@@ -39,7 +37,7 @@ object Application extends Controller {
     implicit val timeout = Timeout(1.second)
     val actor = Visualization.actor
 
-    Storage.get(id) flatMap {
+    Replay find id flatMap {
       case None => Future.successful(NotFound)
 
       case Some(replay) =>
@@ -49,13 +47,14 @@ object Application extends Controller {
           case Some(stream) ⇒
             if (replay.finished) {
               NotFound
-            } else {
+            }
+            else {
               val played = Enumerator.enumerate(replay.games)
               Ok.chunked(played >>> (stream &> asJson) &> EventSource()).as("text/event-stream")
             }
 
         }
-      }
+    }
   }
 
   def test = Action {
