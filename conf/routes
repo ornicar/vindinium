@@ -4,6 +4,10 @@ GET     /api/arena                      controllers.Api.arena
 POST    /api/training/alone             controllers.Api.trainingAlone
 POST    /api/:gameId/:token/play        controllers.Api.move(gameId: String, token: String)
 
+GET     /register                       controllers.User.registerForm
+POST    /register                       controllers.User.register
+GET     /user/:id                       controllers.User.show(id: String)
+
 GET     /test                           controllers.Application.test
 
 GET     /events/$id<[\w]{8}>            controllers.Application.gameEvents(id: String)

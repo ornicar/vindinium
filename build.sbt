@@ -14,4 +14,6 @@ scalacOptions ++= Seq("-feature", "-language:_", "-unchecked", "-deprecation")
 play.Project.playScalaSettings
 
 play.Project.templatesImport ++= Seq(
-  "org.jousse.bot._")
+  "org.jousse.bot.{ Game, Board, Hero, JsonFormat }",
+  "org.jousse.bot.system.Replay",
+  "org.jousse.bot.user.User")

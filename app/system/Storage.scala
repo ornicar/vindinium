@@ -11,10 +11,11 @@ import reactivemongo.bson._
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import MongoDB._
 
 final class Storage extends Actor with ActorLogging {
 
-  import Storage._, BSONJodaDateTimeHandler._
+  import Storage._
 
   val db = play.modules.reactivemongo.ReactiveMongoPlugin.db
   val coll = db("replay")
@@ -61,10 +62,4 @@ object Storage {
 
   import play.api.libs.concurrent.Akka
   val actor = Akka.system.actorOf(Props[Storage], name = "storage")
-
-  import reactivemongo.bson.{ BSONHandler, BSONDateTime }
-  implicit object BSONJodaDateTimeHandler extends BSONHandler[BSONDateTime, DateTime] {
-    def read(x: BSONDateTime) = new DateTime(x.value)
-    def write(x: DateTime) = BSONDateTime(x.getMillis)
-  }
 }
