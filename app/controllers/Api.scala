@@ -17,7 +17,7 @@ object Api extends Controller {
 
   implicit val timeout = Timeout(60.second)
 
-  def trainingAlone = Action.async { implicit req =>
+  def training = Action.async { implicit req =>
     form.training.bindFromRequest.fold(
       err => Future successful BadRequest,
       data => U findByKey data.key flatMap {

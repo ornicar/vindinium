@@ -1,7 +1,7 @@
 GET     /                               controllers.Application.index
 
 GET     /api/arena                      controllers.Api.arena
-POST    /api/training/alone             controllers.Api.trainingAlone
+POST    /api/training                   controllers.Api.training
 POST    /api/:gameId/:token/play        controllers.Api.move(gameId: String, token: String)
 
 GET     /register                       controllers.User.registerForm
