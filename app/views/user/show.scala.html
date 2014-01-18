@@ -1,7 +1,9 @@
 @(user: User, rank: Option[Int])
 
-<h1>@user.name</h1>
+@main("24hCodeBot") {
+    <h1>@user.name</h1>
 
-@rank.map { r =>
-Ranked @r
+    @rank.map { r =>
+    Ranked @r
+    }
 }
