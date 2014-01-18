@@ -24,16 +24,13 @@ final class Client(
 
       case Event(game: Game, Response(promise)) => {
         promise success PlayerInput(game, pov.token)
-        if (game.finished) goto(Closed) using Nothing
+        if (game.finished) stop()
         else goto(Working) using Nothing
       }
     }
     case Driver.Auto(play) => when(Waiting) {
 
-      case Event(game: Game, _) if game.finished => {
-        self ! PoisonPill
-        stay
-      }
+      case Event(game: Game, _) if game.finished => stop()
       case Event(game: Game, _) => {
         context.system.scheduler.scheduleOnce(botDelay, sender, Server.Play(pov, play(game)))
         goto(Working) using Nothing
@@ -44,14 +41,6 @@ final class Client(
   when(Working) {
 
     case Event(WorkDone(promise), Nothing) => goto(Waiting) using Response(promise)
-  }
-
-  when(Closed) {
-
-    case e => {
-      log.warning(s"Received event $e while closed")
-      stay
-    }
   }
 }
 
@@ -68,7 +57,6 @@ object Client {
   sealed trait State
   case object Waiting extends State
   case object Working extends State
-  case object Closed extends State
 
   sealed trait Data
   case object Nothing extends Data
