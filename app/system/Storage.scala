@@ -4,6 +4,7 @@ package system
 import akka.actor._
 import akka.pattern.{ ask, pipe }
 import akka.util.Timeout
+import org.joda.time.DateTime
 import play.api.libs.json._
 import play.api.Play.current
 import reactivemongo.bson._
@@ -13,7 +14,7 @@ import scala.concurrent.Future
 
 final class Storage extends Actor with ActorLogging {
 
-  import Storage._
+  import Storage._, BSONJodaDateTimeHandler._
 
   val db = play.modules.reactivemongo.ReactiveMongoPlugin.db
   val coll = db("replay")
@@ -26,9 +27,14 @@ final class Storage extends Actor with ActorLogging {
 
     case Save(game) => coll.update(
       BSONDocument("_id" -> game.id),
-      BSONDocument("$push" -> BSONDocument(
-        "games" -> (Json stringify JsonFormat(game))
-      )),
+      BSONDocument(
+        "$push" -> BSONDocument(
+          "games" -> (Json stringify JsonFormat(game))
+        ),
+        "$set" -> BSONDocument(
+          "playedAt" -> DateTime.now
+        )
+      ),
       upsert = true)
 
     case Get(id) => coll.find(BSONDocument("_id" -> id)).one[BSONDocument] map { doc =>
@@ -55,4 +61,10 @@ object Storage {
 
   import play.api.libs.concurrent.Akka
   val actor = Akka.system.actorOf(Props[Storage], name = "storage")
+
+  import reactivemongo.bson.{ BSONHandler, BSONDateTime }
+  implicit object BSONJodaDateTimeHandler extends BSONHandler[BSONDateTime, DateTime] {
+    def read(x: BSONDateTime) = new DateTime(x.value)
+    def write(x: DateTime) = BSONDateTime(x.getMillis)
+  }
 }

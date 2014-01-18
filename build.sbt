@@ -5,7 +5,9 @@ version := "1.0-SNAPSHOT"
 libraryDependencies ++= Seq(
   "org.specs2" %% "specs2" % "2.3.6" % "test",
   "org.reactivemongo" %% "reactivemongo" % "0.10.0",
-  "org.reactivemongo" %% "play2-reactivemongo" % "0.10.2")
+  "org.reactivemongo" %% "play2-reactivemongo" % "0.10.2",
+  "joda-time" % "joda-time" % "2.3",
+  "org.joda" % "joda-convert" % "1.2")
 
 scalacOptions ++= Seq("-feature", "-language:_", "-unchecked", "-deprecation")
 
