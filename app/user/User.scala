@@ -37,8 +37,10 @@ object User {
   def find(id: String): Future[Option[User]] =
     coll.find(BSONDocument("_id" -> id)).one[User]
 
-  def all: Future[List[User]] =
-    coll.find(BSONDocument()).sort(BSONDocument("elo" -> -1)).cursor[User].collect[List]()
+  def top(nb: Int): Future[List[User]] =
+    coll.find(BSONDocument())
+      .sort(BSONDocument("elo" -> -1))
+      .cursor[User].collect[List](nb)
 
   def freeName(name: String): Future[Boolean] =
     db command Count(coll.name, Some(BSONDocument("name" -> name))) map (1>)

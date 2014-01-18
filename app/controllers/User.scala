@@ -42,4 +42,11 @@ object User extends Controller {
       case Some(user) => Ok(views.html.user.show(user, None))
     }
   }
+
+  def list = Action.async { req =>
+    val topNb = 100
+    U top topNb map { users =>
+      Ok(views.html.user.top(users, topNb))
+    }
+  }
 }

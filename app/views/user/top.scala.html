@@ -1,0 +1,13 @@
+@(users: List[User], topNb: Int)
+
+<h1>Top @topNb</h1>
+
+<ul>
+  @users.map { user =>
+  <li>
+    <a href="@routes.User.show(user.id)">
+      @user.name (@user.elo)
+    </a>
+  </li>
+  }
+</ul>
