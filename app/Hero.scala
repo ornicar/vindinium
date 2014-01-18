@@ -38,6 +38,8 @@ case class Hero(
   def isAlive = life > 0
   def isDead = !isAlive
 
+  def withName(name: String) = copy(name = name)
+
   def render = s"@$id"
 }
 

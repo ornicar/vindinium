@@ -4,21 +4,19 @@ package system
 import akka.actor._
 import akka.pattern.{ ask, pipe }
 import akka.util.Timeout
+import MongoDB._
 import org.joda.time.DateTime
 import play.api.libs.json._
 import play.api.Play.current
 import reactivemongo.bson._
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
+import reactivemongo.api.collections.default.BSONCollection
 import scala.concurrent.Future
-import MongoDB._
 
-final class Storage extends Actor with ActorLogging {
+final class Storage(coll: BSONCollection) extends Actor with ActorLogging {
 
   import Storage._
-
-  val db = play.modules.reactivemongo.ReactiveMongoPlugin.db
-  val coll = db("replay")
 
   context.system.eventStream.subscribe(self, classOf[Game])
 
@@ -38,28 +36,27 @@ final class Storage extends Actor with ActorLogging {
       ),
       upsert = true)
 
-    case Get(id) => coll.find(BSONDocument("_id" -> id)).one[BSONDocument] map { doc =>
-      doc flatMap {
-        _.getAs[List[String]]("games") map { strs =>
-          Replay(id, strs.map(s => Json.parse(s).as[JsObject]))
-        }
-      }
-    } pipeTo sender
-
     case Init =>
   }
 }
 
 object Storage {
 
-  private implicit val timeout = Timeout(1.second)
+  private val db = play.modules.reactivemongo.ReactiveMongoPlugin.db
+  private val coll = db("replay")
 
-  def get(id: String): Future[Option[Replay]] = actor ? Get(id) mapTo manifest[Option[Replay]]
+  def get(id: String): Future[Option[Replay]] =
+    coll.find(BSONDocument("_id" -> id)).one[BSONDocument] map { doc =>
+      doc flatMap {
+        _.getAs[List[String]]("games") map { strs =>
+          Replay(id, strs.map(s => Json.parse(s).as[JsObject]))
+        }
+      }
+    }
 
   case class Save(game: Game)
-  case class Get(id: String)
   case object Init
 
   import play.api.libs.concurrent.Akka
-  val actor = Akka.system.actorOf(Props[Storage], name = "storage")
+  val actor = Akka.system.actorOf(Props(new Storage(coll)), name = "storage")
 }

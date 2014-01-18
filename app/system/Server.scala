@@ -8,6 +8,7 @@ import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ Future, Await, Promise, promise }
 import scala.util.{ Try, Success, Failure }
+import user.User
 
 final class Server extends Actor with ActorLogging {
 
@@ -21,11 +22,12 @@ final class Server extends Actor with ActorLogging {
 
   def receive = akka.event.LoggingReceive {
 
-    case RequestToPlayAlone(config) => {
+    case RequestToPlayAlone(user, config) => {
       val replyTo = sender
       Pool create config onComplete {
         case Failure(e) => replyTo ! Status.Failure(e)
-        case Success(game) => {
+        case Success(g) => {
+          val game = g.withHero(1, _ withName user.name)
           context.system.eventStream publish game
           self ! AddClient(Pov(game.id, game.hero1.token), Driver.Http, inputPromise(replyTo))
           game.heroes drop 1 foreach { hero =>
@@ -36,20 +38,21 @@ final class Server extends Actor with ActorLogging {
       }
     }
 
-    case RequestToPlayArena => {
+    case RequestToPlayArena(user) => {
       val replyTo = sender
       val game = nextArenaGame match {
         case None => {
           val g = Await.result(Pool create Config.random, 1.second)
+          val game = g.withHero(1, _ withName user.name)
           context.system.eventStream publish g
           nextArenaGame = Some(g)
           self ! AddClient(Pov(g.id, g.hero1.token), Driver.Http, inputPromise(replyTo))
-          self ! AddClient(Pov(g.id, g.hero2.token), Driver.Random, inputPromise(replyTo))
-          self ! AddClient(Pov(g.id, g.hero3.token), Driver.Random, inputPromise(replyTo))
+          // self ! AddClient(Pov(g.id, g.hero2.token), Driver.Random, inputPromise(replyTo))
+          // self ! AddClient(Pov(g.id, g.hero3.token), Driver.Random, inputPromise(replyTo))
         }
         case Some(g) => {
           val id = gameClients(g.id).size + 1
-          println(id)
+          val game = g.withHero(id, _ withName user.name)
           self ! AddClient(Pov(g.id, g.hero(id).token), Driver.Http, inputPromise(replyTo))
           if (id == 4) {
             self ! Start(g)
@@ -116,8 +119,8 @@ final class Server extends Actor with ActorLogging {
 
 object Server {
 
-  case class RequestToPlayAlone(config: Config)
-  case object RequestToPlayArena
+  case class RequestToPlayAlone(user: User, config: Config)
+  case class RequestToPlayArena(user: User)
 
   case class Play(pov: Pov, dir: String)
 

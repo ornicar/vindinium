@@ -6,6 +6,7 @@ import play.api.data.Forms._
 object form {
 
   case class Training(
+      key: String,
       turns: Option[Int],
       map: Option[String]) {
 
@@ -16,6 +17,7 @@ object form {
   }
 
   val training = Form(mapping(
+    "key" -> nonEmptyText,
     "turns" -> optional(number),
     "map" -> optional(text)
   )(Training.apply)(Training.unapply))

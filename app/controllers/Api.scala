@@ -11,6 +11,7 @@ import play.api.mvc._
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import user.{ User => U }
 
 object Api extends Controller {
 
@@ -19,15 +20,18 @@ object Api extends Controller {
   def trainingAlone = Action.async { implicit req =>
     form.training.bindFromRequest.fold(
       err => Future successful BadRequest,
-      data => (Server.actor ? Server.RequestToPlayAlone(data.config)) map {
-        case input: PlayerInput => {
-          println(input.game.render)
-          Ok(JsonFormat(input, req.host)) as JSON
-        }
-      } recover {
-        case e: GameException => {
-          play.api.Logger("API").warn(e.toString)
-          BadRequest
+      data => U findByKey data.key flatMap {
+        case None => Future failed UserNotFoundException("Key not found")
+        case Some(user) => (Server.actor ? Server.RequestToPlayAlone(user, data.config)) map {
+          case input: PlayerInput => {
+            println(input.game.render)
+            Ok(JsonFormat(input, req.host)) as JSON
+          }
+        } recover {
+          case e: GameException => {
+            play.api.Logger("API").warn(e.toString)
+            BadRequest
+          }
         }
       }
     )

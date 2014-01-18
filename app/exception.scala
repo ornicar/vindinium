@@ -10,6 +10,8 @@ case class GeneratorException(message: String) extends GameException
 
 case class NotFoundException(message: String) extends GameException
 
+case class UserNotFoundException(message: String) extends GameException
+
 case class RuleViolationException(message: String) extends GameException
 
 case class GameFinishedException(reason: Status.Finish) extends GameException {

@@ -11,4 +11,5 @@ Game rules: https://bitbucket.org/vjousse/24hcodebot/wiki/Rules
 ---------
 
 db.user.ensureIndex({name:1},{unique:true})
+db.user.ensureIndex({key:1},{unique:true})
 db.user.ensureIndex({elo:-1})

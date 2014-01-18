@@ -37,6 +37,9 @@ object User {
   def find(id: String): Future[Option[User]] =
     coll.find(BSONDocument("_id" -> id)).one[User]
 
+  def findByKey(key: String): Future[Option[User]] =
+    coll.find(BSONDocument("key" -> key)).one[User]
+
   def top(nb: Int): Future[List[User]] =
     coll.find(BSONDocument())
       .sort(BSONDocument("elo" -> -1))
