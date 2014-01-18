@@ -22,5 +22,9 @@ object form {
     "map" -> optional(text)
   )(Training.apply)(Training.unapply))
 
+  val arena = Form(single(
+    "key" -> nonEmptyText
+  ))
+
   val move = Form(single("dir" -> nonEmptyText))
 }
