@@ -12,16 +12,17 @@ import play.api.mvc._
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import user.{ User => U }
 import system.Visualization._
 import system.{ Replay, Visualization }
 
 object Application extends Controller {
 
   def index = Action.async {
-    system.Pool create Config.random map { game ⇒
-      val g2 = game.copy(status = org.jousse.bot.Status.AllCrashed)
-      val replay = system.Replay(g2.id, List(JsonFormat(g2)))
-      Ok(views.html.visualize(replay))
+    val topUserNb = 50
+    val recentReplayNb = 50
+    Replay recent recentReplayNb zip U.top(topUserNb) map {
+      case (replays, users) => Ok(views.html.index(replays, users))
     }
   }
 

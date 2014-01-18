@@ -12,12 +12,12 @@ import scala.concurrent.Future
 
 case class Replay(
     id: String,
+    names: List[String],
     games: List[JsValue]) {
 
   lazy val finished: Boolean = games.lastOption.fold(false) { game =>
     (game \ "finished").as[Boolean]
   }
-
 }
 
 object Replay {
@@ -30,6 +30,11 @@ object Replay {
   def find(id: String): Future[Option[Replay]] =
     coll.find(BSONDocument("_id" -> id)).one[Replay]
 
+  def recent(nb: Int): Future[List[Replay]] =
+    coll.find(BSONDocument())
+      .sort(BSONDocument("playedAt" -> -1))
+      .cursor[Replay].collect[List](nb)
+
   def add(game: Game) = coll.update(
     BSONDocument("_id" -> game.id),
     BSONDocument(
@@ -37,6 +42,7 @@ object Replay {
         "games" -> (Json stringify JsonFormat(game))
       ),
       "$set" -> BSONDocument(
+        "names" -> game.heroes.map(_.name),
         "playedAt" -> DateTime.now
       )
     ),
