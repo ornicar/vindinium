@@ -6,7 +6,7 @@ $(function() {
 
         function updateGame(pos) {
             drawPosition(POSITIONS[pos]);
-            $('#turn > span').text(Math.floor(pos / 4));
+            $('#turn span.number').text(Math.floor(pos / 4));
         }
 
         // nav
