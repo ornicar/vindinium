@@ -37,7 +37,7 @@ $(function() {
 
         var debouncedUpdateGame = _.debounce(function(pos) {
           updateGame(pos);
-        }, 500);
+        }, 20);
 
         // if replay is loaded in global object it means game is over
         // else let's receive events and play them
