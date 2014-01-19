@@ -22,7 +22,7 @@ final class Server extends Actor with CustomLogging {
       val replyTo = sender
       addRound(config) match {
         case Failure(e) => replyTo ! Status.Failure(e)
-        case Success(round) => {
+        case Success((_, round)) => {
           round ! Round.Join(Right(user), Driver.Http, inputPromise(replyTo))
           (1 to 3) foreach { _ =>
             round ! Round.Join(Left("random"), Driver.Random, inputPromise(replyTo))
@@ -38,9 +38,12 @@ final class Server extends Actor with CustomLogging {
           nextArenaRoundClients = nextArenaRoundClients + 1
           Success(round)
         }
-        case _ => addRound(Config.arena) map { round =>
-          nextArenaRoundClients = 1
-          round
+        case _ => addRound(Config.arena) map {
+          case (id, round) => {
+            nextArenaRoundId = Some(id)
+            nextArenaRoundClients = 1
+            round
+          }
         }
       }) match {
         case Failure(e)     => replyTo ! Status.Failure(e)
@@ -59,11 +62,11 @@ final class Server extends Actor with CustomLogging {
     }
   }
 
-  def addRound(config: Config): Try[ActorRef] = config.make map { game =>
+  def addRound(config: Config): Try[(GameId, ActorRef)] = config.make map { game =>
     val round = context.actorOf(Props(new Round(game)), name = game.id)
     rounds += (game.id -> round)
     context watch round
-    round
+    game.id -> round
   }
 }
 
