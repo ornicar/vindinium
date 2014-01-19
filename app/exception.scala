@@ -2,7 +2,7 @@ package org.jousse
 package bot
 
 trait GameException extends Exception {
-  val message: String
+  def message: String
   override def getMessage: String = "Vindinium['" + message + "']"
 }
 
@@ -15,7 +15,7 @@ case class UserNotFoundException(message: String) extends GameException
 case class RuleViolationException(message: String) extends GameException
 
 case class GameFinishedException(reason: Status.Finish) extends GameException {
-  val message = reason.toString
+  def message = reason.toString
 }
 
 case class MapParseException(message: String) extends GameException

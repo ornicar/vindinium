@@ -44,7 +44,7 @@ final class Server extends Actor with ActorLogging {
         }
         case Some(game) => Success(game)
       }) match {
-        case Failure(e) => log.error(e.getMessage)
+        case Failure(e)    => log.error(e.getMessage)
         case Success(game) => join(Right(user), game.id, Driver.Http, inputPromise(replyTo))
       }
     }
@@ -52,24 +52,38 @@ final class Server extends Actor with ActorLogging {
     case Play(pov, dir) => {
       val replyTo = sender
       (clients.get(pov) -> games.get(pov.gameId)) match {
-        case (None, _) => replyTo ! notFound(s"No client for $pov")
         case (_, None) => replyTo ! notFound(s"No game for id ${pov.gameId}")
+        // found game, but no client. Probably it timed out.
+        case (None, Some(g)) => replyTo ! PlayerInput(g, pov.token)
         case (Some(client), Some(g)) => {
           val game = Arbiter.move(g, pov.token, Dir(dir))
-          update(game)
-          context.system.eventStream publish game
           client ! Client.WorkDone(inputPromise(replyTo))
-          game.hero filterNot (_ => game.finished) match {
-            case None    => gameClients(game.id) foreach (_ ! game)
-            case Some(h) => clients get Pov(game.id, h.token) foreach (_ ! game)
-          }
+          step(game)
         }
       }
     }
 
-    case Terminated(actor) ⇒ {
-      context unwatch actor
-      clients filter (_._2 == actor) foreach { case (id, _) ⇒ clients -= id }
+    case Client.AiTimeout(pov) =>
+      games get pov.gameId filterNot (_.finished) foreach { g =>
+        g.hero filter (_.token == pov.token) foreach { hero =>
+          log.info(s"Received $pov timeout")
+          val game = g.crash(hero.token, Crash.Timeout)
+          step(game)
+        }
+      }
+
+    case Terminated(client) ⇒ {
+      context unwatch client
+      clients filter (_._2 == client) foreach { case (id, _) ⇒ clients -= id }
+    }
+  }
+
+  def step(game: Game) {
+    update(game)
+    context.system.eventStream publish game
+    if (game.finished) gameClients(game.id) foreach (_ ! game)
+    else game.hero foreach { h =>
+      clients get Pov(game.id, h.token) foreach (_ ! game)
     }
   }
 
@@ -118,7 +132,7 @@ final class Server extends Actor with ActorLogging {
     if (game.arena) nextArenaGameId = None
     log.info(s"[game ${game.id}] start")
     game.hero map { h => Pov(game.id, h.token) } flatMap clients.get match {
-      case None         => throw UtterFailException(s"Game ${game.id} started without a hero client")
+      case None => throw UtterFailException(s"Game ${game.id} started without a hero client")
       case Some(client) => {
         context.system.eventStream publish game
         client ! game

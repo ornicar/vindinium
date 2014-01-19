@@ -26,8 +26,16 @@ case class Game(
     val next = copy(turn = turn + 1)
     next.copy(
       status = if (next.turn > maxTurns) Status.TurnMax
-      else if (next.activeHeroes.isEmpty) Status.AllCrashed
+      else if (next.activeHeroes.size < 2) Status.AllCrashed
       else Status.Started)
+  }
+
+  def crash(token: String, c: Crash) = activeHeroes find (_.token == token) match {
+    case None => this
+    case Some(hero) => withHero(hero setCrash c) match {
+      case game if game.activeHeroes.size < 2 => game.copy(status = Status.AllCrashed)
+      case game                               => game
+    }
   }
 
   def withHero(hero: Hero): Game = withHero(hero.id, _ => hero)
