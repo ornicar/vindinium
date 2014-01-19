@@ -19,18 +19,20 @@ object Api extends Controller {
 
   def training = Action.async { implicit req =>
     form.training.bindFromRequest.fold(
-      err => Future successful BadRequest,
+      err => Future successful BadRequest(
+        "Did you forget the key parameter?"
+      ),
       data => U findByKey data.key flatMap {
         case None => Future failed UserNotFoundException("Key not found")
         case Some(user) => (Server.actor ? Server.RequestToPlayAlone(user, data.config)) map {
           case input: PlayerInput => {
             Ok(JsonFormat(input, req.host)) as JSON
           }
-        } recover {
-          case e: GameException => {
-            play.api.Logger("API").warn(e.toString)
-            BadRequest
-          }
+        }
+      } recover {
+        case e: GameException => {
+          play.api.Logger("API").warn(e.toString)
+          BadRequest(e.getMessage)
         }
       }
     )
@@ -38,13 +40,20 @@ object Api extends Controller {
 
   def arena = Action.async { implicit req =>
     form.arena.bindFromRequest.fold(
-      err => Future successful BadRequest,
+      err => Future successful BadRequest(
+        "Did you forget the key parameter?"
+      ),
       key => U findByKey key flatMap {
         case None => Future failed UserNotFoundException("Key not found")
         case Some(user) => (Server.actor ? Server.RequestToPlayArena(user)) map {
           case input: PlayerInput => {
             Ok(JsonFormat(input, req.host)) as JSON
           }
+        }
+      } recover {
+        case e: GameException => {
+          play.api.Logger("API").warn(e.toString)
+          BadRequest(e.getMessage)
         }
       }
     )
