@@ -6,9 +6,16 @@ body {
     font-size: 18px;
 }
 
-body h2 {
+body h2, body h3 {
     font-family: 'VT323', cursive;
+}
+
+body h2 {
     font-size: 36px;
+}
+
+body h3 {
+    font-size: 30px;
 }
 
 a {
@@ -25,6 +32,15 @@ ul {
 
 button, input {
     font-family: 'VT323', cursive;
+}
+
+#doc {
+    text-align: left;
+}
+
+#doc p, #doc blockquote {
+    font-family: monospace;
+    font-size: 14px;
 }
 
 #intro {
