@@ -4,9 +4,15 @@ package bot
 import scala.util.Random
 
 case class Config(
-  map: Config.Map,
-  turns: Int,
-  training: Boolean)
+    map: Config.Map,
+    turns: Int,
+    training: Boolean) {
+
+  def make = map match {
+    case m: Config.GenMap      => Generator(m, turns, training)
+    case Config.StringMap(str) => StringMapParser(str) map (_ game turns)
+  }
+}
 
 object Config {
 

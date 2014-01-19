@@ -3,14 +3,13 @@ package system
 
 import akka.actor._
 import akka.pattern.{ ask, pipe }
-import akka.util.Timeout
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ Future, Promise, promise }
 import scala.util.{ Try, Success, Failure }
 
 final class Client(
-    pov: Pov,
+    token: Token,
     driver: Driver,
     initialPromise: Promise[PlayerInput]) extends Actor with LoggingFSM[Client.State, Client.Data] {
 
@@ -23,7 +22,7 @@ final class Client(
     case Driver.Http => {
       when(Waiting) {
         case Event(game: Game, Response(promise)) => {
-          promise success PlayerInput(game, pov.token)
+          promise success PlayerInput(game, token)
           if (game.finished) stop()
           else goto(Working) using Nothing
         }
@@ -37,7 +36,7 @@ final class Client(
 
       case Event(game: Game, _) if game.finished => stop()
       case Event(game: Game, _) => {
-        context.system.scheduler.scheduleOnce(botDelay, sender, Server.Play(pov, play(game)))
+        context.system.scheduler.scheduleOnce(botDelay, sender, Round.Play(token, play(game)))
         goto(Working) using Nothing
       }
     }
@@ -48,7 +47,7 @@ final class Client(
     case Event(WorkDone(promise), Nothing) => goto(Waiting) using Response(promise)
 
     case Event(StateTimeout, _) => {
-      context.parent ! AiTimeout(pov)
+      context.parent ! Timeout(token)
       goto(Crashed)
     }
   }
@@ -67,7 +66,7 @@ object Client {
     .milliseconds
 
   case class WorkDone(promise: Promise[PlayerInput])
-  case class AiTimeout(pov: Pov)
+  case class Timeout(token: Token)
 
   sealed trait State
   case object Waiting extends State

@@ -2,11 +2,8 @@ package org.jousse.bot
 package system
 
 import akka.actor._
-import akka.pattern.{ ask, pipe }
-import akka.util.Timeout
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.{ Future, Await, Promise, promise }
 import scala.util.{ Try, Success, Failure }
 import user.User
 
@@ -14,21 +11,21 @@ final class Server extends Actor with CustomLogging {
 
   import Server._
 
-  val clients = scala.collection.mutable.Map[Pov, ActorRef]()
-  val games = scala.collection.mutable.Map[String, Game]()
+  val rounds = scala.collection.mutable.Map[GameId, ActorRef]()
 
-  var nextArenaGameId: Option[String] = None
+  var nextArenaRoundId: Option[GameId] = None
+  var nextArenaRoundClients: Int = 0
 
   def receive = akka.event.LoggingReceive {
 
     case RequestToPlayAlone(user, config) => {
       val replyTo = sender
-      addGame(config) match {
+      addRound(config) match {
         case Failure(e) => replyTo ! Status.Failure(e)
-        case Success(game) => {
-          join(Right(user), game.id, Driver.Http, inputPromise(replyTo))
-          game.heroes drop 1 foreach { hero =>
-            join(Left("random"), game.id, Driver.Random, inputPromise(replyTo))
+        case Success(round) => {
+          round ! Round.Join(Right(user), Driver.Http, inputPromise(replyTo))
+          (1 to 3) foreach { _ =>
+            round ! Round.Join(Left("random"), Driver.Random, inputPromise(replyTo))
           }
         }
       }
@@ -36,125 +33,37 @@ final class Server extends Actor with CustomLogging {
 
     case RequestToPlayArena(user) => {
       val replyTo = sender
-      (nextArenaGameId flatMap games.get match {
-        case None => addGame(Config.arena) map { game =>
-          nextArenaGameId = Some(game.id)
-          log.info(s"[game ${game.id}] create")
-          game
+      (nextArenaRoundId.flatMap(rounds.get) match {
+        case Some(round) if nextArenaRoundClients < 4 => {
+          nextArenaRoundClients = nextArenaRoundClients + 1
+          Success(round)
         }
-        case Some(game) => Success(game)
+        case _ => addRound(Config.arena) map { round =>
+          nextArenaRoundClients = 1
+          round
+        }
       }) match {
-        case Failure(e)    => log.error(e.getMessage)
-        case Success(game) => join(Right(user), game.id, Driver.Http, inputPromise(replyTo))
+        case Failure(e)     => replyTo ! Status.Failure(e)
+        case Success(round) => round ! Round.Join(Right(user), Driver.Http, inputPromise(sender))
       }
     }
 
-    case Play(pov, dir) => {
-      val replyTo = sender
-      (clients.get(pov) -> games.get(pov.gameId)) match {
-        case (_, None) => replyTo ! notFound(s"No game for id ${pov.gameId}")
-        case (None, _) => replyTo ! notFound(s"No client for $pov")
-        case (Some(client), Some(g)) => Arbiter.move(g, pov.token, Dir(dir)) match {
-          case Failure(e) => {
-            log.info(s"Play fail $pov: ${e.getMessage}")
-            replyTo ! Status.Failure(e)
-          }
-          case Success(game) => {
-            client ! Client.WorkDone(inputPromise(replyTo))
-            step(game)
-          }
-        }
-      }
+    case Play(Pov(gameId, token), dir) => rounds get gameId match {
+      case None        => sender ! notFound(s"Unknown game $gameId")
+      case Some(round) => round.tell(Round.Play(token, dir), sender)
     }
 
-    case Client.AiTimeout(pov) => games get pov.gameId foreach { g =>
-      log.info(s"$pov timeout")
-      Arbiter.crash(g, pov.token) match {
-        case Failure(e)    => log.warning(s"Crash fail $pov: ${e.getMessage}")
-        case Success(game) => step(game)
-      }
-    }
-
-    case Terminated(client) ⇒ {
-      context unwatch client
-      clients filter (_._2 == client) foreach { case (id, _) ⇒ clients -= id }
+    case Terminated(round) ⇒ {
+      context unwatch round
+      rounds filter (_._2 == round) foreach { case (id, _) ⇒ rounds -= id }
     }
   }
 
-  def step(game: Game) {
-    // log.info(s"step game $game")
-    update(game)
-    context.system.eventStream publish game
-    if (game.finished) gameClients(game.id) foreach (_ ! game)
-    else game.hero foreach {
-      case h if h.crashed => step(game.step)
-      case h              => clients get Pov(game.id, h.token) foreach (_ ! game)
-    }
-  }
-
-  def addGame(config: Config): Try[Game] = (config.map match {
-    case m: Config.GenMap      => Generator(m, config.turns, config.training)
-    case Config.StringMap(str) => StringMapParser(str) map (_ game config.turns)
-  }) map { game =>
-    update(game)
-    game
-  }
-
-  def update(game: Game) {
-    games += (game.id -> game)
-  }
-
-  def join(
-    user: Either[String, User],
-    gameId: String,
-    driver: Driver,
-    promise: Promise[PlayerInput]) {
-    games get gameId match {
-      case None => log.error(s"Can't join non existing game $gameId")
-      case Some(g) => {
-        val id = gameClients(g.id).size + 1
-        val game = g.withHero(id, h => user.fold(h.withName, _ blame h))
-        val token = game.hero(id).token
-        val pov = Pov(game.id, token)
-        log.info(s"[game ${game.id}] add client $user ($token)")
-        try {
-          val client = context.actorOf(
-            Props(new Client(pov, driver, promise)),
-            name = s"client-${game.id}-$token")
-          clients += (pov -> client)
-          context watch client
-          update(game)
-          if (id == 4) start(game)
-        }
-        catch {
-          case InvalidActorNameException(e) => log.warning(e)
-        }
-      }
-    }
-  }
-
-  def start(game: Game) {
-    if (game.arena) nextArenaGameId = None
-    log.info(s"[game ${game.id}] start")
-    game.hero map { h => Pov(game.id, h.token) } flatMap clients.get match {
-      case None => throw UtterFailException(s"Game ${game.id} started without a hero client")
-      case Some(client) => {
-        context.system.eventStream publish game
-        client ! game
-      }
-    }
-  }
-
-  def inputPromise(to: ActorRef) = {
-    val p = promise[PlayerInput]
-    p.future onSuccess {
-      case x => to ! x
-    }
-    p
-  }
-
-  def gameClients(gameId: String) = clients collect {
-    case (Pov(id, _), client) if id == gameId => client
+  def addRound(config: Config): Try[ActorRef] = config.make map { game =>
+    val round = context.actorOf(Props(new Round(game)), name = game.id)
+    rounds += (game.id -> round)
+    context watch round
+    round
   }
 }
 
