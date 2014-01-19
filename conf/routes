@@ -1,4 +1,4 @@
-GET     /                               controllers.Application.index
+GET     /                               controllers.Game.index
 
 POST    /api/arena                      controllers.Api.arena
 POST    /api/training                   controllers.Api.training
@@ -6,13 +6,11 @@ POST    /api/:gameId/:token/play        controllers.Api.move(gameId: String, tok
 
 GET     /register                       controllers.User.registerForm
 POST    /register                       controllers.User.register
-GET     /user/:id                       controllers.User.show(id: String)
-GET     /user                           controllers.User.list
+GET     /ai/$id<[\w]{8}>                controllers.User.show(id: String)
+GET     /ai                             controllers.User.list
 
-GET     /test                           controllers.Application.test
-
-GET     /events/$id<[\w]{8}>            controllers.Application.gameEvents(id: String)
-
-GET     /$id<[\w]{8}>                   controllers.Application.visualization(id: String)
+GET     /events/$id<[\w]{8}>            controllers.Game.events(id: String)
+GET     /$id<[\w]{8}>                   controllers.Game.show(id: String)
+GET     /test                           controllers.Game.test
 
 GET     /assets/*file                   controllers.Assets.at(path="/public", file)

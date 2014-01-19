@@ -8,7 +8,7 @@
   <ul>
     @replays.map { replay =>
     <li>
-      <a href="@routes.Application.visualization(replay.id)">
+      <a href="@routes.Game.show(replay.id)">
         @replay.names.mkString(" vs "),
         @if(replay.finished) { Finished } else { In progress }
       </a>

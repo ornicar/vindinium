@@ -11,7 +11,7 @@ object JsonFormat {
     "game" -> apply(i.game),
     "hero" -> i.hero.map(apply(_, i.game)),
     "token" -> i.token,
-    "viewUrl" -> ("http://" + host + routes.Application.visualization(i.game.id).url),
+    "viewUrl" -> ("http://" + host + routes.Game.show(i.game.id).url),
     "playUrl" -> ("http://" + host + routes.Api.move(i.game.id, i.token).url)
   )
 

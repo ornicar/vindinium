@@ -16,7 +16,7 @@ import user.{ User => U }
 import system.Visualization._
 import system.{ Replay, Visualization }
 
-object Application extends Controller {
+object Game extends Controller {
 
   def index = Action.async {
     val topUserNb = 50
@@ -26,14 +26,14 @@ object Application extends Controller {
     }
   }
 
-  def visualization(id: String) = Action.async {
+  def show(id: String) = Action.async {
     Replay find id map {
       case Some(replay) ⇒ Ok(views.html.visualize(replay))
       case None         ⇒ NotFound
     }
   }
 
-  def gameEvents(id: String) = Action.async {
+  def events(id: String) = Action.async {
 
     implicit val timeout = Timeout(1.second)
     val actor = Visualization.actor
