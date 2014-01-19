@@ -92,7 +92,7 @@ function drawPosition(game) {
             }
 
             if(game.heroes[i].hasOwnProperty('userId')) {
-                $("#player" + (i+1) +" span.name").wrap('<a href="/ai/' + game.heroes[i].userId + '" />');
+                $("#player" + (i+1) +" a").attr('href', '/ai/' + game.heroes[i].userId);
             }
 
             var name = game.heroes[i].name;
