@@ -18,6 +18,16 @@ button, input {
     font-family: 'VT323', cursive;
 }
 
+blockquote {
+    font-style: italic;
+}
+
+#intro {
+    width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
 #logo {
     font-size: 40px;
     font-weight: bold;
@@ -97,6 +107,7 @@ button, input {
     height: 55px;
     margin-bottom: 7px;
     background-image: url('../img/parchment.png');
+    position: relative;
 }
 
 #legend {
@@ -118,10 +129,12 @@ button, input {
 }
 
 #gold .player {
-    padding-top: 8px;
     width: 20px;
     height: 20px;
     vertical-align:-4px;
+    position: absolute;
+    left: 2px;
+    top: 2px;
 }
 
 .coin {
@@ -131,9 +144,30 @@ button, input {
     vertical-align:-3px;
 }
 
-li.first span {
+li.first {
+    color: black;
     font-weight: bold;
-    border-bottom: 2px solid black;
+}
+
+li.first span.name {
+    text-decoration: underline;
+}
+
+#gold a {
+    color: #474747;
+    text-decoration: none;
+}
+
+#gold {
+    font-size: 13px;
+}
+
+#gold .gold {
+    font-size: 16px;
+}
+
+#gold .elo {
+    font-size: 10px;
 }
 
 #scoreBar {

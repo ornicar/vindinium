@@ -83,13 +83,25 @@ function drawPosition(game) {
     function updatePlayers() {
         for(i=0; i<game.heroes.length; i++) {
             $("#player" + (i+1) +" span.gold").text(game.heroes[i].gold);
+
+            //It's not a Random bot
+            if(game.heroes[i].hasOwnProperty('elo')) {
+                $("#player" + (i+1) +" span.elo").text(game.heroes[i].elo);
+            } else {
+                $("#player" + (i+1) +" span.elo").text('N/A');
+            }
+
+            if(game.heroes[i].hasOwnProperty('userId')) {
+                $("#player" + (i+1) +" span.name").wrap('<a href="/ai/' + game.heroes[i].userId + '" />');
+            }
+
             var name = game.heroes[i].name;
 
             $("#player" + (i+1) +" span.name").attr('title', name);
 
             //Truncate the name if too long
-            if(name.length > 14) {
-                name = name.substring(0, 14) + "…";
+            if(name.length > 16) {
+                name = name.substring(0, 16) + "…";
             }
 
             $("#player" + (i+1) +" span.name").text(name);
