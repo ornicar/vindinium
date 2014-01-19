@@ -37,7 +37,7 @@ $(function() {
         // if replay is loaded in global object it means game is over
         // else let's receive events and play them
         if (replay) {
-            POSITIONS = replay.games
+            POSITIONS = replay.games;
             updateGame(CURRENTPOS);
         } else {
             var source = new EventSource("/events/" + gameId);
