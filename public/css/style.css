@@ -6,7 +6,16 @@ body {
     font-size: 18px;
 }
 
+body h2 {
+    font-family: 'VT323', cursive;
+    font-size: 36px;
+}
+
 a {
+    color: white;
+}
+
+a:hover {
     color: white;
 }
 
