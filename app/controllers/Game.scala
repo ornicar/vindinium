@@ -33,6 +33,10 @@ object Game extends Controller {
     }
   }
 
+  def documentation() = Action {
+    Ok(views.html.documentation())
+  }
+
   def events(id: String) = Action.async {
 
     implicit val timeout = Timeout(1.second)
