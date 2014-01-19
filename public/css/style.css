@@ -97,6 +97,7 @@ button, input {
     height: 55px;
     margin-bottom: 7px;
     background-image: url('../img/parchment.png');
+    position: relative;
 }
 
 #legend {
@@ -118,10 +119,12 @@ button, input {
 }
 
 #gold .player {
-    padding-top: 8px;
     width: 20px;
     height: 20px;
     vertical-align:-4px;
+    position: absolute;
+    left: 2px;
+    top: 2px;
 }
 
 .coin {
@@ -140,6 +143,17 @@ li.first span.name {
     text-decoration: underline;
 }
 
+#gold {
+    font-size: 13px;
+}
+
+#gold .gold {
+    font-size: 16px;
+}
+
+#gold .elo {
+    font-size: 10px;
+}
 
 #scoreBar {
     display: inline-block;
