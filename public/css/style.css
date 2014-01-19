@@ -105,6 +105,7 @@ blockquote {
 #gold li {
     width: 117px;
     height: 55px;
+    padding-top: 3px;
     margin-bottom: 7px;
     background-image: url('../img/parchment.png');
     position: relative;
@@ -119,6 +120,7 @@ blockquote {
 #legend li {
     width: 117px;
     height: 55px;
+    padding-top: 14px;
     background-image: url('../img/parchment.png');
     color: #474747;
     text-align: center;
@@ -138,9 +140,8 @@ blockquote {
 }
 
 .coin {
-    padding-left: 5px;
-    width: 14px;
-    height: 15px;
+    width: 13px;
+    height: 14px;
     vertical-align:-3px;
 }
 
@@ -160,10 +161,12 @@ li.first span.name {
 
 #gold {
     font-size: 13px;
+    line-height: 16px;
 }
 
 #gold .gold {
     font-size: 16px;
+    margin-right: 3px;
 }
 
 #gold .elo {
@@ -179,16 +182,19 @@ li.first span.name {
 #scoreBarCoin {
     background-color: #777777;
     width: 24px;
+    height: 30px;
     border-top-left-radius: 5px;
     border-top-right-radius: 5px;
 }
 
 #scoreBarCoin img {
-    padding: 2px 0 2px 0;
-    margin: 0;
+    padding: 0;
+    margin: 10px 0 0 0;
+    width: 14px;
+    height: 15px;
 }
 #bars {
-    width: 20px;
+    width: 24px;
     height: 240px;
     border: 2px solid #777777;
     position: relative;
