@@ -14,7 +14,7 @@ case class Game(
     maxTurns: Int,
     status: Status) {
 
-  def heroes = List(hero1, hero2, hero3, hero4)
+  val heroes = List(hero1, hero2, hero3, hero4)
 
   def hero: Option[Hero] = heroes lift (turn % heroes.size)
   def hero(id: Int): Hero = heroes find (_.id == id) getOrElse hero1
