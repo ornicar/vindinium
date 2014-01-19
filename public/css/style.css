@@ -18,6 +18,10 @@ button, input {
     font-family: 'VT323', cursive;
 }
 
+blockquote {
+    font-style: italic;
+}
+
 #logo {
     font-size: 40px;
     font-weight: bold;
