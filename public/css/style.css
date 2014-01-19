@@ -27,12 +27,15 @@ button, input {
     font-family: 'VT323', cursive;
 }
 
+#intro {
+    text-align: left;
+}
+
 #intro blockquote {
     font-style: italic;
 }
 
 #intro p {
-    text-align: left;
     padding-top: 10px;
 }
 
