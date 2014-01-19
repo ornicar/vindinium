@@ -1,5 +1,142 @@
 @()
 
 @main("Documentation") {
-    <h2>Documentation</h2>
+<section id="doc">
+    <div class="row">
+        <div class="col-md-8 col-md-offset-2">
+        <h2>Documentation and rules</h2>
+
+
+            <blockquote>
+                Four legendary heroes were fighting for the land of Vindinium<br />
+                Making their way in the dangerous woods<br />
+                Slashing goblins and stealing gold mines<br />
+                And looking for a tavern where to drink their gold
+            </blockquote>
+
+            <h3>Description</h3>
+
+            <p>Vindinium is a multi-player turn based dungeon crawling game. Each player has one hero that can move across a map. The objective is for players to amass the maximum quantity of gold during a predetermined number of turn. Players must take control of gold mines to produce gold; however, gold mines are protected by goblins. When a player defeats a goblin, he becomes owner of the gold mine and receives one gold per turn. Furthermore, the goblin now defends the mine against other players.</p>
+
+            <p>Heroes can fight each other. The survivor gets control of all his opponent's gold mines. The killed hero is immediatly respawned with all his gold, but no mine.</p>
+
+            <p>When going to the tavern, heroes can buy beers for gold, restoring their life points.</p>
+
+            <p>The objective is to create a computer program (a bot) that plays the game of Vindinium as intelligently as possible. It is recommended that you use one of the <a href="@routes.Game.starters()">starter packages</a> as a starting point.</p>
+
+            <h3>Maps</h3>
+
+            <p>Maps are generated randomly. Each element of the map is coded using 2 character. Here is an example:</p>
+
+<pre>+----------------------------------------+
+|######$-    $-############$-    $-######|
+|######        ##        ##        ######|
+|####[]    ####            ####    []####|
+|##      ####  ##        ##  ####      ##|
+|####            $-    $-            ####|
+|##########  @@1            @@4  ##########|
+|############  ####    ####  ############|
+|$-##$-        ############        $-##$-|
+|  $-      $-################$-      $-  |
+|        ########################        |
+|        ########################        |
+|  $-      $-################$-      $-  |
+|$-##$-        ############        $-##$-|
+|############  ####    ####  ############|
+|##########  @@2            @@3  ##########|
+|####            $-    $-            ####|
+|##      ####  ##        ##  ####      ##|
+|####[]    ####            ####    []####|
+|######        ##        ##        ######|
+|######$-    $-############$-    $-######|
++----------------------------------------+</pre>
+
+            <h3>Legend</h3>
+
+            <pre>## Impassable wood
+@@1 Hero number 1
+[] Tavern
+$- Gold mine (neutral)
+$1 Gold mine (belonging to hero 1)</pre>
+
+            <p>Generated maps are symmetric, and always contain 4 taverns and 4 heroes.</p>
+
+            <h3 id="markdown-header-hero">Hero</h3>
+            <p>Heroes can move by one square each turn, and have the following attributes:</p>
+            <ul>
+                <li>
+                <p>Life points (HP): Starting at the maximum value = 100.
+                If HP drop to zero, the hero dies (see: <a href="#death-of-a-hero">Death of a hero</a>).</p>
+                </li>
+                <li>
+                <p>Gold: Starting at zero, this is the success indicator of the hero.
+                At the end of the game, heroes will be scored based on their gold value.</p>
+                </li>
+            </ul>
+            <h3 id="resolution-of-a-turn">Resolution of a turn</h3>
+            <p>A bot must issue one order per turn.
+            Possible orders are: Stay, North, South, East or West.
+            Once the order is executed, the hero stays put, or moves one square in the given direction.
+            If the hero:</p>
+            <ul>
+                <li>
+                <p>Tries to step out of the map, or over a tree, nothing happens.</p>
+                </li>
+                <li>
+                <p>Steps into a gold mine, he stays in place, and:</p>
+                <ul>
+                    <li>
+                    <p>If the mine already belongs to the hero, nothing happens.</p>
+                    </li>
+                    <li>
+                    <p>If the mine is neutral, or belongs to another hero,
+                    a fight happens against the goblin guarding the mine.
+                    The hero loses 35 life points. If he survives, the mine is his.</p>
+                    </li>
+
+                </ul>
+                </li>
+                <li>
+                <p>Steps into another hero, he stays in place and nothing happens.
+                Hero fights are resolved at the end of the turn.</p>
+                </li>
+                <li>
+                <p>Steps into a tavern, he stays in place and commands a beer.
+                The hero pays 3 gold and receive 50HP. Note than HP can never exceed 100.</p>
+                </li>
+                <li>
+                <p>Times out, i.e. fails to send an order in the given delay,
+                he stays in place and loses 10HP.</p>
+                </li>
+            </ul>
+            <p>At the end of each turn, a few things happen:</p>
+            <ul>
+                <li>Fights</li>
+            </ul>
+            <p>Heroes are quite nervous and never miss an opportunity to slap each others with their big blades.
+            After the hero has moved, if there is another hero at a distance of one square in any direction,
+            then a fight is triggered. For instance, in this situation, after Hero 1 (<code>@@1</code>) has moved:</p>
+            <div class="codehilite"><pre><span class="err">@@</span><span class="mi">1</span><span class="err">@@</span><span class="mi">2</span>
+  <span class="err">@@</span><span class="mi">3</span>
+            </pre></div>
+
+
+            <p>A fight with Hero 2 happens.
+            A fight with Hero 3 does NOT happen, because it is 2 squares far from Hero 1.
+            The attacking hero loses 20 life points, the defending one, 30 points.
+            If a hero dies (see: <a href="#death-of-a-hero">Death of a hero</a>), his opponent obtains control of all the loser's gold mines.</p>
+            <ul>
+                <li>The hero gains one gold per controlled mine</li>
+                <li>The hero loses one HP (because all this action made him thirsty)</li>
+            </ul>
+            <h3 id="death-of-a-hero">Death of a hero</h3>
+            <p>When a hero HP drops to zero, he <a href="http://www.youtube.com/watch?v=4vuW6tQ0218">ceases to live</a>.
+            The hero immediatly respawns somewhere on the map, with HP=100.
+            The hero loses control of all his gold mines, but keeps all his amassed gold.</p>
+            <h3 id="end-of-the-game">End of the game</h3>
+            <p>The game ends when a hero reaches a predefined amount of gold.</p>
+
+        </div>
+    </div>
+</section>
 }

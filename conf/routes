@@ -1,5 +1,6 @@
 GET     /                               controllers.Game.index
 GET     /doc                            controllers.Game.documentation
+GET     /starters                       controllers.Game.starters
 
 POST    /api/arena                      controllers.Api.arena
 POST    /api/training                   controllers.Api.training
