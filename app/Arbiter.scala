@@ -55,16 +55,24 @@ object Arbiter {
     }
 
     @annotation.tailrec
-    def reSpawn(h: Hero): Hero = {
-      val p1 = Pos(Random nextInt (game.board.size / 2 - 2), Random nextInt (game.board.size / 2 - 2))
+    def reSpawn(h: Hero, attempts: Int = 0): Hero = {
+      val halfSize = game.board.size / 2
+      val range =
+        if (attempts < 10) halfSize - 2
+        else if (attempts < 20) halfSize - 1
+        else if (attempts < 30) halfSize
+        else if (attempts < 500) game.board.size
+        else sys error s"FUUUUUUUCK Can't respawn hero $h on game $game"
+      val p1 = Pos(Random nextInt range, Random nextInt range)
       val pos = h.id match {
+        case _ if range == game.board.size => p1
         case 1 => p1
         case 2 => game.board mirrorX p1
         case 3 => game.board mirrorXY p1
         case 4 => game.board mirrorY p1
       }
       if (Validator.heroPos(game, pos)) h reSpawn pos
-      else reSpawn(h)
+      else reSpawn(h, attempts + 1)
     }
 
     def fights(g: Game): Game =
