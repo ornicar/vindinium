@@ -13,7 +13,7 @@ object JsonFormat {
     "token" -> i.token,
     "viewUrl" -> ("http://" + host + routes.Game.show(i.game.id).url),
     "playUrl" -> ("http://" + host + routes.Api.move(i.game.id, i.token).url)
-  )
+  ).noNull
 
   def apply(g: Game): JsObject = Json.obj(
     "id" -> g.id,
@@ -27,19 +27,30 @@ object JsonFormat {
       }).mkString
     ),
     "finished" -> g.finished
-  )
+  ).noNull
 
   def apply(h: Hero, g: Game): JsObject = Json.obj(
     "id" -> h.id,
     "name" -> h.name,
+    "userId" -> h.userId,
+    "elo" -> h.elo,
     "pos" -> Json.obj("x" -> h.pos.x, "y" -> h.pos.y),
     "life" -> h.life,
     "gold" -> h.gold,
     "mineCount" -> g.board.countMines(h.id),
-    "crashed" -> h.crashed)
+    "crashed" -> h.crashed
+  ).noNull
 
   def apply(r: Replay): JsObject = Json.obj(
     "id" -> r.id,
     "games" -> JsArray(r.games)
   )
+
+  private implicit final class PimpedJsObject(js: JsObject) {
+    def noNull = JsObject {
+      js.fields collect {
+        case (key, value) if value != JsNull ⇒ key -> value
+      }
+    }
+  }
 }
