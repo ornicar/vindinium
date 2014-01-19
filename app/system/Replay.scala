@@ -14,20 +14,20 @@ case class Replay(
     _id: String,
     training: Boolean,
     names: List[String],
-    games: List[JsValue]) {
+    games: List[String]) {
 
   def id = _id
 
-  lazy val finished: Boolean = games.lastOption.fold(false) { game =>
+  lazy val finished: Boolean = games.lastOption.map(Json.parse).fold(false) { game =>
     (game \ "finished").as[Boolean]
   }
 }
 
 object Replay {
 
-  implicit val jsValueReader = new BSONReader[BSONString, JsValue] {
-    def read(string: BSONString) = Json parse string.value
-  }
+  // implicit val jsValueReader = new BSONReader[BSONString, JsValue] {
+  //   def read(string: BSONString) = Json parse string.value
+  // }
   private implicit val reader = reactivemongo.bson.Macros.reader[Replay]
 
   def find(id: String): Future[Option[Replay]] =

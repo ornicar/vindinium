@@ -45,20 +45,22 @@ object Game extends Controller {
     Replay find id flatMap {
       case None => Future.successful(NotFound)
 
-      case Some(replay) =>
+      case Some(replay) => {
+
+        val soFar: Enumerator[String] = Enumerator.enumerate(replay.games)
+
         actor ? GetStream(id) mapTo manifest[Option[Enumerator[Game]]] map {
-          case None => Ok.chunked(Enumerator.enumerate(replay.games) &> EventSource()).as("text/event-stream")
+          case None => Ok.chunked(soFar &> EventSource()).as("text/event-stream")
 
           case Some(stream) ⇒
             if (replay.finished) {
               NotFound
             }
             else {
-              val played = Enumerator.enumerate(replay.games)
-              Ok.chunked(played >>> (stream &> asJson) &> EventSource()).as("text/event-stream")
+              Ok.chunked(soFar >>> (stream &> asJsonString) &> EventSource()).as("text/event-stream")
             }
-
         }
+      }
     }
   }
 

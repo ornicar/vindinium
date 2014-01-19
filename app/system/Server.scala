@@ -56,7 +56,7 @@ final class Server extends Actor with CustomLogging {
         case (None, _) => replyTo ! notFound(s"No client for $pov")
         case (Some(client), Some(g)) => Arbiter.move(g, pov.token, Dir(dir)) match {
           case Failure(e) => {
-            log.info(s"Play fail: ${e.getMessage}")
+            log.info(s"Play fail $pov: ${e.getMessage}")
             replyTo ! Status.Failure(e)
           }
           case Success(game) => {
@@ -70,7 +70,7 @@ final class Server extends Actor with CustomLogging {
     case Client.AiTimeout(pov) => games get pov.gameId foreach { g =>
       log.info(s"$pov timeout")
       Arbiter.crash(g, pov.token) match {
-        case Failure(e)    => log.warning(s"Crash fail: ${e.getMessage}")
+        case Failure(e)    => log.warning(s"Crash fail $pov: ${e.getMessage}")
         case Success(game) => step(game)
       }
     }
