@@ -12,9 +12,9 @@ import play.api.mvc._
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import user.{ User => U }
 import system.Visualization._
 import system.{ Replay, Visualization }
+import user.{ User => U }
 
 object Game extends Controller {
 
@@ -47,7 +47,7 @@ object Game extends Controller {
 
       case Some(replay) =>
         actor ? GetStream(id) mapTo manifest[Option[Enumerator[Game]]] map {
-          case None => NotFound
+          case None => Ok.chunked(Enumerator.enumerate(replay.games)).as("text/event-stream")
 
           case Some(stream) ⇒
             if (replay.finished) {
