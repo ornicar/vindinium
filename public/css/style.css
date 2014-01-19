@@ -27,12 +27,17 @@ button, input {
     font-family: 'VT323', cursive;
 }
 
+#intro {
+    text-align: left;
+}
+
 #intro blockquote {
     font-style: italic;
+    text-align: center;
+    border-left:0;
 }
 
 #intro p {
-    text-align: left;
     padding-top: 10px;
 }
 
@@ -154,6 +159,28 @@ button, input {
     position: absolute;
     left: 2px;
     top: 2px;
+}
+
+#gold .award {
+    position: absolute;
+    top: 2px;
+    left: 22px;
+    width: 20px;
+    height: 20px;
+    vertical-align:-4px;
+}
+
+#gold .goldWrapper {
+    text-align: right;
+    padding-right: 5px;
+}
+
+#gold .award {
+    display: none;
+}
+
+#gold li.first .award {
+    display: block;
 }
 
 .coin {

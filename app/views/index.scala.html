@@ -5,7 +5,7 @@
 
 <section id="intro">
     <div class="row">
-        <div class="col-md-6">
+        <div class="col-md-6 col-md-offset-3">
             <blockquote>
                 Four legendary heroes were fighting for the land of Vindinium<br />
                 Making their way in the dangerous woods<br />
@@ -13,39 +13,48 @@
                 And looking for a tavern where to drink their gold
             </blockquote>
         </div>
-        <div class="col-md-6">
+    </div>
+
+    <div class="row">
+        <div class="col-md-8 col-md-offset-2">
             <p>
-            <strong>Vindinium</strong> is an Artificial Intelligence programming challenge. You have to take the control of a <strong>legendary hero</strong> using the programming language of your choice. You will fight with other AI for a predetermined number of turns and the hero with the <strong>greatest amount of gold</strong> will be the winner.
+            <strong>Vindinium</strong> is an Artificial Intelligence programming challenge. You have to take the control of a <strong>legendary hero</strong> using the programming language of your choice. You will fight with other AI for a predetermined number of turns and the hero with the <strong>greatest amount of gold</strong> will win.
             </p>
         </div>
     </div>
-
 </section>
 
-<section id="recent-games">
-  <h2>Recent games</h2>
-  <ul>
-    @replays.map { replay =>
-    <li>
-      <a href="@routes.Game.show(replay.id)">
-        @replay.names.mkString(" vs "),
-        @if(replay.finished) { Finished } else { In progress }
-      </a>
-    </li>
-    }
-  </ul>
-</section>
+<div class="row">
 
-<section id="top-users">
-  <h2>Top users</h2>
-  <ul>
-    @topUsers.map { user =>
-    <li>
-      <a href="@routes.User.show(user.id)">
-        @user.name (@user.elo)
-      </a>
-    </li>
-    }
-  </ul>
-</section>
+    <div class="col-md-6">
+        <section id="recent-games">
+            <h2>Recent games</h2>
+            <ul>
+                @replays.map { replay =>
+                <li>
+                <a href="@routes.Game.show(replay.id)">
+                    @replay.names.mkString(" vs "),
+                    @if(replay.finished) { Finished } else { In progress }
+                </a>
+                </li>
+                }
+            </ul>
+        </section>
+    </div>
+
+    <div class="col-md-6">
+        <section id="top-users">
+            <h2>Top users</h2>
+            <ul>
+                @topUsers.map { user =>
+                <li>
+                <a href="@routes.User.show(user.id)">
+                    @user.name (@user.elo)
+                </a>
+                </li>
+                }
+            </ul>
+        </section>
+    </div>
+</div>
 }
