@@ -42,9 +42,7 @@ $(function() {
         } else {
             var source = new EventSource("/events/" + gameId);
             source.addEventListener('message', function(e) {
-                var game = JSON.parse(e.data);
-                POSITIONS.push(game);
-
+                POSITIONS.push(JSON.parse(e.data));
                 updateGame(CURRENTPOS);
                 CURRENTPOS++;
             });
@@ -52,6 +50,7 @@ $(function() {
                 // Connection was opened.
             }, false);
             source.addEventListener('error', function(e) {
+                source.close();
                 if (e.readyState == EventSource.CLOSED) {
                     // Connection was closed.
                 }
