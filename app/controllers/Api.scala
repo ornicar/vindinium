@@ -15,9 +15,8 @@ import user.{ User => U }
 
 object Api extends Controller {
 
-  implicit val timeout = Timeout(10.minutes)
-
   def training = Action.async { implicit req =>
+    implicit val timeout = Timeout(10.minutes)
     form.training.bindFromRequest.fold(
       err => Future successful BadRequest(
         "Did you forget the key parameter?"
@@ -39,6 +38,7 @@ object Api extends Controller {
   }
 
   def arena = Action.async { implicit req =>
+    implicit val timeout = Timeout(20.minutes)
     form.arena.bindFromRequest.fold(
       err => Future successful BadRequest(
         "Did you forget the key parameter?"
@@ -60,6 +60,7 @@ object Api extends Controller {
   }
 
   def move(gameId: String, token: String) = Action.async { implicit req =>
+    implicit val timeout = Timeout(10.seconds)
     form.move.bindFromRequest.fold(
       err => Future successful BadRequest,
       dir => Server.actor ? Server.Play(Pov(gameId, token), dir) map {
