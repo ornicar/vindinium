@@ -2,11 +2,11 @@ body {
     background: #383b32;
     color: #d0d0d0;
     text-align: center;
-    font-family: 'VT323', cursive;
-    font-size: 18px;
+    font-size: 13px;
+    font-family: monospace;
 }
 
-body h2, body h3 {
+body h1, body h2, body h3, #logo, #main-menu, #game {
     font-family: 'VT323', cursive;
 }
 
@@ -110,6 +110,7 @@ button, input {
 #game {
     position: relative;
     display: inline-block;
+    font-size: 18px;
 }
 
 #board {
