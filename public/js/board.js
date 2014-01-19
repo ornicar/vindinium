@@ -192,8 +192,17 @@ function drawPosition(game) {
                 context.fillText("Draw!", (boardWidth - width)/2 + 100, (boardWidth - height)/2 + 45);
                 context.fillText("No winner :(", (boardWidth - width)/2 + 80, (boardWidth - height)/2 + 70);
             } else {
-                context.fillText("Game finished!", (boardWidth - width)/2 + 63, (boardWidth - height)/2 + 30);
-                context.fillText("And the winner is…", (boardWidth - width)/2 + 50, (boardWidth - height)/2 + 55);
+
+
+                var name = game.heroes[winner-1].name;
+
+                //Truncate the name if too long
+                if(name.length > 23) {
+                    name = name.substring(0, 23) + "…";
+                }
+                context.textAlign = 'center';
+                context.fillText("And the winner is:", boardWidth/2, (boardWidth - height)/2 + 28);
+                context.fillText(name, boardWidth/2, (boardWidth - height)/2 + 54);
 
                 canvas.getContext("2d").drawImage(playerImages[winner-1], 0, 0, objectTileSize, objectTileSize, (boardWidth - width)/2 + 103, (boardWidth - height)/2 + 66, objectTileSize, objectTileSize);
 
