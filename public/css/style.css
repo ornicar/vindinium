@@ -161,6 +161,28 @@ button, input {
     top: 2px;
 }
 
+#gold .award {
+    position: absolute;
+    top: 2px;
+    left: 22px;
+    width: 20px;
+    height: 20px;
+    vertical-align:-4px;
+}
+
+#gold .goldWrapper {
+    text-align: right;
+    padding-right: 5px;
+}
+
+#gold .award {
+    display: none;
+}
+
+#gold li.first .award {
+    display: block;
+}
+
 .coin {
     width: 13px;
     height: 14px;
