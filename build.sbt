@@ -1,4 +1,4 @@
-name := "24hCodeBot"
+name := "vindinium"
 
 version := "1.0-SNAPSHOT"
 
