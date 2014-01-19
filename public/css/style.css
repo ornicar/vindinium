@@ -22,6 +22,12 @@ blockquote {
     font-style: italic;
 }
 
+#intro {
+    width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
 #logo {
     font-size: 40px;
     font-weight: bold;
