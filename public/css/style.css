@@ -143,6 +143,11 @@ li.first span.name {
     text-decoration: underline;
 }
 
+#gold a {
+    color: #474747;
+    text-decoration: none;
+}
+
 #gold {
     font-size: 13px;
 }
