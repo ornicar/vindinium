@@ -1,9 +1,15 @@
 @(user: User)
 
-<h1>@user.name successfully registered</h1>
+@main("Registration successfull") {
+
+<h1>"@user.name" successfully registered</h1>
 
 <p>
-  This your user key: <strong>@user.key</strong>.
+  This is your user key:
+</p>
+<p id="user-key">
+    <strong>@user.key</strong>
+</p>
 
   Keep it secret. You will need it as an API parameter
   to authenticate your AI with the server.
@@ -14,3 +20,4 @@
 
   Copy the key, then <a href="@routes.User.show(user.id)">Proceed to your user page</a>.
 </p>
+}
