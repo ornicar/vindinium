@@ -10,7 +10,7 @@ import scala.concurrent.{ Future, Await, Promise, promise }
 import scala.util.{ Try, Success, Failure }
 import user.User
 
-final class Server extends Actor with ActorLogging {
+final class Server extends Actor with CustomLogging {
 
   import Server._
 
@@ -53,24 +53,27 @@ final class Server extends Actor with ActorLogging {
       val replyTo = sender
       (clients.get(pov) -> games.get(pov.gameId)) match {
         case (_, None) => replyTo ! notFound(s"No game for id ${pov.gameId}")
-        // found game, but no client. Probably it timed out.
-        case (None, Some(g)) => replyTo ! PlayerInput(g, pov.token)
-        case (Some(client), Some(g)) => {
-          val game = Arbiter.move(g, pov.token, Dir(dir))
-          client ! Client.WorkDone(inputPromise(replyTo))
-          step(game)
+        case (None, _) => replyTo ! notFound(s"No client for $pov")
+        case (Some(client), Some(g)) => Arbiter.move(g, pov.token, Dir(dir)) match {
+          case Failure(e) => {
+            log.info(s"Play fail: ${e.getMessage}")
+            replyTo ! Status.Failure(e)
+          }
+          case Success(game) => {
+            client ! Client.WorkDone(inputPromise(replyTo))
+            step(game)
+          }
         }
       }
     }
 
-    case Client.AiTimeout(pov) =>
-      games get pov.gameId filterNot (_.finished) foreach { g =>
-        g.hero filter (_.token == pov.token) foreach { hero =>
-          log.info(s"Received $pov timeout")
-          val game = g.crash(hero.token, Crash.Timeout)
-          step(game)
-        }
+    case Client.AiTimeout(pov) => games get pov.gameId foreach { g =>
+      log.info(s"$pov timeout")
+      Arbiter.crash(g, pov.token) match {
+        case Failure(e)    => log.warning(s"Crash fail: ${e.getMessage}")
+        case Success(game) => step(game)
       }
+    }
 
     case Terminated(client) ⇒ {
       context unwatch client
@@ -79,11 +82,13 @@ final class Server extends Actor with ActorLogging {
   }
 
   def step(game: Game) {
+    // log.info(s"step game $game")
     update(game)
     context.system.eventStream publish game
     if (game.finished) gameClients(game.id) foreach (_ ! game)
-    else game.hero foreach { h =>
-      clients get Pov(game.id, h.token) foreach (_ ! game)
+    else game.hero foreach {
+      case h if h.crashed => step(game.step)
+      case h              => clients get Pov(game.id, h.token) foreach (_ ! game)
     }
   }
 

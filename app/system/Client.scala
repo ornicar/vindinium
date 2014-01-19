@@ -20,12 +20,17 @@ final class Client(
 
   driver match {
 
-    case Driver.Http => when(Waiting) {
-
-      case Event(game: Game, Response(promise)) => {
-        promise success PlayerInput(game, pov.token)
-        if (game.finished) stop()
-        else goto(Working) using Nothing
+    case Driver.Http => {
+      when(Waiting) {
+        case Event(game: Game, Response(promise)) => {
+          promise success PlayerInput(game, pov.token)
+          if (game.finished) stop()
+          else goto(Working) using Nothing
+        }
+      }
+      when(Crashed) {
+        case Event(game: Game, _) if game.finished => stop()
+        case Event(game: Game, _) => stay
       }
     }
     case Driver.Auto(play) => when(Waiting) {
@@ -43,9 +48,8 @@ final class Client(
     case Event(WorkDone(promise), Nothing) => goto(Waiting) using Response(promise)
 
     case Event(StateTimeout, _) => {
-      log.info(s"$pov timeout")
       context.parent ! AiTimeout(pov)
-      stop()
+      goto(Crashed)
     }
   }
 }
@@ -68,6 +72,7 @@ object Client {
   sealed trait State
   case object Waiting extends State
   case object Working extends State
+  case object Crashed extends State
 
   sealed trait Data
   case object Nothing extends Data

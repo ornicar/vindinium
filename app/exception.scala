@@ -3,7 +3,7 @@ package bot
 
 trait GameException extends Exception {
   def message: String
-  override def getMessage: String = "Vindinium['" + message + "']"
+  override def getMessage: String = s"Vindinium - $message"
 }
 
 case class GeneratorException(message: String) extends GameException

@@ -5,19 +5,28 @@ import scala.util.{ Random, Try, Success, Failure }
 
 object Arbiter {
 
-  def move(game: Game, token: String, dir: Dir): Game = (game.hero match {
-    case None => Failure(RuleViolationException(s"No hero can play"))
-    case Some(hero) =>
-      if (hero.token != token) Failure(RuleViolationException(s"Not hero $token turn to move"))
-      else if (game.finished) Failure(RuleViolationException(s"Game $game is finished"))
-      else Success(doMove(game, hero.id, dir))
-  }) match {
-    case Success(g) => g
-    case Failure(e) => {
-      play.api.Logger("arbiter") warn e.toString
-      game
+  def move(game: Game, token: String, dir: Dir): Try[Game] =
+    validate(game, token) { hero =>
+      doMove(game, hero.id, dir)
     }
-  }
+
+  def crash(game: Game, token: String): Try[Game] =
+    validate(game, token) { hero =>
+      game.crash(Crash.Timeout).step
+    }
+
+  private def validate(game: Game, token: String)(f: Hero => Game): Try[Game] =
+    (game.finished, game.hero) match {
+      case (true, _) =>
+        Failure(RuleViolationException("Game is finished"))
+      case (_, None) =>
+        Failure(RuleViolationException("No hero can play"))
+      case (_, Some(hero)) if hero.crashed =>
+        Failure(RuleViolationException(s"Hero has crashed: ${h.crash.getOrElse("?")}"))
+      case (_, Some(hero)) if hero.token != token =>
+        Failure(RuleViolationException(s"Not your turn to move"))
+      case (_, Some(hero)) => Success(f(hero))
+    }
 
   private def doMove(game: Game, id: Int, dir: Dir) = {
 

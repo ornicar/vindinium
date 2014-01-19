@@ -67,7 +67,8 @@ object Api extends Controller {
           Ok(JsonFormat(input, req.host)) as JSON
         }
       } recover {
-        case e: NotFoundException => NotFound(e.getMessage)
+        case e: NotFoundException      => NotFound(e.getMessage)
+        case e: RuleViolationException => BadRequest(e.getMessage)
       }
     )
   }
