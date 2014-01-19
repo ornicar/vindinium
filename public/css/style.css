@@ -131,10 +131,15 @@ button, input {
     vertical-align:-3px;
 }
 
-li.first span {
+li.first {
+    color: black;
     font-weight: bold;
-    border-bottom: 2px solid black;
 }
+
+li.first span.name {
+    text-decoration: underline;
+}
+
 
 #scoreBar {
     display: inline-block;
