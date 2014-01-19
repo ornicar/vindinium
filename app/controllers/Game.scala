@@ -37,6 +37,9 @@ object Game extends Controller {
     Ok(views.html.documentation())
   }
 
+
+  implicit val stringMessages = play.api.libs.Comet.CometMessage[String](identity)
+
   def events(id: String) = Action.async {
 
     implicit val timeout = Timeout(1.second)
