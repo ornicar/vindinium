@@ -18,6 +18,12 @@ case class User(
     elo: Int) {
 
   def id = _id
+
+  def blame(hero: Hero) = hero.copy(
+    name = name,
+    userId = Some(id),
+    elo = Some(elo)
+  )
 }
 
 object User {

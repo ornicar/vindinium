@@ -36,10 +36,10 @@ object Generator {
     id = RandomString(8),
     training = training,
     board = board,
-    hero1 = Hero(1, "Alaric", heroPos),
-    hero2 = Hero(2, "Luther", board mirrorX heroPos),
-    hero3 = Hero(3, "Thorfinn", board mirrorXY heroPos),
-    hero4 = Hero(4, "York", board mirrorY heroPos),
+    hero1 = Hero(1, "Alaric", None, None, heroPos),
+    hero2 = Hero(2, "Luther", None, None, board mirrorX heroPos),
+    hero3 = Hero(3, "Thorfinn", None, None, board mirrorXY heroPos),
+    hero4 = Hero(4, "York", None, None, board mirrorY heroPos),
     maxTurns = turns,
     status = Status.Created)
 

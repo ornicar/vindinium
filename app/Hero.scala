@@ -5,6 +5,8 @@ case class Hero(
     id: Int,
     token: String,
     name: String,
+    userId: Option[String],
+    elo: Option[Int],
     pos: Pos,
     life: Int,
     gold: Int,
@@ -45,10 +47,12 @@ case class Hero(
 
 object Hero {
 
-  def apply(id: Int, name: String, pos: Pos): Hero = Hero(
+  def apply(id: Int, name: String, userId: Option[String], elo: Option[Int], pos: Pos): Hero = Hero(
     id = id,
     token = RandomString(4),
     name = name,
+    userId = userId,
+    elo = elo,
     pos = pos,
     life = maxLife,
     gold = 0,

@@ -11,10 +11,10 @@ object StringMapParser {
       id = RandomString(8),
       training = true,
       board = board,
-      hero1 = Hero(1, "Alaric", pos1),
-      hero2 = Hero(2, "Luther", pos2),
-      hero3 = Hero(3, "Thorfinn", pos3),
-      hero4 = Hero(4, "York", pos4),
+      hero1 = Hero(1, "Alaric", None, None, pos1),
+      hero2 = Hero(2, "Luther", None, None, pos2),
+      hero3 = Hero(3, "Thorfinn", None, None, pos3),
+      hero4 = Hero(4, "York", None, None, pos4),
       maxTurns = turns,
       status = Status.Created)
   }

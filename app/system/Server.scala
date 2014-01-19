@@ -26,9 +26,9 @@ final class Server extends Actor with ActorLogging {
       addGame(config) match {
         case Failure(e) => replyTo ! Status.Failure(e)
         case Success(game) => {
-          join(user.name, game.id, Driver.Http, inputPromise(replyTo))
+          join(Right(user), game.id, Driver.Http, inputPromise(replyTo))
           game.heroes drop 1 foreach { hero =>
-            join("random", game.id, Driver.Random, inputPromise(replyTo))
+            join(Left("random"), game.id, Driver.Random, inputPromise(replyTo))
           }
         }
       }
@@ -45,7 +45,7 @@ final class Server extends Actor with ActorLogging {
         case Some(game) => Success(game)
       }) match {
         case Failure(e) => log.error(e.getMessage)
-        case Success(game) => join(user.name, game.id, Driver.Http, inputPromise(replyTo))
+        case Success(game) => join(Right(user), game.id, Driver.Http, inputPromise(replyTo))
       }
     }
 
@@ -86,7 +86,7 @@ final class Server extends Actor with ActorLogging {
   }
 
   def join(
-    name: String,
+    user: Either[String, User],
     gameId: String,
     driver: Driver,
     promise: Promise[PlayerInput]) {
@@ -94,10 +94,10 @@ final class Server extends Actor with ActorLogging {
       case None => log.error(s"Can't join non existing game $gameId")
       case Some(g) => {
         val id = gameClients(g.id).size + 1
-        val game = g.withHero(id, _ withName name)
+        val game = g.withHero(id, h => user.fold(h.withName, _ blame h))
         val token = game.hero(id).token
         val pov = Pov(game.id, token)
-        log.info(s"[game ${game.id}] add client $name ($token)")
+        log.info(s"[game ${game.id}] add client $user ($token)")
         try {
           val client = context.actorOf(
             Props(new Client(pov, driver, promise)),
