@@ -38,6 +38,11 @@ object Replay {
       .sort(BSONDocument("playedAt" -> -1))
       .cursor[Replay].collect[List](nb)
 
+  def recentByUserName(name: String, nb: Int): Future[List[Replay]] =
+    coll.find(BSONDocument("training" -> false, "names" -> name))
+      .sort(BSONDocument("playedAt" -> -1))
+      .cursor[Replay].collect[List](nb)
+
   def add(game: Game) = coll.update(
     BSONDocument("_id" -> game.id),
     BSONDocument(

@@ -1,9 +1,23 @@
-@(user: User, rank: Option[Int])
+@(user: User, replays: List[Replay], rank: Option[Int])
 
-@main("24hCodeBot") {
-    <h1>@user.name</h1>
+@main(user.name) {
+<h1>@user.name</h1>
 
-    @rank.map { r =>
-    Ranked @r
+@rank.map { r =>
+Ranked @r
+}
+
+<section id="recent-games">
+  <h2>Recent games</h2>
+  <ul>
+    @replays.map { replay =>
+    <li>
+      <a href="@routes.Game.show(replay.id)">
+        @replay.names.mkString(" vs "),
+        @if(replay.finished) { Finished } else { In progress }
+      </a>
+    </li>
     }
+  </ul>
+</section>
 }

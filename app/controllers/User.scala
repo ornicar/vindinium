@@ -2,6 +2,7 @@ package controllers
 
 import org.jousse.bot._
 import org.jousse.bot.user.{ User => U }
+import org.jousse.bot.system.Replay
 
 import akka.pattern.{ ask, pipe }
 import play.api._
@@ -36,9 +37,11 @@ object User extends Controller {
   }
 
   def show(id: String) = Action.async { req =>
-    U find id map {
-      case None       => NotFound
-      case Some(user) => Ok(views.html.user.show(user, None))
+    U find id flatMap {
+      case None       => Future successful NotFound
+      case Some(user) => Replay.recentByUserName(user.name, 100) map { replays =>
+        Ok(views.html.user.show(user, replays, None))
+      }
     }
   }
 

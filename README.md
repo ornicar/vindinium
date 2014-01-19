@@ -14,4 +14,4 @@ db.user.ensureIndex({name:1},{unique:true})
 db.user.ensureIndex({key:1},{unique:true})
 db.user.ensureIndex({elo:-1})
 
-db.replay.ensureIndex({training: 1, playedAt: -1})
+db.replay.ensureIndex({training: 1, names: 1, playedAt: -1})
