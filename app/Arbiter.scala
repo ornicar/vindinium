@@ -16,14 +16,14 @@ object Arbiter {
     }
 
   private def validate(game: Game, token: String)(f: Hero => Game): Try[Game] =
-    (game.finished, game.hero) match {
+    (game.finished, game heroByToken token) match {
       case (true, _) =>
         Failure(RuleViolationException("Game is finished"))
       case (_, None) =>
-        Failure(RuleViolationException("No hero can play"))
+        Failure(RuleViolationException("Token not found"))
       case (_, Some(hero)) if hero.crashed =>
-        Failure(RuleViolationException(s"Hero has crashed: ${h.crash.getOrElse("?")}"))
-      case (_, Some(hero)) if hero.token != token =>
+        Failure(RuleViolationException(s"Hero has crashed: ${hero.crash.getOrElse("?")}"))
+      case (_, Some(hero)) if game.hero != Some(hero) =>
         Failure(RuleViolationException(s"Not your turn to move"))
       case (_, Some(hero)) => Success(f(hero))
     }
