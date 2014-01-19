@@ -67,6 +67,15 @@ blockquote {
 
 #turn {
     list-style-type: none;
+    line-height: 22px;
+}
+
+#legend #turn {
+    padding-top:5px;
+}
+
+#turn strong {
+    display: block;
 }
 
 #game {
