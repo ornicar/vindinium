@@ -36,6 +36,6 @@ object Config {
 
   def arena = random.copy(
     training = false,
-    turns = 300 * 4
+    turns = 200 * 4
   )
 }

@@ -14,7 +14,7 @@ object Arbiter {
   }) match {
     case Success(g) => g
     case Failure(e) => {
-      play.api.Logger("arbiter").warn(e.toString)
+      play.api.Logger("arbiter") warn e.toString
       game
     }
   }

@@ -38,9 +38,15 @@ final class Client(
     }
   }
 
-  when(Working) {
+  when(Working, stateTimeout = aiTimeout) {
 
     case Event(WorkDone(promise), Nothing) => goto(Waiting) using Response(promise)
+
+    case Event(StateTimeout, _) => {
+      log.info(s"$pov timeout")
+      context.parent ! AiTimeout(pov)
+      stop()
+    }
   }
 }
 
@@ -51,8 +57,13 @@ object Client {
     .getMilliseconds("vindinium.auto-client-delay")
     .getOrElse(0l)
     .milliseconds
+  private val aiTimeout = play.api.Play.configuration
+    .getMilliseconds("vindinium.ai-timeout")
+    .getOrElse(0l)
+    .milliseconds
 
   case class WorkDone(promise: Promise[PlayerInput])
+  case class AiTimeout(pov: Pov)
 
   sealed trait State
   case object Waiting extends State
