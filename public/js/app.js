@@ -3,11 +3,12 @@ $(function() {
 
         var CURRENTPOS = 0;
         var POSITIONS = [];
+        var $turn = $('#turn span.number');
 
         function updateGame(pos) {
             var game = POSITIONS[pos];
             drawPosition(game);
-            $('#turn span.number').text(Math.floor((game['turn'] + 1) / 4) + '/' + Math.ceil(game['maxTurns']/4));
+            $turn.text(Math.floor((game['turn'] + 1) / 4) + '/' + Math.ceil(game['maxTurns']/4));
         }
 
         // nav
@@ -34,16 +35,21 @@ $(function() {
             return false;
         });
 
+        var debouncedUpdateGame = _.debounce(function(pos) {
+          updateGame(pos);
+        }, 500);
+
         // if replay is loaded in global object it means game is over
         // else let's receive events and play them
-        if (replay) {
-            POSITIONS = replay.games;
+        if (replayObject) {
+            POSITIONS = replayObject.games;
             updateGame(CURRENTPOS);
         } else {
             var source = new EventSource("/events/" + gameId);
             source.addEventListener('message', function(e) {
                 POSITIONS.push(JSON.parse(e.data));
-                updateGame(CURRENTPOS);
+                debouncedUpdateGame(CURRENTPOS);
+                // updateGame(CURRENTPOS);
                 CURRENTPOS++;
             });
             source.addEventListener('open', function(e) {

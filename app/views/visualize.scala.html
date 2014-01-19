@@ -49,8 +49,9 @@
 
 <script language="javascript">
   var gameId = "@replay.id";
+  var replayObject;
   @if(replay.finished) {
-    var replay = @Html(JsonFormat jsonString replay);
+    replayObject = @Html(JsonFormat jsonString replay);
   }
 </script>
 }
