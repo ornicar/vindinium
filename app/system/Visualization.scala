@@ -48,5 +48,7 @@ object Visualization {
   import play.api.Play.current
 
   val actor = Akka.system.actorOf(Props[Visualization], name = "visualization")
-  val asJson: Enumeratee[Game, JsValue] = Enumeratee.map[Game](game ⇒ JsonFormat(game))
+  val asJsonString: Enumeratee[Game, String] = 
+    Enumeratee.map[Game](game ⇒ Json stringify JsonFormat(game))
+  // val stringAsJson: Enumeratee[String, JsValue] = Enumeratee.map[String](Json.parse)
 }

@@ -5,19 +5,28 @@ import scala.util.{ Random, Try, Success, Failure }
 
 object Arbiter {
 
-  def move(game: Game, token: String, dir: Dir): Game = (game.hero match {
-    case None => Failure(RuleViolationException(s"No hero can play"))
-    case Some(hero) =>
-      if (hero.token != token) Failure(RuleViolationException(s"Not hero $token turn to move"))
-      else if (game.finished) Failure(RuleViolationException(s"Game $game is finished"))
-      else Success(doMove(game, hero.id, dir))
-  }) match {
-    case Success(g) => g
-    case Failure(e) => {
-      play.api.Logger("arbiter") warn e.toString
-      game
+  def move(game: Game, token: String, dir: Dir): Try[Game] =
+    validate(game, token) { hero =>
+      doMove(game, hero.id, dir)
     }
-  }
+
+  def crash(game: Game, token: String): Try[Game] =
+    validate(game, token) { hero =>
+      game.crash(Crash.Timeout).step
+    }
+
+  private def validate(game: Game, token: String)(f: Hero => Game): Try[Game] =
+    (game.finished, game heroByToken token) match {
+      case (true, _) =>
+        Failure(RuleViolationException("Game is finished"))
+      case (_, None) =>
+        Failure(RuleViolationException("Token not found"))
+      case (_, Some(hero)) if hero.crashed =>
+        Failure(RuleViolationException(s"Hero has crashed: ${hero.crash.getOrElse("?")}"))
+      case (_, Some(hero)) if game.hero != Some(hero) =>
+        Failure(RuleViolationException(s"Not your turn to move"))
+      case (_, Some(hero)) => Success(f(hero))
+    }
 
   private def doMove(game: Game, id: Int, dir: Dir) = {
 
@@ -46,16 +55,24 @@ object Arbiter {
     }
 
     @annotation.tailrec
-    def reSpawn(h: Hero): Hero = {
-      val p1 = Pos(Random nextInt (game.board.size / 2 - 2), Random nextInt (game.board.size / 2 - 2))
+    def reSpawn(h: Hero, attempts: Int = 0): Hero = {
+      val halfSize = game.board.size / 2
+      val range =
+        if (attempts < 10) halfSize - 2
+        else if (attempts < 20) halfSize - 1
+        else if (attempts < 30) halfSize
+        else if (attempts < 500) game.board.size
+        else sys error s"FUUUUUUUCK Can't respawn hero $h on game $game"
+      val p1 = Pos(Random nextInt range, Random nextInt range)
       val pos = h.id match {
+        case _ if range == game.board.size => p1
         case 1 => p1
         case 2 => game.board mirrorX p1
         case 3 => game.board mirrorXY p1
         case 4 => game.board mirrorY p1
       }
       if (Validator.heroPos(game, pos)) h reSpawn pos
-      else reSpawn(h)
+      else reSpawn(h, attempts + 1)
     }
 
     def fights(g: Game): Game =

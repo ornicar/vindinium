@@ -64,6 +64,6 @@ object Hero {
   val beerGold = -2
   val dayLife = -1
   val mineLife = -20
-  val attackLife = -10
+  val attackLife = -0
   val defendLife = -20
 }

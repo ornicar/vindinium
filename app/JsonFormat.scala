@@ -43,7 +43,7 @@ object JsonFormat {
 
   def apply(r: Replay): JsObject = Json.obj(
     "id" -> r.id,
-    "games" -> JsArray(r.games)
+    "games" -> JsArray(r.games.map(Json.parse))
   )
 
   private implicit final class PimpedJsObject(js: JsObject) {

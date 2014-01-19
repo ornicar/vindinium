@@ -14,27 +14,23 @@ case class Game(
     maxTurns: Int,
     status: Status) {
 
-  def heroes = List(hero1, hero2, hero3, hero4)
-  def activeHeroes = heroes filterNot (_.crashed)
+  val heroes = List(hero1, hero2, hero3, hero4)
 
-  // TODO fixme, this will break if all heroes have crashed
-  def hero: Option[Hero] = activeHeroes lift (turn % activeHeroes.size)
+  def hero: Option[Hero] = heroes lift (turn % heroes.size)
   def hero(id: Int): Hero = heroes find (_.id == id) getOrElse hero1
   def hero(pos: Pos): Option[Hero] = heroes find (_.pos == pos)
+  def heroByToken(token: String): Option[Hero] = heroes find (_.token == token)
 
-  def step = {
+  def step = if (finished) this else {
     val next = copy(turn = turn + 1)
-    next.copy(
-      status = if (next.turn > maxTurns) Status.TurnMax
-      else if (next.activeHeroes.size < 2) Status.AllCrashed
-      else Status.Started)
+    if (next.turn > maxTurns) next.copy(status = Status.TurnMax) else next
   }
 
-  def crash(token: String, c: Crash) = activeHeroes find (_.token == token) match {
-    case None => this
+  def crash(c: Crash) = hero match {
+    case None                       => this
     case Some(hero) => withHero(hero setCrash c) match {
-      case game if game.activeHeroes.size < 2 => game.copy(status = Status.AllCrashed)
-      case game                               => game
+      case game if game.heroes.count(_.crashed) > 2 => game.copy(status = Status.AllCrashed)
+      case game                                     => game
     }
   }
 
