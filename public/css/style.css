@@ -38,6 +38,10 @@ button, input {
     text-align: left;
 }
 
+#doc ul {
+    list-style-type: disc;
+}
+
 #doc p, #doc blockquote {
     font-family: monospace;
     font-size: 14px;

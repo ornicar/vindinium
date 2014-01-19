@@ -37,6 +37,10 @@ object Game extends Controller {
     Ok(views.html.documentation())
   }
 
+  def starters() = Action {
+    Ok(views.html.starters())
+  }
+
 
   implicit val stringMessages = play.api.libs.Comet.CometMessage[String](identity)
 
