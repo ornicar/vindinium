@@ -2,17 +2,26 @@
 
 @main("Register") {
 
-@helper.form(routes.User.register) {
+<div class="row">
+    <div class="col-md-8 col-md-offset-2">
+        <p>Here is the place where you will <strong>create your hero</strong>. Choose your name carefully as it will appear on all the game reports.<p>
+        <p>Be sure to have something to <strong>write down the unique key</strong> we will generate for you. You will need this key to identify your AI to the server. If you loose it, you will need to create a new AI and you will loose your ranking.</p>
+    </div>
 
-<label for="input-name">Name</label>
-<input name="name" id="input-name" value="@form("name").value" />
-@if(form("name").hasErrors) {
-<p class="error">
-  @form("name").errors.map(_.message).mkString(", ")
-</p>
-}
+    <div class="col-md-8 col-md-offset-2 register-form">
+        @helper.form(routes.User.register) {
 
-<input type="submit" value="Create new AI" />
-}
+        <label for="input-name">Name</label>
+        <input name="name" id="input-name" value="@form("name").value" />
+        @if(form("name").hasErrors) {
+        <p class="error">
+        @form("name").errors.map(_.message).mkString(", ")
+        </p>
+        }
 
+        <input type="submit" value="Create new AI" />
+        }
+    </div>
+
+</div>
 }
