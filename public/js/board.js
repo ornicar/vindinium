@@ -48,15 +48,18 @@ var objectTileSize = 32;
 var borderSize = 24;
 var firstRender = true;
 var background; // canvas with static elements, drawn only once
+var first = true;
 
 function drawPosition(game) {
 
     var canvas = document.getElementById("board");
     var boardSize = game.board.size;
-
     var boardWidth = borderSize*2 + groundTileSize * boardSize;
 
-    $('#bars').css('height', (boardWidth-($('#scoreBarCoin').height())) + 'px');
+    if(first) {
+        $('#bars').css('height', (boardWidth-($('#scoreBarCoin').height())) + 'px');
+        first = false;
+    }
 
     if (firstRender) {
       canvas.width = groundTileSize * boardSize + borderSize * 2;

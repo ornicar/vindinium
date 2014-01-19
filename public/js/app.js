@@ -5,8 +5,9 @@ $(function() {
         var POSITIONS = [];
 
         function updateGame(pos) {
-            drawPosition(POSITIONS[pos]);
-            $('#turn span.number').text(Math.ceil((pos + 1) / 4));
+            var game = POSITIONS[pos];
+            drawPosition(game);
+            $('#turn span.number').text(Math.floor((game['turn'] + 1) / 4) + '/' + Math.ceil(game['maxTurns']/4));
         }
 
         // nav

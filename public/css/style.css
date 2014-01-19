@@ -6,7 +6,16 @@ body {
     font-size: 18px;
 }
 
+body h2 {
+    font-family: 'VT323', cursive;
+    font-size: 36px;
+}
+
 a {
+    color: white;
+}
+
+a:hover {
     color: white;
 }
 
@@ -18,14 +27,13 @@ button, input {
     font-family: 'VT323', cursive;
 }
 
-blockquote {
+#intro blockquote {
     font-style: italic;
 }
 
-#intro {
-    width: 600px;
-    margin-left: auto;
-    margin-right: auto;
+#intro p {
+    text-align: left;
+    padding-top: 10px;
 }
 
 #logo {
@@ -67,6 +75,15 @@ blockquote {
 
 #turn {
     list-style-type: none;
+    line-height: 22px;
+}
+
+#legend #turn {
+    padding-top:5px;
+}
+
+#turn strong {
+    display: block;
 }
 
 #game {
