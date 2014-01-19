@@ -47,7 +47,7 @@ object Game extends Controller {
 
       case Some(replay) =>
         actor ? GetStream(id) mapTo manifest[Option[Enumerator[Game]]] map {
-          case None => Ok.chunked(Enumerator.enumerate(replay.games)).as("text/event-stream")
+          case None => Ok.chunked(Enumerator.enumerate(replay.games) &> EventSource()).as("text/event-stream")
 
           case Some(stream) ⇒
             if (replay.finished) {
