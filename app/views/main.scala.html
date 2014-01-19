@@ -14,16 +14,18 @@
     <script src="@routes.Assets.at("js/manual.js")" type="text/javascript"></script>
   </head>
   <body>
-    <div id="logo"><a href="@routes.Game.index()">Vindinium</a></div>
-    <div id="main-menu">
-        <ul>
-            <li><a href="@routes.Game.index()">Home</a></li>
-            <li><a href="@routes.User.registerForm()">Register to play</a></li>
-            <li><a href="#">Documentation</a></li>
-            <li><a href="#">About</a></li>
-        </ul>
-    </div>
-    @content
-    <script src="@routes.Assets.at("js/app.js")" type="text/javascript"></script>
+  <div class="container">
+      <div id="logo"><a href="@routes.Game.index()">Vindinium</a></div>
+      <div id="main-menu">
+          <ul>
+              <li><a href="@routes.Game.index()">Home</a></li>
+              <li><a href="@routes.User.registerForm()">Register to play</a></li>
+              <li><a href="#">Documentation</a></li>
+              <li><a href="#">About</a></li>
+          </ul>
+      </div>
+      @content
+  </div>
+  <script src="@routes.Assets.at("js/app.js")" type="text/javascript"></script>
   </body>
 </html>
