@@ -48,13 +48,16 @@ object Replay {
     BSONDocument(
       "$push" -> BSONDocument(
         "games" -> (Json stringify JsonFormat(game))
-      ),
-      "$set" -> BSONDocument(
-        "training" -> game.training,
-        "names" -> game.heroes.map(_.name),
-        "playedAt" -> DateTime.now
       )
-    ),
+    ) ++ {
+      if (game.turn == 0) BSONDocument(
+        "$set" -> BSONDocument(
+          "training" -> game.training,
+          "names" -> game.heroes.map(_.name),
+          "playedAt" -> DateTime.now
+        )
+      ) else BSONDocument()
+    },
     upsert = true)
 
   private val db = play.modules.reactivemongo.ReactiveMongoPlugin.db
