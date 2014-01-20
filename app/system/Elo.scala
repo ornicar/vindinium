@@ -16,8 +16,12 @@ final class Elo extends Actor with ActorLogging {
   def receive = {
 
     case game: Game if game.finished && game.arena && game.hasManyNames => playersOf(game) foreach { players =>
-      players foreach { player =>
-        players filterNot (_.name == player.name) map { opponent =>
+      players.groupBy(_.user) foreach {
+        case (user, userPlayers) => {
+          val diff = userPlayers.foldLeft(0) {
+            case (d, p) => d + players.map(calculateEloDiff(p)).foldLeft(0)(_ + _)
+          }
+          User.setElo(user.id, user.elo + diff)
         }
       }
     }
@@ -26,26 +30,39 @@ final class Elo extends Actor with ActorLogging {
   }
 
   def playersOf(game: Game): Future[List[Player]] = User findByNames game.names map { users =>
-    users.map { user =>
-      game heroByName user.name map { Player(user, _) }
+    game.heroes.map { hero =>
+      users.find(_.name == hero.name) map { Player(_, hero) }
     }.flatten
   }
+
+  private def calculateEloDiff(player: Player)(opponent: Player): Int =
+    if (player is opponent) 0
+    else {
+      val expected = 1 / (1 + math.pow(10, (opponent.elo - player.elo) / 400f))
+      val kFactor = math.round(
+        if (player.nbGames > 20) 16
+        else 50 - player.nbGames * (34 / 20f)
+      )
+      val diff = 2 * kFactor * (player.score(opponent) - expected)
+      // println(s"$player vs $opponent = ${diff.toInt}")
+      diff.toInt
+    }
 }
 
 object Elo {
 
-  sealed trait Score
-  case object Win extends Score
-  case object Loss extends Score
-  case object Draw extends Score
-
   case class Player(user: User, hero: Hero) {
     def name = user.name
     def gold = hero.gold
-    def score(opponent: Player) =
-      if (gold > opponent.gold) Win
-      else if (gold < opponent.gold) Loss
-      else Draw
+    def elo = user.elo
+    def nbGames = user.nbGames
+    def is(opponent: Player) = name == opponent.name
+    def score(opponent: Player): Float =
+      if (gold > opponent.gold) 1f
+      else if (gold < opponent.gold) 0f
+      else 0.5f
+
+    override def toString = s"$name [${hero.id}] [gold:$gold] [elo:$elo]"
   }
 
   case object Init

@@ -15,7 +15,8 @@ case class User(
     name: String,
     key: String,
     createdAt: DateTime,
-    elo: Int) {
+    elo: Int,
+    nbGames: Int) {
 
   def id = _id
 
@@ -24,6 +25,8 @@ case class User(
     userId = Some(id),
     elo = Some(elo)
   )
+
+  override def toString = s"$name [elo:$elo] [games:$nbGames]"
 }
 
 object User {
@@ -36,7 +39,8 @@ object User {
       name = name,
       key = RandomString(8),
       createdAt = DateTime.now,
-      elo = 1200)
+      elo = 1200,
+      nbGames = 0)
     coll.insert(user) map { _ => user }
   }
 
@@ -51,11 +55,19 @@ object User {
       .sort(BSONDocument("elo" -> -1))
       .cursor[User].collect[List](nb)
 
+  def setElo(id: String, elo: Int) = coll.update(
+    BSONDocument("_id" -> id),
+    BSONDocument(
+      "$set" -> BSONDocument("elo" -> BSONInteger(elo)),
+      "$inc" -> BSONDocument("nbGames" -> BSONInteger(1))
+    )
+  )
+
   def freeName(name: String): Future[Boolean] =
     db command Count(coll.name, Some(BSONDocument("name" -> name))) map (1>)
 
   def findByNames(names: List[String]): Future[List[User]] =
-    coll.find(BSONDocument("name" -> BSONDocument("$in" -> names))).cursor[User].collect[List]() 
+    coll.find(BSONDocument("name" -> BSONDocument("$in" -> names))).cursor[User].collect[List]()
 
   private val db = play.modules.reactivemongo.ReactiveMongoPlugin.db
   private val coll = db("user")
