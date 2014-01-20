@@ -92,7 +92,6 @@ final class Round(val initGame: Game) extends Actor with CustomLogging {
   }
 
   def step(g: Game) {
-    // log.info(s"step game $game")
     game = g
     context.system.eventStream publish game
     if (game.finished) clients.values foreach (_ ! game)

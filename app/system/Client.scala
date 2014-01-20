@@ -20,7 +20,7 @@ final class HttpClient(token: Token, initialPromise: Promise[PlayerInput]) exten
 
     case Event(game: Game, Response(promise)) => {
       promise success PlayerInput(game, token)
-      if (game.finished) stop()
+      if (game.finished) goto(GameFinished)
       else goto(Working) using Nothing
     }
 
@@ -47,7 +47,7 @@ final class HttpClient(token: Token, initialPromise: Promise[PlayerInput]) exten
 
   when(TimedOut) {
 
-    case Event(game: Game, _) if game.finished => stop()
+    case Event(game: Game, _) if game.finished => goto(GameFinished)
 
     case Event(game: Game, _)                  => stay
 
@@ -55,6 +55,15 @@ final class HttpClient(token: Token, initialPromise: Promise[PlayerInput]) exten
       replyTo ! Status.Failure(TimeoutException("Time out! You must play faster"))
       stay
     }
+  }
+
+  when(GameFinished) {
+
+    case Event(Round.ClientPlay(_, replyTo), _) => {
+      replyTo ! Status.Failure(TimeoutException("The game is finished"))
+      stay
+    }
+
   }
 }
 
@@ -104,6 +113,7 @@ object Client {
   case object Waiting extends State
   case object Working extends State
   case object TimedOut extends State
+  case object GameFinished extends State
 
   sealed trait Data
   case object Nothing extends Data

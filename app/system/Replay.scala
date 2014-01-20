@@ -53,7 +53,7 @@ object Replay {
       if (game.turn == 0) BSONDocument(
         "$set" -> BSONDocument(
           "training" -> game.training,
-          "names" -> game.heroes.map(_.name),
+          "names" -> game.names,
           "playedAt" -> DateTime.now
         )
       ) else BSONDocument()

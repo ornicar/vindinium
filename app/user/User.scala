@@ -1,6 +1,7 @@
 package org.jousse.bot
 package user
 
+import MongoDB._
 import org.joda.time.DateTime
 import play.api.Play.current
 import reactivemongo.bson._
@@ -8,7 +9,6 @@ import reactivemongo.core.commands.Count
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import MongoDB._
 
 case class User(
     _id: String,
@@ -53,6 +53,9 @@ object User {
 
   def freeName(name: String): Future[Boolean] =
     db command Count(coll.name, Some(BSONDocument("name" -> name))) map (1>)
+
+  def findByNames(names: List[String]): Future[List[User]] =
+    coll.find(BSONDocument("name" -> BSONDocument("$in" -> names))).cursor[User].collect[List]() 
 
   private val db = play.modules.reactivemongo.ReactiveMongoPlugin.db
   private val coll = db("user")

@@ -19,7 +19,6 @@ final class Storage extends Actor with ActorLogging {
 
 object Storage {
 
-  case class Save(game: Game)
   case object Init
 
   import play.api.Play.current

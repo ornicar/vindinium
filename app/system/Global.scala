@@ -8,6 +8,7 @@ object Global extends GlobalSettings {
 
   override def onStart(app: Application) {
     Storage.actor ! Storage.Init
+    Elo.actor ! Elo.Init
     Visualization.actor ! Visualization.Init
   }
 }

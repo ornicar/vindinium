@@ -1,5 +1,6 @@
 package org.jousse
 package bot
+
 import scala.util.{ Try, Success, Failure }
 
 case class Game(
@@ -20,6 +21,7 @@ case class Game(
   def hero(id: Int): Hero = heroes find (_.id == id) getOrElse hero1
   def hero(pos: Pos): Option[Hero] = heroes find (_.pos == pos)
   def heroByToken(token: String): Option[Hero] = heroes find (_.token == token)
+  def heroByName(name: String): Option[Hero] = heroes find (_.name == name)
 
   def step = if (finished) this else {
     val next = copy(turn = turn + 1)
@@ -29,10 +31,14 @@ case class Game(
   def crash(c: Crash) = hero match {
     case None                       => this
     case Some(hero) => withHero(hero setCrash c) match {
-      case game if game.heroes.count(_.crashed) > 2 => game.copy(status = Status.AllCrashed)
+      case game if game.heroes.count(_.crashed) == 4 => game.copy(status = Status.AllCrashed)
       case game                                     => game
     }
   }
+
+  def names = heroes.map(_.name)
+
+  def hasManyNames = names.distinct.size > 1
 
   def withHero(hero: Hero): Game = withHero(hero.id, _ => hero)
 
