@@ -17,3 +17,6 @@ play.Project.templatesImport ++= Seq(
   "org.jousse.bot.{ Game, Board, Hero, JsonFormat }",
   "org.jousse.bot.system.Replay",
   "org.jousse.bot.user.User")
+
+
+sources in doc in Compile := List()
