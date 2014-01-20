@@ -182,6 +182,21 @@ button, input {
     display: inline-block;
 }
 
+#gold .cross {
+    width: 24px;
+    height: 24px;
+    vertical-align:-4px;
+    position: absolute;
+    left: 0px;
+    top: 2px;
+    z-index: 10;
+    display: none;
+}
+
+#gold li.crashed .cross {
+    display: block;
+}
+
 #gold .player {
     width: 20px;
     height: 20px;

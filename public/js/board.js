@@ -84,8 +84,15 @@ function drawPosition(game) {
     drawState();
 
     function updatePlayers() {
+
+        $('#gold>li').removeClass('crashed');
+
         for(i=0; i<game.heroes.length; i++) {
             $("#player" + (i+1) +" span.gold").text(game.heroes[i].gold);
+
+            if(game.heroes[i].crashed) {
+                $("#player" + (i+1)).addClass('crashed');
+            }
 
             //It's not a Random bot
             if(game.heroes[i].hasOwnProperty('elo')) {
