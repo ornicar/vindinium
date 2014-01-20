@@ -42,26 +42,13 @@ case class Board(tiles: Vector[Vector[Tile]]) {
   }
   def countMines = tiles.flatten count {
     case Tile.Mine(_) => true
-    case _ => false
+    case _            => false
   }
 
   def section = Board(tiles = tiles.take(size / 2).map(_.take(size / 2)))
 
-  override def toString = {
-
-    val stringVector = tiles flatMap { xs =>
-      xs.zipWithIndex map {
-        case (tile, y) => {
-          val x = tile.render
-          if (y == 0) s"|$x" else if (y == size - 1) s"$x|\n" else x
-        }
-      }
-    }
-
-    val line = "+" + "--" * size + "+\n"
-
-    line + stringVector.mkString + line
-  }
+  def render =
+    tiles map { _ map (_.render) mkString } mkString "\n"
 }
 
 object Board {

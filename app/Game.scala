@@ -29,10 +29,10 @@ case class Game(
   }
 
   def crash(c: Crash) = hero match {
-    case None                       => this
+    case None => this
     case Some(hero) => withHero(hero setCrash c) match {
       case game if game.heroes.count(_.crashed) == 4 => game.copy(status = Status.AllCrashed)
-      case game                                     => game
+      case game                                      => game
     }
   }
 
@@ -58,21 +58,9 @@ case class Game(
 
   override def toString = s"Game[$id]: $status, turn $turn"
 
-  def render = {
-
-    val stringVector = board.tiles.zipWithIndex flatMap {
-      case (xs, x) => xs.zipWithIndex map {
-        case (tile, y) => {
-          val s = hero(Pos(x, y)).fold(tile.render)(_.render)
-          if (y == 0) s"|$s"
-          else if (y == board.size - 1) s"$s|\n"
-          else s
-        }
-      }
-    }
-
-    val line = "+" + "--" * board.size + "+\n"
-
-    line + stringVector.mkString + line
-  }
+  def render = board.tiles.zipWithIndex map {
+    case (xs, x) => xs.zipWithIndex map {
+      case (tile, y) => hero(Pos(x, y)).fold(tile.render)(_.render)
+    } mkString ""
+  } mkString "\n"
 }
