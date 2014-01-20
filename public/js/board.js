@@ -12,7 +12,7 @@ var goblinImage = makeImage("img/mine_neutral.png");
 
 var player1Image = makeImage("img/fireheart/player1_life.png");
 var goblinPlayer1Image = makeImage("img/mine_1.png");
-var player2Image = makeImage("img/fireheart/player2_life.png");
+var player2Image = makeImage("img/nekroblue.png");
 var goblinPlayer2Image = makeImage("img/mine_2.png");
 var player3Image = makeImage("img/fireheart/player3_life.png");
 var goblinPlayer3Image = makeImage("img/mine_3.png");
