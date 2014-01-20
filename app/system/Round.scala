@@ -15,7 +15,7 @@ final class Round(val initGame: Game) extends Actor with CustomLogging {
 
   import Round._
 
-  context setReceiveTimeout 10.seconds
+  context setReceiveTimeout 1.minute
 
   def receive = {
 
@@ -69,7 +69,7 @@ final class Round(val initGame: Game) extends Actor with CustomLogging {
       clients filter (_._2 == client) foreach { case (id, _) ⇒ clients -= id }
     }
 
-    case ReceiveTimeout ⇒ self ! PoisonPill
+    case ReceiveTimeout ⇒ context.parent ! Inactive(game.id)
   }
 
   def addClient(token: Token, props: Props) {
@@ -102,9 +102,11 @@ final class Round(val initGame: Game) extends Actor with CustomLogging {
 
 object Round {
 
-  case class Play(token: String, dir: String)
+  case class Play(token: Token, dir: String)
   case class ClientPlay(play: Play, replyTo: ActorRef)
 
   case class Join(user: User, promise: Promise[PlayerInput])
   case class JoinBot(name: String, driver: Driver)
+
+  case class Inactive(id: GameId)
 }
