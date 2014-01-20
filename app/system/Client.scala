@@ -17,10 +17,16 @@ final class HttpClient(token: Token, initialPromise: Promise[PlayerInput]) exten
   startWith(Waiting, Response(initialPromise))
 
   when(Waiting) {
+
     case Event(game: Game, Response(promise)) => {
       promise success PlayerInput(game, token)
       if (game.finished) stop()
       else goto(Working) using Nothing
+    }
+
+    case Event(Round.ClientPlay(_, replyTo), _) => {
+      replyTo ! Status.Failure(TimeoutException("Wait, you're not supposed to play now"))
+      stay
     }
   }
 

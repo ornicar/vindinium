@@ -20,7 +20,10 @@ final class Round(val initGame: Game) extends Actor with CustomLogging {
   def receive = {
 
     case msg@Play(token, _) => clients get token match {
-      case None         => sender ! notFound(s"No client for ${game.id}/$token")
+      case None         => {
+        log.warning(s"No client for ${game.id}/$token")
+        sender ! notFound("Wrong or expired token")
+      }
       case Some(client) => client ! ClientPlay(msg, sender)
     }
 
