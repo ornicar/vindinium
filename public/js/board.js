@@ -123,7 +123,7 @@ function drawPosition(game) {
         if(winner >= 0) $("#player" + winner).addClass('first');
 
         $('#gold').css('display', 'inline-block');
-        
+
         var percentageSum=0;
 
         if (totalGold == 0) {
@@ -142,7 +142,7 @@ function drawPosition(game) {
 
             });
         }
-        
+
     }
 
     function getWinner() {
@@ -161,8 +161,8 @@ function drawPosition(game) {
 
     function getTotalGold() {
 
-        var totalGold = (game.heroes.reduce(function(pv, cv) { 
-            return {gold: pv.gold + cv.gold}; 
+        var totalGold = (game.heroes.reduce(function(pv, cv) {
+            return {gold: pv.gold + cv.gold};
         }, {gold:0})).gold;
 
         return totalGold;
@@ -354,7 +354,7 @@ function drawPosition(game) {
 
             case '$2':
                 renderObject(index, {
-                    context: canvas.getContext("2d"), 
+                    context: canvas.getContext("2d"),
                     width: 27,
                     height: 28,
                     image: goblinPlayer2Image,
