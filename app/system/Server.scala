@@ -23,9 +23,9 @@ final class Server extends Actor with CustomLogging {
       addRound(config) match {
         case Failure(e) => replyTo ! Status.Failure(e)
         case Success((_, round)) => {
-          round ! Round.Join(Right(user), Driver.Http, inputPromise(replyTo))
+          round ! Round.Join(user, inputPromise(replyTo))
           (1 to 3) foreach { _ =>
-            round ! Round.Join(Left("random"), Driver.Random, inputPromise(replyTo))
+            round ! Round.JoinBot("random", Driver.Random)
           }
         }
       }
@@ -47,7 +47,7 @@ final class Server extends Actor with CustomLogging {
         }
       }) match {
         case Failure(e)     => replyTo ! Status.Failure(e)
-        case Success(round) => round ! Round.Join(Right(user), Driver.Http, inputPromise(sender))
+        case Success(round) => round ! Round.Join(user, inputPromise(sender))
       }
     }
 

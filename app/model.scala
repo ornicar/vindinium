@@ -67,12 +67,10 @@ object Crash {
   case class Rule(r: String) extends Crash(r)
 }
 
-sealed trait Driver
+case class Driver(play: Game => String)
 object Driver {
-  case object Http extends Driver
-  case class Auto(play: Game => String) extends Driver
-  val Immobile = Auto(_ => "stay")
-  val Random = Auto { _ =>
+  val Immobile = Driver(_ => "stay")
+  val Random = Driver { _ =>
     scala.util.Random.shuffle(List("north", "south", "east", "west")).head
   }
 }

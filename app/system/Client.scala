@@ -8,59 +8,85 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ Future, Promise, promise }
 import scala.util.{ Try, Success, Failure }
 
-final class Client(
-    token: Token,
-    driver: Driver,
-    initialPromise: Promise[PlayerInput]) extends Actor with LoggingFSM[Client.State, Client.Data] {
+sealed trait Client extends Actor with LoggingFSM[Client.State, Client.Data]
+
+final class HttpClient(token: Token, initialPromise: Promise[PlayerInput]) extends Client {
 
   import Client._
 
   startWith(Waiting, Response(initialPromise))
 
-  driver match {
-
-    case Driver.Http => {
-      when(Waiting) {
-        case Event(game: Game, Response(promise)) => {
-          promise success PlayerInput(game, token)
-          if (game.finished) stop()
-          else goto(Working) using Nothing
-        }
-      }
-      when(Crashed) {
-        case Event(game: Game, _) if game.finished => stop()
-        case Event(game: Game, _) => stay
-      }
-    }
-    case Driver.Auto(play) => when(Waiting) {
-
-      case Event(game: Game, _) if game.finished => stop()
-      case Event(game: Game, _) => {
-        context.system.scheduler.scheduleOnce(botDelay, sender, Round.Play(token, play(game)))
-        goto(Working) using Nothing
-      }
+  when(Waiting) {
+    case Event(game: Game, Response(promise)) => {
+      promise success PlayerInput(game, token)
+      if (game.finished) stop()
+      else goto(Working) using Nothing
     }
   }
 
   when(Working, stateTimeout = aiTimeout) {
 
+    case Event(msg: Round.ClientPlay, _) => {
+      sender ! msg
+      stay
+    }
+
     case Event(WorkDone(promise), Nothing) => goto(Waiting) using Response(promise)
 
     case Event(StateTimeout, _) => {
       context.parent ! Timeout(token)
-      goto(Crashed)
+      goto(TimedOut)
     }
+  }
+
+  when(TimedOut) {
+
+    case Event(game: Game, _) if game.finished => stop()
+
+    case Event(game: Game, _)                  => stay
+
+    case Event(Round.ClientPlay(_, replyTo), _) => {
+      replyTo ! Status.Failure(TimeoutException("Time out! You must play faster"))
+      stay
+    }
+  }
+}
+
+final class BotClient(token: Token, driver: Driver) extends Client {
+
+  import Client._
+
+  startWith(Waiting, Nothing)
+
+  when(Waiting) {
+
+    case Event(game: Game, _) if game.finished => stop()
+
+    case Event(game: Game, _) => {
+      context.system.scheduler.scheduleOnce(botDelay, sender, Round.Play(token, driver play game))
+      goto(Working)
+    }
+  }
+
+  when(Working) {
+
+    case Event(msg: Round.ClientPlay, _) => {
+      sender ! msg
+      stay
+    }
+
+    case Event(WorkDone(promise), Nothing) => goto(Waiting)
   }
 }
 
 object Client {
 
   import play.api.Play.current
-  private val botDelay = play.api.Play.configuration
+  val botDelay = play.api.Play.configuration
     .getMilliseconds("vindinium.auto-client-delay")
     .getOrElse(0l)
     .milliseconds
-  private val aiTimeout = play.api.Play.configuration
+  val aiTimeout = play.api.Play.configuration
     .getMilliseconds("vindinium.ai-timeout")
     .getOrElse(0l)
     .milliseconds
@@ -71,7 +97,7 @@ object Client {
   sealed trait State
   case object Waiting extends State
   case object Working extends State
-  case object Crashed extends State
+  case object TimedOut extends State
 
   sealed trait Data
   case object Nothing extends Data

@@ -19,42 +19,41 @@ final class Round(val initGame: Game) extends Actor with CustomLogging {
 
   def receive = {
 
-    case Play(token, dir) => {
-      val replyTo = sender
-      clients get token match {
-        case None => replyTo ! notFound(s"No client for ${game.id}/$token")
-        case Some(client) => Arbiter.move(game, token, Dir(dir)) match {
-          case Failure(e) => {
-            log.info(s"Play fail ${game.id}/$token: ${e.getMessage}")
-            replyTo ! Status.Failure(e)
-          }
-          case Success(g) => {
-            client ! Client.WorkDone(inputPromise(replyTo))
-            step(g)
-          }
+    case msg@Play(token, _) => clients get token match {
+      case None         => sender ! notFound(s"No client for ${game.id}/$token")
+      case Some(client) => client ! ClientPlay(msg, sender)
+    }
+
+    case ClientPlay(Play(token, dir), replyTo) => {
+      val client = sender
+      Arbiter.move(game, token, Dir(dir)) match {
+        case Failure(e) => {
+          log.info(s"Play fail ${game.id}/$token: ${e.getMessage}")
+          replyTo ! Status.Failure(e)
+        }
+        case Success(g) => {
+          client ! Client.WorkDone(inputPromise(replyTo))
+          step(g)
         }
       }
     }
 
-    case Join(user, driver, promise) => {
+    case Join(user, promise) => {
       val heroId = clients.size + 1
-      game = game.withHero(heroId, h => user.fold(h.withName, _ blame h))
+      game = game.withHero(heroId, user.blame)
       // FIXME
       val token = game.hero(heroId).token
-      log.info(s"[game ${game.id}] add client $user ($token)")
-      val client = context.actorOf(Props(new Client(token, driver, promise)), name = token)
-      clients += (token -> client)
-      context watch client
-      if (clients.size == 4) {
-        log.info(s"[game ${game.id}] start")
-        game.hero map (_.token) flatMap clients.get match {
-          case None => throw UtterFailException(s"Game ${game.id} started without a hero client")
-          case Some(client) => {
-            context.system.eventStream publish game
-            client ! game
-          }
-        }
-      }
+      log.info(s"[game ${game.id}] add user ${user.name} ($token)")
+      addClient(token, Props(new HttpClient(token, promise)))
+    }
+
+    case JoinBot(name, driver) => {
+      val heroId = clients.size + 1
+      game = game.withHero(heroId, _ withName name)
+      // FIXME
+      val token = game.hero(heroId).token
+      log.info(s"[game ${game.id}] add bot $name ($token)")
+      addClient(token, Props(new BotClient(token, driver)))
     }
 
     case Client.Timeout(token) => {
@@ -73,6 +72,22 @@ final class Round(val initGame: Game) extends Actor with CustomLogging {
     case ReceiveTimeout ⇒ self ! PoisonPill
   }
 
+  def addClient(token: Token, props: Props) {
+    val client = context.actorOf(props, name = token)
+    clients += (token -> client)
+    context watch client
+    if (clients.size == 4) {
+      log.info(s"[game ${game.id}] start")
+      game.hero map (_.token) flatMap clients.get match {
+        case None => throw UtterFailException(s"Game ${game.id} started without a hero client")
+        case Some(client) => {
+          context.system.eventStream publish game
+          client ! game
+        }
+      }
+    }
+  }
+
   def step(g: Game) {
     // log.info(s"step game $game")
     game = g
@@ -88,9 +103,8 @@ final class Round(val initGame: Game) extends Actor with CustomLogging {
 object Round {
 
   case class Play(token: String, dir: String)
+  case class ClientPlay(play: Play, replyTo: ActorRef)
 
-  case class Join(
-    user: Either[String, User],
-    driver: Driver,
-    promise: Promise[PlayerInput])
+  case class Join(user: User, promise: Promise[PlayerInput])
+  case class JoinBot(name: String, driver: Driver)
 }

@@ -14,6 +14,8 @@ case class UserNotFoundException(message: String) extends GameException
 
 case class RuleViolationException(message: String) extends GameException
 
+case class TimeoutException(message: String) extends GameException
+
 case class GameFinishedException(reason: Status.Finish) extends GameException {
   def message = reason.toString
 }

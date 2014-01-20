@@ -70,6 +70,7 @@ object Api extends Controller {
       } recover {
         case e: NotFoundException      => NotFound(e.getMessage)
         case e: RuleViolationException => BadRequest(e.getMessage)
+        case e: TimeoutException       => BadRequest(e.getMessage)
       }
     )
   }

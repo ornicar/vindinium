@@ -10,7 +10,6 @@ case class Hero(
     pos: Pos,
     life: Int,
     gold: Int,
-    driver: Driver,
     crash: Option[Crash]) {
 
   def moveTo(p: Pos) = copy(pos = p)
@@ -56,7 +55,6 @@ object Hero {
     pos = pos,
     life = maxLife,
     gold = 0,
-    driver = Driver.Http,
     crash = None)
 
   val maxLife = 100
