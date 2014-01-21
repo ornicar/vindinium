@@ -43,7 +43,7 @@ object Game extends Controller {
           case None => Ok.chunked(soFar &> EventSource()).as("text/event-stream")
 
           case Some(stream) ⇒
-            if (replay.finished) notFoundPage
+            if (replay.finished) Ok.chunked(soFar &> EventSource()).as("text/event-stream")
             else Ok.chunked(soFar >>> (stream &> asJsonString) &> EventSource()).as("text/event-stream")
 
         }
