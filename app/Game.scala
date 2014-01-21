@@ -11,6 +11,7 @@ case class Game(
     hero2: Hero,
     hero3: Hero,
     hero4: Hero,
+    spawnPos: Pos,
     turn: Int = 0,
     maxTurns: Int,
     status: Status) {
@@ -47,6 +48,13 @@ case class Game(
     hero2 = if (id == 2) f(hero2) else hero2,
     hero3 = if (id == 3) f(hero3) else hero3,
     hero4 = if (id == 4) f(hero4) else hero4)
+
+  def spawnPosOf(hero: Hero) = hero.id match {
+    case 1 => spawnPos
+    case 2 => board mirrorX spawnPos
+    case 3 => board mirrorXY spawnPos
+    case _ => board mirrorY spawnPos
+  }
 
   def withTraining(v: Boolean) = copy(training = v)
 

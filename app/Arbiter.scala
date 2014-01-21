@@ -51,28 +51,15 @@ object Arbiter {
     def mine(pos: Pos) = {
       val h = game.hero(id).fightMine
       if (h.isAlive) game.withHero(h).withBoard(_.transferMine(pos, Some(h.id)))
-      else game.withHero(reSpawn(h)).withBoard(_.transferMines(h.id, None))
+      else reSpawn(game, h).withBoard(_.transferMines(h.id, None))
     }
 
-    @annotation.tailrec
-    def reSpawn(h: Hero, attempts: Int = 0): Hero = {
-      val halfSize = game.board.size / 2
-      val range =
-        if (attempts < 10) halfSize - 2
-        else if (attempts < 20) halfSize - 1
-        else if (attempts < 30) halfSize
-        else if (attempts < 500) game.board.size
-        else sys error s"FUUUUUUUCK Can't respawn hero $h on game $game"
-      val p1 = Pos(Random nextInt range, Random nextInt range)
-      val pos = h.id match {
-        case _ if range == game.board.size => p1
-        case 1 => p1
-        case 2 => game.board mirrorX p1
-        case 3 => game.board mirrorXY p1
-        case 4 => game.board mirrorY p1
-      }
-      if (Validator.heroPos(game, pos)) h reSpawn pos
-      else reSpawn(h, attempts + 1)
+    def reSpawn(g: Game, h: Hero): Game = {
+      val pos = g spawnPosOf h
+      (g hero pos match {
+        case Some(opponent) if opponent.id != h.id => reSpawn(g, opponent)
+        case _                                     => g
+      }) withHero (h reSpawn pos)
     }
 
     def fights(g: Game): Game =
@@ -81,17 +68,16 @@ object Arbiter {
     def attack(g: Game, enemy: Hero): Game = {
       val (h1, h2) = g hero id attack enemy
       List(h1 -> h2, h2 -> h1).foldLeft(g) {
-        case (game, (x, y)) => if (x.isDead) game
-          .withHero(reSpawn(x))
-          .withBoard(_.transferMines(x.id, if (y.isAlive) Some(y.id) else None))
-        else game withHero x
+        case (game, (x, y)) =>
+          if (x.isDead) reSpawn(game, x).withBoard(_.transferMines(x.id, if (y.isAlive) Some(y.id) else None))
+          else game withHero x
       }
     }
 
     def finalize(g: Game) = {
       val h = (g hero id).day withGold g.board.countMines(id)
-      if (h.isDead) g.withHero(reSpawn(h)).withBoard(_.transferMines(id, None))
-      else g.withHero(h)
+      if (h.isDead) reSpawn(g, h).withBoard(_.transferMines(id, None))
+      else g withHero h
     }
 
     finalize(fights(reach(game.hero(id).pos to dir))).step

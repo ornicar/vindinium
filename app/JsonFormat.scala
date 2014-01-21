@@ -34,12 +34,15 @@ object JsonFormat {
     "name" -> h.name,
     "userId" -> h.userId,
     "elo" -> h.elo,
-    "pos" -> Json.obj("x" -> h.pos.x, "y" -> h.pos.y),
+    "pos" -> apply(h.pos),
     "life" -> h.life,
     "gold" -> h.gold,
     "mineCount" -> g.board.countMines(h.id),
+    "spawnPos" -> apply(g.spawnPosOf(h)),
     "crashed" -> h.crashed
   ).noNull
+
+  def apply(p: Pos) = Json.obj("x" -> p.x, "y" -> p.y)
 
   // def apply(r: Replay): JsObject = Json.obj(
   //   "id" -> r.id,

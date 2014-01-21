@@ -15,6 +15,7 @@ object StringMapParser {
       hero2 = Hero(2, "Luther", None, None, pos2),
       hero3 = Hero(3, "Thorfinn", None, None, pos3),
       hero4 = Hero(4, "York", None, None, pos4),
+      spawnPos = pos1,
       maxTurns = turns,
       status = Status.Created)
   }

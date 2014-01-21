@@ -17,13 +17,13 @@ object Generator {
 
     val boardDraft = generateBoard(config)
 
-    generateHeroPos(boardDraft) flatMap { heroPos =>
+    generateSpawnPos(boardDraft) flatMap { spawnPos =>
 
-      val board = fillBoard(boardDraft, heroPos)
+      val board = fillBoard(boardDraft, spawnPos)
 
       if (board.countMines == 0) fail("Board has no mine")
-      else placeTaverns(board, heroPos, config) map { finalBoard =>
-        generateGame(finalBoard, config, turns, training, heroPos)
+      else placeTaverns(board, spawnPos, config) map { finalBoard =>
+        generateGame(finalBoard, config, turns, training, spawnPos)
       }
     }
   } recoverWith {
@@ -32,14 +32,15 @@ object Generator {
     }
   }
 
-  private def generateGame(board: Board, config: Config.GenMap, turns: Int, training: Boolean, heroPos: Pos) = Game(
+  private def generateGame(board: Board, config: Config.GenMap, turns: Int, training: Boolean, spawnPos: Pos) = Game(
     id = RandomString(8),
     training = training,
     board = board,
-    hero1 = Hero(1, "Alaric", None, None, heroPos),
-    hero2 = Hero(2, "Luther", None, None, board mirrorX heroPos),
-    hero3 = Hero(3, "Thorfinn", None, None, board mirrorXY heroPos),
-    hero4 = Hero(4, "York", None, None, board mirrorY heroPos),
+    hero1 = Hero(1, "Alaric", None, None, spawnPos),
+    hero2 = Hero(2, "Luther", None, None, board mirrorX spawnPos),
+    hero3 = Hero(3, "Thorfinn", None, None, board mirrorXY spawnPos),
+    hero4 = Hero(4, "York", None, None, board mirrorY spawnPos),
+    spawnPos = spawnPos,
     maxTurns = turns,
     status = Status.Created)
 
@@ -67,16 +68,16 @@ object Generator {
     doPlace(Random.shuffle(Traverser(board.section, heroPos).toList))
   }
 
-  private def generateHeroPos(board: Board, attempts: Int = 1): Try[Pos] = {
+  private def generateSpawnPos(board: Board, attempts: Int = 1): Try[Pos] = {
     val pos = Pos(Random nextInt (board.size / 2 - 2), Random nextInt (board.size / 2 - 2))
-    if (Validator.heroPos(board, pos)) Success(pos)
+    if (validateSpawnPos(board, pos)) Success(pos)
     else fail("Can't find a good starting position")
   } recoverWith {
-    case err if attempts < maxAttempts => generateHeroPos(board, attempts + 1)
+    case err if attempts < maxAttempts => generateSpawnPos(board, attempts + 1)
   }
 
-  private def fillBoard(board: Board, heroPos: Pos) = {
-    val reachable = Traverser(board, heroPos)
+  private def fillBoard(board: Board, spawnPos: Pos) = {
+    val reachable = Traverser(board, spawnPos)
     board.allPos.diff(reachable).foldLeft(board) {
       case (b, pos) => b get pos match {
         case Some(Tile.Mine(_)) =>
@@ -107,6 +108,12 @@ object Generator {
     }
 
     replicate(sector(config.size / 2))
+  }
+
+  def validateSpawnPos(b: Board, pos: Pos): Boolean = (b isAir pos) && {
+    val traverse = Traverser(b, pos)
+    (traverse contains b.mirrorX(pos)) &&
+      (traverse contains b.mirrorY(pos))
   }
 
   private def fail(err: String) = scala.util.Failure(bot.GeneratorException(err))
