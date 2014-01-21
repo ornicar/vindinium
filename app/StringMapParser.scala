@@ -23,7 +23,9 @@ object StringMapParser {
     import Tile._
     val str = Maps get strOrName getOrElse strOrName
     val heroes = collection.mutable.Map[Int, Pos]()
-    val nonEmptyLines = str.lines.filter(_.nonEmpty).toList
+    val nonEmptyLines = str.lines.toList
+      .dropWhile(_.isEmpty)
+      .reverse.dropWhile(_.isEmpty).reverse
     val width = (nonEmptyLines.foldLeft(0) {
       case (len, line) => if (line.size > len) line.size else len
     }) / 2
@@ -48,9 +50,10 @@ object StringMapParser {
       }
     }
     (tiles.toList, heroes.toMap.toList.sortBy(_._1).map(_._2)) match {
-      case (tiles, List(h1, h2, h3, h4)) => Parsed(
-        board = Board(tiles.map(_.toVector).toVector),
-        h1, h2, h3, h4)
+      case (tiles, List(h1, h2, h3, h4)) => {
+        val board = Board(tiles.map(_.toVector).toVector)
+        Parsed(board, h1, h2, h3, h4)
+      }
       case _ => throw MapParseException(str)
     }
   }
