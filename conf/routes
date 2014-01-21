@@ -1,6 +1,6 @@
-GET     /                               controllers.Game.index
-GET     /doc                            controllers.Game.documentation
-GET     /starters                       controllers.Game.starters
+GET     /                               controllers.App.index
+GET     /doc                            controllers.App.documentation
+GET     /starters                       controllers.App.starters
 
 POST    /api/arena                      controllers.Api.arena
 POST    /api/training                   controllers.Api.training
@@ -13,6 +13,5 @@ GET     /ai                             controllers.User.list
 
 GET     /events/$id<[\w]{8}>            controllers.Game.events(id: String)
 GET     /$id<[\w]{8}>                   controllers.Game.show(id: String)
-GET     /test                           controllers.Game.test
 
 GET     /assets/*file                   controllers.Assets.at(path="/public", file)

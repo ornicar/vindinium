@@ -18,29 +18,12 @@ import user.{ User => U }
 
 object Game extends Controller {
 
-  def index = Action.async {
-    val topUserNb = 50
-    val recentReplayNb = 50
-    Replay recent recentReplayNb zip U.top(topUserNb) map {
-      case (replays, users) => Ok(views.html.index(replays, users))
-    }
-  }
-
   def show(id: String) = Action.async {
     Replay find id map {
       case Some(replay) ⇒ Ok(views.html.visualize(replay))
       case None         ⇒ NotFound
     }
   }
-
-  def documentation() = Action {
-    Ok(views.html.documentation())
-  }
-
-  def starters() = Action {
-    Ok(views.html.starters())
-  }
-
 
   implicit val stringMessages = play.api.libs.Comet.CometMessage[String](identity)
 
@@ -70,9 +53,4 @@ object Game extends Controller {
       }
     }
   }
-
-  def test = Action {
-    Ok(views.html.test())
-  }
-
 }
