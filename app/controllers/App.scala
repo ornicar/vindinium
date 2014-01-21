@@ -17,11 +17,11 @@ object App extends Controller {
     }
   }
 
-  def documentation() = Action {
+  def documentation = Action {
     Ok(views.html.documentation())
   }
 
-  def starters() = Action {
+  def starters = Action {
     Ok(views.html.starters())
   }
 }

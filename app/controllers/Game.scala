@@ -21,7 +21,7 @@ object Game extends Controller {
   def show(id: String) = Action.async {
     Replay find id map {
       case Some(replay) ⇒ Ok(views.html.visualize(replay))
-      case None         ⇒ NotFound
+      case None         ⇒ notFoundPage
     }
   }
 
@@ -33,7 +33,7 @@ object Game extends Controller {
     val actor = Visualization.actor
 
     Replay find id flatMap {
-      case None => Future.successful(NotFound)
+      case None => Future successful notFoundPage
 
       case Some(replay) => {
 
@@ -43,12 +43,9 @@ object Game extends Controller {
           case None => Ok.chunked(soFar &> EventSource()).as("text/event-stream")
 
           case Some(stream) ⇒
-            if (replay.finished) {
-              NotFound
-            }
-            else {
-              Ok.chunked(soFar >>> (stream &> asJsonString) &> EventSource()).as("text/event-stream")
-            }
+            if (replay.finished) notFoundPage
+            else Ok.chunked(soFar >>> (stream &> asJsonString) &> EventSource()).as("text/event-stream")
+
         }
       }
     }

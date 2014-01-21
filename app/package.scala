@@ -15,5 +15,7 @@ package object bot {
     }
   }
 
+  def notFoundPage = play.api.mvc.Results.NotFound(views.html.notFound())
+
   // implicit final class BotPimpedOption
 }

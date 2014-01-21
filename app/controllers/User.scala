@@ -38,7 +38,7 @@ object User extends Controller {
 
   def show(id: String) = Action.async { req =>
     U find id flatMap {
-      case None       => Future successful NotFound
+      case None       => Future successful notFoundPage
       case Some(user) => Replay.recentByUserName(user.name, 100) map { replays =>
         Ok(views.html.user.show(user, replays, None))
       }
