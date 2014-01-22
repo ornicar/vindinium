@@ -12,7 +12,7 @@ object Arbiter {
 
   def crash(game: Game, token: String): Try[Game] =
     validate(game, token) { hero =>
-      game.crash(Crash.Timeout).step
+      game.setTimedOut.step
     }
 
   private def validate(game: Game, token: String)(f: Hero => Game): Try[Game] =
@@ -22,7 +22,7 @@ object Arbiter {
       case (_, None) =>
         Failure(RuleViolationException("Token not found"))
       case (_, Some(hero)) if hero.crashed =>
-        Failure(RuleViolationException(s"Hero has crashed: ${hero.crash.getOrElse("?")}"))
+        Failure(RuleViolationException(s"Hero has timed out"))
       case (_, Some(hero)) if game.hero != Some(hero) =>
         Failure(RuleViolationException(s"Not your turn to move"))
       case (_, Some(hero)) => Success(f(hero))

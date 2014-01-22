@@ -29,9 +29,9 @@ case class Game(
     if (next.turn > maxTurns) next.copy(status = Status.TurnMax) else next
   }
 
-  def crash(c: Crash) = hero match {
+  def setTimedOut = hero match {
     case None => this
-    case Some(hero) => withHero(hero setCrash c) match {
+    case Some(hero) => withHero(hero.setTimedOut) match {
       case game if game.heroes.count(_.crashed) == 4 => game.copy(status = Status.AllCrashed)
       case game                                      => game
     }

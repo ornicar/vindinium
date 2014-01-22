@@ -61,12 +61,6 @@ object Status {
   case object TurnMax extends Finish
 }
 
-sealed abstract class Crash(reason: String)
-object Crash {
-  case object Timeout extends Crash("Timed out")
-  case class Rule(r: String) extends Crash(r)
-}
-
 case class Driver(play: Game => String)
 object Driver {
   val Immobile = Driver(_ => "stay")
