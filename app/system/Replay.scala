@@ -14,13 +14,10 @@ case class Replay(
     _id: String,
     training: Boolean,
     names: List[String],
-    games: List[String]) {
+    games: List[String],
+    finished: Boolean) {
 
   def id = _id
-
-  lazy val finished: Boolean = games.lastOption.map(Json.parse).fold(false) { game =>
-    (game \ "finished").as[Boolean]
-  }
 }
 
 object Replay {
@@ -35,12 +32,12 @@ object Replay {
 
   def recent(nb: Int): Future[List[Replay]] =
     coll.find(BSONDocument("training" -> false))
-      .sort(BSONDocument("playedAt" -> -1))
+      .sort(BSONDocument("date" -> -1))
       .cursor[Replay].collect[List](nb)
 
   def recentByUserName(name: String, nb: Int): Future[List[Replay]] =
     coll.find(BSONDocument("training" -> false, "names" -> name))
-      .sort(BSONDocument("playedAt" -> -1))
+      .sort(BSONDocument("date" -> -1))
       .cursor[Replay].collect[List](nb)
 
   def add(game: Game) = coll.update(
@@ -50,14 +47,16 @@ object Replay {
         "games" -> (Json stringify JsonFormat(game))
       )
     ) ++ {
-      if (game.turn == 0) BSONDocument(
-        "$set" -> BSONDocument(
-          "training" -> game.training,
-          "names" -> game.names,
-          "playedAt" -> DateTime.now
+        if (game.turn == 0) BSONDocument(
+          "$set" -> BSONDocument(
+            "training" -> game.training,
+            "names" -> game.names,
+            "date" -> DateTime.now,
+            "finished" -> false
+          )
         )
-      ) else BSONDocument()
-    },
+        else if (game.finished) BSONDocument("$set" -> BSONDocument("finished" -> true)) else BSONDocument()
+      },
     upsert = true)
 
   private val db = play.modules.reactivemongo.ReactiveMongoPlugin.db
