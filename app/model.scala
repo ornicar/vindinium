@@ -19,6 +19,8 @@ case class Pos(x: Int, y: Int) {
     case Dir.East  => east
     case Dir.West  => west
   }
+
+  def isIn(size: Int) = (x >= 0 && x < size && y >= 0 && y < size)
 }
 
 sealed trait Dir

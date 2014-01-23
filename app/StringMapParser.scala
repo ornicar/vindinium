@@ -52,7 +52,7 @@ object StringMapParser {
     }
     (tiles.toList, heroes.toMap.toList.sortBy(_._1).map(_._2)) match {
       case (tiles, List(h1, h2, h3, h4)) => {
-        val board = Board(tiles.map(_.toVector).toVector)
+        val board = Board(tiles.map(_.toVector).toVector.flatten)
         Parsed(board, h1, h2, h3, h4)
       }
       case _ => throw MapParseException(str)

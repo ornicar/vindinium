@@ -69,9 +69,5 @@ case class Game(
 
   override def toString = s"Game[$id]: $status, turn $turn"
 
-  def render = board.tiles.zipWithIndex map {
-    case (xs, x) => xs.zipWithIndex map {
-      case (tile, y) => hero(Pos(x, y)).fold(tile.render)(_.render)
-    } mkString ""
-  } mkString "\n"
+  def render = board.render 
 }
