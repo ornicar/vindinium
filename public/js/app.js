@@ -4,12 +4,19 @@ $(function() {
         var CURRENTPOS = 0;
         var POSITIONS = [];
         var $turn = $('#turn span.number');
+        var $replayRange = $('#replayRange');
+        var maxTurns = -1;
 
         function updateGame(pos) {
-          console.debug('paint');
             var game = POSITIONS[pos];
+
+            if(maxTurns == -1) {
+                maxTurns = game['maxTurns'];
+                $replayRange.attr('max', maxTurns);
+            }
             drawPosition(game);
-            $turn.text(Math.floor((game['turn'] + 1) / 4) + '/' + Math.ceil(game['maxTurns']/4));
+            $replayRange.val(pos);
+            $turn.text(Math.floor((game['turn'] + 1) / 4) + '/' + Math.ceil(maxTurns/4));
         }
 
         // nav
@@ -34,6 +41,12 @@ $(function() {
             }
             event.stopPropagation();
             return false;
+        });
+
+        //Replay
+        //
+        $("#replayRange").change(function() {
+            updateGame($(this).val());
         });
 
         var throttledUpdateGame = _.throttle(function(pos) {

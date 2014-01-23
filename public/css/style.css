@@ -101,6 +101,7 @@ button, input {
 
 #nav {
     display: none;
+    text-align: center;
 }
 
 #nav span {

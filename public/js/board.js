@@ -58,6 +58,8 @@ function drawPosition(game) {
 
     if(first) {
         $('#bars').css('height', (boardWidth-($('#scoreBarCoin').height())) + 'px');
+        $('#replay').css('width', boardWidth);
+        $('#replayRange').css('width', boardWidth);
         first = false;
     }
 
