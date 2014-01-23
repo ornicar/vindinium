@@ -6,16 +6,20 @@ body {
     font-family: monospace;
 }
 
-body h1, body h2, body h3, #logo, #main-menu, #game {
+body h1, body h2, body h3, body h4, #logo, #main-menu, #game {
     font-family: 'VT323', cursive;
 }
 
 body h2 {
-    font-size: 36px;
+    font-size: 38px;
 }
 
 body h3 {
-    font-size: 30px;
+    font-size: 28px;
+}
+
+body h4 {
+    font-size: 22px;
 }
 
 a {
@@ -38,7 +42,7 @@ button, input {
     padding-top: 30px;
 }
 
-#doc {
+#doc, #starters {
     text-align: left;
 }
 

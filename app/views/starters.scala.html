@@ -1,5 +1,39 @@
 @()
 
 @main("Starter packages") {
+<section id="starters">
+    <div class="row">
+        <div class="col-md-8 col-md-offset-2">
 
+            <h2>Chat</h2>
+            <p>
+            First, be sure to join the #vindinium IRC chan on Freenode if you have any questions or if you want to geek around a little bit. Here is a <a href="http://webchat.freenode.net/?channels=vindinium">direct link for people who don't have an IRC client</a>.
+            </p>
+            <h2>Registration</h2>
+            <p>First, you will need to register your AI (Artificial Intelligence) on the server using the <a href="@routes.User.registerForm()">register page</a>. You just have to enter a name and we will give you a secret key. Be sure to write it down as there is no way to recover it later. This key will be used to uniquely identify your bot with the name you choosed.</p>
+            <p>Once you have your key, you can already try one of <a href="#starter-packs">the starter packs</a> in training mode if you want. More on <a href="#game-modes">modes in the next section</a>.</p>
+
+            <h2>API</h2>
+
+            <h3 id="game-modes">Game modes</h3>
+            <p> The game server supports two modes: training and arena. Both have different urls.</p>
+
+            <h4>Training</h4>
+            <p>In training mode, you can play against some dummy bots, you can specify the number of turns you want to play and, if you want, you can provide a specific map to test your algorithms. The games played in Training mode are not scored, so feel free to use it as much as you want.</p>
+            <p>In training mode, the url you will need to use is: <pre>http://vindinium.jousse.org/api/training</pre></p>
+
+            <h4>Arena</h4>
+            <p>In arena mode, the url you will need to use is: <pre>http://vindinium.jousse.org/api/training</pre></p>
+
+            <h2 id="starter-packs">Starter packs</h2>
+            <h3>Scala</h3>
+            <p>A scala starter pack is <a href="">downloadable here</a>. Be sure to read the included README to understand how to use it.</p>
+            <h3>Python</h3>
+            <p>A python starter pack is <a href="">downloadable here</a>. Be sure to read the included README to understand how to use it.</p>
+            <h3>Java</h3>
+            <p>A python starter pack is <a href="">downloadable here</a>. Be sure to read the included README to understand how to use it.</p>
+
+        </div>
+    </div>
+</section>
 }
