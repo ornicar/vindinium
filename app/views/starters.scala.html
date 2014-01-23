@@ -13,8 +13,23 @@
             <p>First, you will need to register your AI (Artificial Intelligence) on the server using the <a href="@routes.User.registerForm()">register page</a>. You just have to enter a name and we will give you a secret key. Be sure to write it down as there is no way to recover it later. This key will be used to uniquely identify your bot with the name you choosed.</p>
             <p>Once you have your key, you can already try one of <a href="#starter-packs">the starter packs</a> in training mode if you want. More on <a href="#game-modes">modes in the next section</a>.</p>
 
-            <h2>API</h2>
+            <h2>Game architecture</h2>
+            <pre>
+             +------------+                             +-----------------+
+             |            |  1)HTTP Request             |                 |
+             |            | (initial state, move order) |                 |
+             |   Client   +---------------------------->|                 |
+             |            |                             |                 |
+             | scala,     |                             |    Game server  |
+             | python,    |  2)Json Response            |                 |
+             | java,      |(new game state)             |                 |
+             | …          |<----------------------------+                 |
+             |            |                             |                 |
+             |            |                             |                 |
+             +------------+                             +-----------------+</pre>
 
+            <p>As you may already have noticed with the above diagram, your bot will basically be an HTTP client. You send a request (to have the initial game state or to move your bot) and then you got a HTTP Response encoded in Json.</p>
+            <h2>API</h2>
             <h3 id="game-modes">Game modes</h3>
             <p> The game server supports two modes: training and arena. Both have different urls.</p>
 
