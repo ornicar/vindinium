@@ -39,28 +39,21 @@ $(function() {
           updateGame(pos);
         }, 20);
 
-        // if replay is loaded in global object it means game is over
-        // else let's receive events and play them
-        if (replayObject) {
-            POSITIONS = replayObject.games;
-            updateGame(CURRENTPOS);
-        } else {
-            var source = new EventSource("/events/" + gameId);
-            source.addEventListener('message', function(e) {
-                POSITIONS.push(JSON.parse(e.data));
-                debouncedUpdateGame(CURRENTPOS);
-                // updateGame(CURRENTPOS);
-                CURRENTPOS++;
-            });
-            source.addEventListener('open', function(e) {
-                // Connection was opened.
-            }, false);
-            source.addEventListener('error', function(e) {
-                source.close();
-                if (e.readyState == EventSource.CLOSED) {
-                    // Connection was closed.
-                }
-            }, false);
-        }
+        var source = new EventSource("/events/" + gameId);
+        source.addEventListener('message', function(e) {
+            POSITIONS.push(JSON.parse(e.data));
+            debouncedUpdateGame(CURRENTPOS);
+            // updateGame(CURRENTPOS);
+            CURRENTPOS++;
+        });
+        source.addEventListener('open', function(e) {
+            // Connection was opened.
+        }, false);
+        source.addEventListener('error', function(e) {
+            source.close();
+            if (e.readyState == EventSource.CLOSED) {
+                // Connection was closed.
+            }
+        }, false);
     });
 });
