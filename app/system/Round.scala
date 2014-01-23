@@ -96,7 +96,10 @@ final class Round(val initGame: Game) extends Actor with CustomLogging {
   def step(g: Game) {
     game = g
     context.system.eventStream publish game
-    if (game.finished) clients.values foreach (_ ! game)
+    if (game.finished) {
+      Replay finish game.id
+      clients.values foreach (_ ! game)
+    }
     else game.hero foreach {
       case h if h.crashed => step(game.step)
       case h              => clients get h.token foreach (_ ! game)

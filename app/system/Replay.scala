@@ -49,6 +49,11 @@ object Replay {
     BSONDocument("$push" -> BSONDocument("moves" -> dir))
   )
 
+  def finish(id: String) = coll.update(
+    BSONDocument("_id" -> id),
+    BSONDocument("$set" -> BSONDocument("finished" -> true))
+  )
+
   def insert(game: Game) = coll.insert(Replay(
     _id = game.id,
     init = game,

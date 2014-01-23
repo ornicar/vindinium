@@ -44,15 +44,9 @@ object JsonFormat {
 
   def apply(p: Pos) = Json.obj("x" -> p.x, "y" -> p.y)
 
-  // def apply(r: Replay): JsObject = Json.obj(
-  //   "id" -> r.id,
-  //   "games" -> JsArray(r.games.map(Json.parse))
-  // )
-
-  def jsonString(r: Replay): String = {
-    val games = r.games.mkString("[", ", ", "]")
-    s"""{"id": "${r.id}", "games": $games}"""
-  }
+  def apply(r: Replay): JsObject = Json.obj(
+    "id" -> r.id,
+    "games" -> r.games.map(apply))
 
   private implicit final class PimpedJsObject(js: JsObject) {
     def noNull = JsObject {

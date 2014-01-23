@@ -49,7 +49,7 @@
   var gameId = "@replay.id";
   var replayObject;
   @if(replay.finished) {
-    replayObject = @Html(JsonFormat jsonString replay);
+    replayObject = @Html(Json.stringify(JsonFormat(replay)));
   }
 </script>
 }
