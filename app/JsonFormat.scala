@@ -44,10 +44,6 @@ object JsonFormat {
 
   def apply(p: Pos) = Json.obj("x" -> p.x, "y" -> p.y)
 
-  def apply(r: Replay): JsObject = Json.obj(
-    "id" -> r.id,
-    "games" -> r.games.map(apply))
-
   private implicit final class PimpedJsObject(js: JsObject) {
     def noNull = JsObject {
       js.fields collect {

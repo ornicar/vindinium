@@ -3,6 +3,7 @@ package system
 
 import MongoDB._
 import org.joda.time.DateTime
+import play.api.libs.iteratee._
 import play.api.libs.json._
 import play.api.Play.current
 import reactivemongo.bson._
@@ -19,10 +20,8 @@ case class Replay(
     finished: Boolean,
     date: DateTime) {
 
-  def games: List[Game] = (moves.foldLeft(List(init)) {
-    case (Nil, _)                => Nil
-    case (all@(game :: _), move) => Arbiter.replay(game, move) :: all
-  }).reverse
+  def games: Enumerator[Game] =
+    (Enumerator enumerate moves) &> Enumeratee.scanLeft(init)(Arbiter.replay)
 
   def id = _id
 }

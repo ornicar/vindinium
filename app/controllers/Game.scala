@@ -26,7 +26,7 @@ object Game extends Controller {
   }
 
   private implicit val stringMessages = play.api.libs.Comet.CometMessage[String](identity)
-  private def soFar(replay: Replay): Enumerator[String] = Enumerator.enumerate(replay.games) &> asJsonString
+  private def soFar(replay: Replay): Enumerator[String] = replay.games &> asJsonString
   private def eventSource(data: Enumerator[String]) = Ok.chunked(data &> EventSource()).as("text/event-stream")
 
   def events(id: String) = Action.async {
