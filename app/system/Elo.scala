@@ -9,6 +9,8 @@ import scala.concurrent.Future
 
 final class Elo extends Actor with ActorLogging {
 
+  val gameBonus = 1
+
   import Elo._
 
   context.system.eventStream.subscribe(self, classOf[Game])
@@ -21,7 +23,7 @@ final class Elo extends Actor with ActorLogging {
           val diff = userPlayers.foldLeft(0) {
             case (d, p) => d + players.map(calculateEloDiff(p)).foldLeft(0)(_ + _)
           }
-          User.setElo(user.id, user.elo + diff)
+          User.setElo(user.id, user.elo + diff + gameBonus)
         }
       }
     }
