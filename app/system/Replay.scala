@@ -12,20 +12,31 @@ import scala.concurrent.Future
 
 case class Replay(
     _id: String,
+    init: Game,
+    moves: List[Dir],
     training: Boolean,
     names: List[String],
-    games: List[String],
     finished: Boolean) {
+
+  def games: List[Game] = (moves.foldLeft(List(init)) {
+    case (Nil, _)                => Nil
+    case (all@(game :: _), move) => Arbiter.replay(game, move) :: all
+  }).reverse
 
   def id = _id
 }
 
 object Replay {
 
-  // implicit val jsValueReader = new BSONReader[BSONString, JsValue] {
-  //   def read(string: BSONString) = Json parse string.value
-  // }
-  private implicit val reader = reactivemongo.bson.Macros.reader[Replay]
+  def make(game: Game) = Replay(
+    _id = game.id,
+    init = game,
+    moves = Nil,
+    training = game.training,
+    names = game.names,
+    finished = game.finished)
+
+  import BSONHandlers._
 
   def find(id: String): Future[Option[Replay]] =
     coll.find(BSONDocument("_id" -> id)).one[Replay]
@@ -40,24 +51,12 @@ object Replay {
       .sort(BSONDocument("date" -> -1))
       .cursor[Replay].collect[List](nb)
 
-  def add(game: Game) = coll.update(
-    BSONDocument("_id" -> game.id),
-    BSONDocument(
-      "$push" -> BSONDocument(
-        "games" -> (Json stringify JsonFormat(game))
-      )
-    ) ++ {
-        if (game.turn == 0) BSONDocument(
-          "$set" -> BSONDocument(
-            "training" -> game.training,
-            "names" -> game.names,
-            "date" -> DateTime.now,
-            "finished" -> false
-          )
-        )
-        else if (game.finished) BSONDocument("$set" -> BSONDocument("finished" -> true)) else BSONDocument()
-      },
-    upsert = true)
+  def add(id: String, dir: Dir) = coll.update(
+    BSONDocument("_id" -> id),
+    BSONDocument("$push" -> BSONDocument("moves" -> dir))
+  )
+
+  def insert(game: Game) = coll.insert(make(game))
 
   private val db = play.modules.reactivemongo.ReactiveMongoPlugin.db
   private val coll = db("replay")

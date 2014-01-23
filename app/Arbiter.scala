@@ -5,6 +5,8 @@ import scala.util.{ Random, Try, Success, Failure }
 
 object Arbiter {
 
+  def replay(game: Game, dir: Dir): Game = doMove(game, game.heroId, dir)
+
   def move(game: Game, token: String, dir: Dir): Try[Game] =
     validate(game, token) { hero =>
       doMove(game, hero.id, dir)
