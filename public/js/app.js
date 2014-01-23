@@ -46,7 +46,8 @@ $(function() {
         //Replay
         //
         $("#replayRange").change(function() {
-            updateGame($(this).val());
+            CURRENTPOS = $(this).val();
+            updateGame(CURRENTPOS);
         });
 
         var throttledUpdateGame = _.throttle(function(pos) {
