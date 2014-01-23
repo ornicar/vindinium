@@ -6,6 +6,7 @@ $(function() {
         var $turn = $('#turn span.number');
 
         function updateGame(pos) {
+          console.debug('paint');
             var game = POSITIONS[pos];
             drawPosition(game);
             $turn.text(Math.floor((game['turn'] + 1) / 4) + '/' + Math.ceil(game['maxTurns']/4));
@@ -35,14 +36,14 @@ $(function() {
             return false;
         });
 
-        var debouncedUpdateGame = _.debounce(function(pos) {
+        var throttledUpdateGame = _.throttle(function(pos) {
           updateGame(pos);
-        }, 20);
+        }, 100);
 
         var source = new EventSource("/events/" + gameId);
         source.addEventListener('message', function(e) {
             POSITIONS.push(JSON.parse(e.data));
-            debouncedUpdateGame(CURRENTPOS);
+            throttledUpdateGame(CURRENTPOS);
             // updateGame(CURRENTPOS);
             CURRENTPOS++;
         });
