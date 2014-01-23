@@ -17,5 +17,6 @@ package object bot {
 
   def notFoundPage = play.api.mvc.Results.NotFound(views.html.notFound())
 
-  // implicit final class BotPimpedOption
+  private[bot] def charInt(c: Char): Option[Int] = 
+    scala.util.Try(java.lang.Integer.parseInt(c.toString)).toOption
 }

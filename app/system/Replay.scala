@@ -16,7 +16,8 @@ case class Replay(
     moves: List[Dir],
     training: Boolean,
     names: List[String],
-    finished: Boolean) {
+    finished: Boolean,
+    date: DateTime) {
 
   def games: List[Game] = (moves.foldLeft(List(init)) {
     case (Nil, _)                => Nil
@@ -27,14 +28,6 @@ case class Replay(
 }
 
 object Replay {
-
-  def make(game: Game) = Replay(
-    _id = game.id,
-    init = game,
-    moves = Nil,
-    training = game.training,
-    names = game.names,
-    finished = game.finished)
 
   import BSONHandlers._
 
@@ -56,7 +49,14 @@ object Replay {
     BSONDocument("$push" -> BSONDocument("moves" -> dir))
   )
 
-  def insert(game: Game) = coll.insert(make(game))
+  def insert(game: Game) = coll.insert(Replay(
+    _id = game.id,
+    init = game,
+    moves = Nil,
+    training = game.training,
+    names = game.names,
+    finished = game.finished,
+    date = DateTime.now))
 
   private val db = play.modules.reactivemongo.ReactiveMongoPlugin.db
   private val coll = db("replay")

@@ -48,6 +48,14 @@ object Tile {
   case object Wall extends Tile('#', '#')
   case object Tavern extends Tile('[', ']')
   case class Mine(owner: Option[Int]) extends Tile('$', owner.fold('-')(_.toString.head))
+
+  def read(str: String): Tile = str.toList match {
+    case List(' ', ' ') ⇒ Tile.Air
+    case List('#', '#') ⇒ Tile.Wall
+    case List('[', ']') ⇒ Tile.Tavern
+    case List('$', x)   ⇒ Tile.Mine(charInt(x))
+    case x              ⇒ sys error s"Can't parse tile $str"
+  }
 }
 
 sealed trait Status {
