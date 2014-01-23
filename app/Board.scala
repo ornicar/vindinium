@@ -3,17 +3,19 @@ package bot
 
 import scala.util.Try
 
-case class Board(tiles: Vector[Vector[Tile]]) {
+case class Board(tiles: Vector[Tile]) {
 
-  def get(pos: Pos): Option[Tile] = (tiles lift pos.x).flatMap(_ lift pos.y)
+  def posIndex(pos: Pos): Option[Int] = if (pos isIn size) Some(pos.x * size + pos.y) else None
+  def indexPos(index: Int): Pos = Pos(index / size, index % size)
 
-  def update(pos: Pos, tile: Tile): Board = Try {
-    tiles.updated(pos.x, tiles(pos.x).updated(pos.y, tile))
-  } map Board.apply getOrElse this
+  def get(pos: Pos): Option[Tile] = posIndex(pos) flatMap tiles.lift
+
+  def update(pos: Pos, tile: Tile): Board =
+    posIndex(pos).fold(this) { index => Board(tiles.updated(index, tile)) }
 
   def remove(pos: Pos): Board = update(pos, Tile.Air)
 
-  val size = tiles.length
+  val size = math.sqrt(tiles.length).toInt
 
   def isAir(pos: Pos) = get(pos).fold(false)(Tile.Air==)
 
@@ -21,11 +23,11 @@ case class Board(tiles: Vector[Vector[Tile]]) {
   def mirrorY(pos: Pos) = pos.copy(y = size - pos.y - 1)
   def mirrorXY(pos: Pos) = mirrorX(mirrorY(pos))
 
-  def allPos = (0 to size - 1).toList flatMap { x =>
-    (0 to size - 1).toList map { Pos(x, _) }
+  lazy val posTiles = tiles.zipWithIndex map {
+    case (tile, index) => indexPos(index) -> tile
   }
 
-  def posTiles = allPos zip tiles.flatten
+  def allPos = posTiles map (_._1)
 
   def transferMine(pos: Pos, to: Option[Int]): Board = update(pos, Tile.Mine(to))
 
@@ -36,24 +38,15 @@ case class Board(tiles: Vector[Vector[Tile]]) {
     }
   }
 
-  def countMines(of: Int) = tiles.flatten.foldLeft(0) {
-    case (c, Tile.Mine(Some(owner))) if owner == of => c + 1
-    case (c, _)                                     => c
-  }
-  def countMines = tiles.flatten count {
+  def countMines(of: Int) = tiles count (Tile.Mine(Some(of))==)
+  def countMines = tiles count {
     case Tile.Mine(_) => true
     case _            => false
   }
 
-  def section = Board(tiles = tiles.take(size / 2).map(_.take(size / 2)))
+  def section = Board(tiles = tiles.zipWithIndex collect {
+    case (tile, index) if (index % size) < (size / 2) => tile
+  })
 
-  def render =
-    tiles map { _ map (_.render) mkString } mkString "\n"
-}
-
-object Board {
-
-  def empty = Board(Vector())
-
-  def empty(size: Int) = Board(Vector.fill(size)(Vector.fill(size)(Tile.Air)))
+  def render = tiles grouped size map { _ map (_.render) mkString } mkString "\n"
 }

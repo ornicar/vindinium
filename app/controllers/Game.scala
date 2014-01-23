@@ -25,27 +25,20 @@ object Game extends Controller {
     }
   }
 
-  implicit val stringMessages = play.api.libs.Comet.CometMessage[String](identity)
+  private implicit val stringMessages = play.api.libs.Comet.CometMessage[String](identity)
+  private def eventSource(data: Enumerator[String]) = Ok.chunked(data &> EventSource()).as("text/event-stream")
 
   def events(id: String) = Action.async {
-
     implicit val timeout = Timeout(1.second)
-    val actor = Visualization.actor
-
     Replay find id flatMap {
       case None => Future successful notFoundPage
-
       case Some(replay) => {
-
-        val soFar: Enumerator[String] = Enumerator.enumerate(replay.games)
-
-        actor ? GetStream(id) mapTo manifest[Option[Enumerator[Game]]] map {
-          case None => Ok.chunked(soFar &> EventSource()).as("text/event-stream")
-
-          case Some(stream) ⇒
-            if (replay.finished) Ok.chunked(soFar &> EventSource()).as("text/event-stream")
-            else Ok.chunked(soFar >>> (stream &> asJsonString) &> EventSource()).as("text/event-stream")
-
+        val soFar: Enumerator[String] = Enumerator.enumerate(replay.games) &> asJsonString
+        Visualization.actor ? GetStream(id) mapTo manifest[Option[Enumerator[Game]]] map {
+          case None => eventSource(soFar)
+          case Some(stream) ⇒ eventSource {
+            if (replay.finished) soFar else soFar >>> (stream &> asJsonString)
+          }
         }
       }
     }

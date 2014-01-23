@@ -91,20 +91,20 @@ object Generator {
   private def generateBoard(config: Config.GenMap): Board = {
 
     def sector(size: Int) = Board {
-      (1 to size).toVector map { _ =>
-        (1 to size).toVector map { _ =>
-          Random.nextInt(100) match {
-            case x if x < config.minePercent => Tile.Mine(None)
-            case x if x < (config.minePercent + config.wallPercent) => Tile.Wall
-            case _ => Tile.Air
-          }
+      (1 to math.pow(size, 2).toInt).toVector map { _ =>
+        Random.nextInt(100) match {
+          case x if x < config.minePercent => Tile.Mine(None)
+          case x if x < (config.minePercent + config.wallPercent) => Tile.Wall
+          case _ => Tile.Air
         }
       }
     }
 
     def replicate(board: Board) = Board {
-      val xs2 = board.tiles map { xs => xs ++ xs.reverse }
-      xs2 ++ xs2.reverse
+      val vects = (board.tiles grouped board.size).toVector
+      val xs2 = vects map { xs => xs ++ xs.reverse }
+      val all = xs2 ++ xs2.reverse
+      all.flatten
     }
 
     replicate(sector(config.size / 2))

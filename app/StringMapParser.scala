@@ -40,9 +40,9 @@ object StringMapParser {
           case (List(' ', ' '), _) ⇒ Air
           case (List('#', '#'), _) ⇒ Wall
           case (List('[', ']'), _) ⇒ Tavern
-          case (List('$', x), _)   ⇒ Mine(int(x))
+          case (List('$', x), _)   ⇒ Mine(charInt(x))
           case (List('@', x), j) ⇒ {
-            val id = int(x) getOrElse (sys error "Wrong hero ID")
+            val id = charInt(x) getOrElse (sys error "Wrong hero ID")
             heroes += (id -> Pos(i, j))
             Air
           }
@@ -52,12 +52,10 @@ object StringMapParser {
     }
     (tiles.toList, heroes.toMap.toList.sortBy(_._1).map(_._2)) match {
       case (tiles, List(h1, h2, h3, h4)) => {
-        val board = Board(tiles.map(_.toVector).toVector)
+        val board = Board(tiles.map(_.toVector).toVector.flatten)
         Parsed(board, h1, h2, h3, h4)
       }
       case _ => throw MapParseException(str)
     }
   }
-
-  private def int(c: Char): Option[Int] = Try(java.lang.Integer.parseInt(c.toString)).toOption
 }

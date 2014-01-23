@@ -18,20 +18,23 @@ case class Game(
 
   val heroes = List(hero1, hero2, hero3, hero4)
 
+  def heroId = turn % heroes.size + 1
   def hero: Option[Hero] = heroes lift (turn % heroes.size)
   def hero(id: Int): Hero = heroes find (_.id == id) getOrElse hero1
   def hero(pos: Pos): Option[Hero] = heroes find (_.pos == pos)
   def heroByToken(token: String): Option[Hero] = heroes find (_.token == token)
   def heroByName(name: String): Option[Hero] = heroes find (_.name == name)
 
+  def heroOrDefault: Hero = hero getOrElse hero1
+
   def step = if (finished) this else {
     val next = copy(turn = turn + 1)
     if (next.turn > maxTurns) next.copy(status = Status.TurnMax) else next
   }
 
-  def crash(c: Crash) = hero match {
+  def setTimedOut = hero match {
     case None => this
-    case Some(hero) => withHero(hero setCrash c) match {
+    case Some(hero) => withHero(hero.setTimedOut) match {
       case game if game.heroes.count(_.crashed) == 4 => game.copy(status = Status.AllCrashed)
       case game                                      => game
     }
@@ -66,9 +69,5 @@ case class Game(
 
   override def toString = s"Game[$id]: $status, turn $turn"
 
-  def render = board.tiles.zipWithIndex map {
-    case (xs, x) => xs.zipWithIndex map {
-      case (tile, y) => hero(Pos(x, y)).fold(tile.render)(_.render)
-    } mkString ""
-  } mkString "\n"
+  def render = board.render 
 }

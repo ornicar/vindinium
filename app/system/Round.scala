@@ -27,14 +27,16 @@ final class Round(val initGame: Game) extends Actor with CustomLogging {
       case Some(client) => client ! ClientPlay(msg, sender)
     }
 
-    case ClientPlay(Play(token, dir), replyTo) => {
+    case ClientPlay(Play(token, d), replyTo) => {
       val client = sender
-      Arbiter.move(game, token, Dir(dir)) match {
+      val dir = Dir(d)
+      Arbiter.move(game, token, dir) match {
         case Failure(e) => {
           log.info(s"Play fail ${game.id}/$token: ${e.getMessage}")
           replyTo ! Status.Failure(e)
         }
         case Success(g) => {
+          Replay.add(g.id, dir)
           client ! Client.WorkDone(inputPromise(replyTo))
           step(g)
         }
@@ -84,7 +86,7 @@ final class Round(val initGame: Game) extends Actor with CustomLogging {
       game.hero map (_.token) flatMap clients.get match {
         case None => throw UtterFailException(s"Game ${game.id} started without a hero client")
         case Some(client) => {
-          context.system.eventStream publish game
+          Replay insert game
           client ! game
         }
       }

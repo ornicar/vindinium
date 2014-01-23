@@ -19,6 +19,8 @@ case class Pos(x: Int, y: Int) {
     case Dir.East  => east
     case Dir.West  => west
   }
+
+  def isIn(size: Int) = (x >= 0 && x < size && y >= 0 && y < size)
 }
 
 sealed trait Dir
@@ -46,6 +48,14 @@ object Tile {
   case object Wall extends Tile('#', '#')
   case object Tavern extends Tile('[', ']')
   case class Mine(owner: Option[Int]) extends Tile('$', owner.fold('-')(_.toString.head))
+
+  def read(str: String): Tile = str.toList match {
+    case List(' ', ' ') ⇒ Tile.Air
+    case List('#', '#') ⇒ Tile.Wall
+    case List('[', ']') ⇒ Tile.Tavern
+    case List('$', x)   ⇒ Tile.Mine(charInt(x))
+    case x              ⇒ sys error s"Can't parse tile $str"
+  }
 }
 
 sealed trait Status {
@@ -59,12 +69,6 @@ object Status {
   case object Started extends Status
   case object AllCrashed extends Finish
   case object TurnMax extends Finish
-}
-
-sealed abstract class Crash(reason: String)
-object Crash {
-  case object Timeout extends Crash("Timed out")
-  case class Rule(r: String) extends Crash(r)
 }
 
 case class Driver(play: Game => String)

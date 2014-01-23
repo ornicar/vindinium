@@ -48,7 +48,7 @@ object JsonFormat {
   //   "id" -> r.id,
   //   "games" -> JsArray(r.games.map(Json.parse))
   // )
-  
+
   def jsonString(r: Replay): String = {
     val games = r.games.mkString("[", ", ", "]")
     s"""{"id": "${r.id}", "games": $games}"""
