@@ -38,6 +38,14 @@ button, input {
     font-family: 'VT323', cursive;
 }
 
+#starters dl {
+    padding-left: 20px;
+}
+
+#starters dd {
+    padding-left: 20px;
+}
+
 .register-form {
     padding-top: 30px;
 }

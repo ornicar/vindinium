@@ -11,7 +11,7 @@
             </p>
             <h2>Registration</h2>
             <p>First, you will need to register your AI (Artificial Intelligence) on the server using the <a href="@routes.User.registerForm()">register page</a>. You just have to enter a name and we will give you a secret key. Be sure to write it down as there is no way to recover it later. This key will be used to uniquely identify your bot with the name you choosed.</p>
-            <p>Once you have your key, you can already try one of <a href="#starter-packs">the starter packs</a> in training mode if you want. More on <a href="#game-modes">modes in the next section</a>.</p>
+            <p>Once you have your key, you can already try one of <a href="#starter-packs">the starter packs</a> in training mode if you want. More on <a href="#game-modes">modes in the API section</a>.</p>
 
             <h2>Game architecture</h2>
             <pre>
@@ -28,17 +28,41 @@
              |            |                             |                 |
              +------------+                             +-----------------+</pre>
 
-            <p>As you may already have noticed with the above diagram, your bot will basically be an HTTP client. You send a HTTP request (to have the initial game state or to move your bot) and then you got a HTTP Response encoded in Json.</p>
+            <p>As you may already have noticed with the above diagram, your bot will basically be a HTTP client. You send a HTTP request (to have the initial game state or to move your bot) and then you got a HTTP Response encoded in Json.</p>
+            <p>Ok fine, let's see what those requests look like.</p>
             <h2>API</h2>
+            <p>The requests you will have to send to the server will depend on the mode you are using. You can either train your bot by using the "training mode" or play for real using the "arena mode". Each mode is using a different URL for the requests.</p>
+
             <h3 id="game-modes">Game modes</h3>
-            <p> The game server supports two modes: training and arena. Both have different urls.</p>
 
             <h4>Training</h4>
             <p>In training mode, you can play against some dummy bots, you can specify the number of turns you want to play and, if you want, you can provide a specific map to test your algorithms. The games played in Training mode are not scored, so feel free to use it as much as you want.</p>
             <p>In training mode, the url you will need to use is: <pre>http://vindinium.jousse.org/api/training</pre></p>
 
+            <p>Here are the steps you need to follow to play in training mode</p>
+            <ol>
+                <li>Send a POST HTTP request to the <strong>http://vindinium.jousse.org/api/training</strong> URL to get the initial game state. Here are the parameters you can pass in the POST body:
+                <dl>
+                    <dt>key (required)<dt><dd>The secret key you wrote down after registering at the <a href="@routes.User.registerForm()">register page</a></dd>
+                    <dt>turns<dt><dd>The number of turns you want to play. If you don't specify this parameter, 300 turns will be played.</dd>
+                    <dt>map<dt><dd>The map id corresponding to the map you want to use. Possible values are: m1, m2, m3, m4, m5, m6. You can <a href="https://bitbucket.org/vjousse/24hcodebot/src/6ad21de9da64d51592d4ac0b8ebbe86443cb3b2f/app/Maps.scala?at=master#cl-7">have a look at the maps here</a>. If you don't specify this parameter, a random map will be generated for you.</dd>
+                </dl>
+                </li>
+                <li>Parse the JSON you've received as a response of the first step. See <a href="#json-doc">Json documentation for more details</a>.</li>
+                <li>Send your move to the <strong>http://vindinium.jousse.org/api/training</strong> URL using a POST request. Here are the parameters you need to send in the POST body:
+                <dl>
+                    <dt>key (required)<dt><dd>The secret key you wrote down after registering at the <a href="@routes.User.registerForm()">register page</a></dd>
+                    <dt>dir (required)<dt><dd>Can be one of: 'Stay', 'North', 'South', 'East', 'West'</dd>
+                </dl>
+                </li>
+                <li>Parse the JSON received in the same way you did in the second step. Repeat until the game is finished. See the <a href="#json-doc">Json documentation</a> to know when a game is finished.</li>
+            </ol>
+
             <h4>Arena</h4>
+            <p>In arena mode, you will play against other players. Your games will be rated and your rank will be updated accordingly.</p>
             <p>In arena mode, the url you will need to use is: <pre>http://vindinium.jousse.org/api/arena</pre></p>
+
+            <h4>HTTP response codes</h4>
 
             <h2 id="starter-packs">Starter packs</h2>
             <h3>Scala</h3>
@@ -47,7 +71,6 @@
             <p>A python starter pack is <a href="">downloadable here</a>. Be sure to read the included README to understand how to use it.</p>
             <h3>Java</h3>
             <p>A python starter pack is <a href="">downloadable here</a>. Be sure to read the included README to understand how to use it.</p>
-
         </div>
     </div>
 </section>
