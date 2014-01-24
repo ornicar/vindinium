@@ -49,7 +49,7 @@
                 </dl>
                 </li>
                 <li>Parse the JSON you've received as a response of the first step. See <a href="#json-doc">Json documentation for more details</a>.</li>
-                <li>Send your move to the <strong>http://vindinium.jousse.org/api/training</strong> URL using a POST request. Here are the parameters you need to send in the POST body:
+                <li>Send your move to the URL extracted from the Json (see <a href="#json-url">Json urls for more details</a>) using a POST request. Here are the parameters you need to send in the POST body:
                 <dl>
                     <dt>key (required)<dt><dd>The secret key you wrote down after registering at the <a href="@routes.User.registerForm()">register page</a></dd>
                     <dt>dir (required)<dt><dd>Can be one of: 'Stay', 'North', 'South', 'East', 'West'</dd>
@@ -61,9 +61,198 @@
             <h4>Arena</h4>
             <p>In arena mode, you will play against other players. Your games will be rated and your rank will be updated accordingly.</p>
             <p>In arena mode, the url you will need to use is: <pre>http://vindinium.jousse.org/api/arena</pre></p>
+            <p>Here are the steps you need to follow to play in arena mode:</p>
+            <ol>
+                <li>Send a POST HTTP request to the <strong>http://vindinium.jousse.org/api/arena</strong> URL to get the initial game state. There is only one required parameter to this first call:
+                <dl>
+                    <dt>key (required)<dt><dd>The secret key you wrote down after registering at the <a href="@routes.User.registerForm()">register page</a></dd>
+                </dl>
+                </li>
+                <li>Parse the JSON you've received as a response of the first step. See <a href="#json-doc">Json documentation for more details</a>.</li>
+                <li>Send your move to the URL extracted from the Json (see <a href="#json-url">Json urls for more details</a>) using a POST request. Here are the parameters you need to send in the POST body:
+                <dl>
+                    <dt>key (required)<dt><dd>The secret key you wrote down after registering at the <a href="@routes.User.registerForm()">register page</a></dd>
+                    <dt>dir (required)<dt><dd>Can be one of: 'Stay', 'North', 'South', 'East', 'West'</dd>
+                </dl>
+                </li>
+                <li>Parse the JSON received in the same way you did in the second step. Repeat until the game is finished. See the <a href="#json-doc">Json documentation</a> to know when a game is finished.</li>
+            </ol>
 
             <h4>HTTP response codes</h4>
+            <p>When you issue a call to the server, it will respond using normal HTTP codes:<p>
+            <ul>
+                <li><strong>200</strong>: Everything went well, good job!</li>
+                <li><strong>4xx</strong> (400, 404, …): You did something wrong (wrong secret key, trying to play when the game is already finished, too slow to send the move, …). Be sure to check the <strong>response body</strong> to know what the exact error is.</li>
+                <li><strong>500</strong>: Something went wrong on the server side. How could it be possible? ;)</li>
+            </ul>
 
+            <h4>Timeout</h4>
+            <p>You have a maximum of 2 seconds to play a move. If you exceed this limit, your bot is marked as "crashed". The game is over for you, you can't issue any move anymore. You should be aware that you can still be the winner of the game if nobody is able to earn more gold than the gold you had when your bot crashed.</p>
+
+            <h2 id="json-doc">Json Documentation</h2>
+            <p>Below is a full sample of the Json that the server will send to your client. Each object is described in details later in the documenattion.</p>
+            <pre>
+{
+   "game":{
+      "id":"s2xh3aig",
+      "turn":1100,
+      "maxTurns":1200,
+      "heroes":[
+         {
+            "id":1,
+            "name":"vjousse",
+            "userId":"j07ws669",
+            "elo":1200,
+            "pos":{
+               "x":5,
+               "y":6
+            },
+            "life":60,
+            "gold":0,
+            "mineCount":0,
+            "spawnPos":{
+               "x":5,
+               "y":6
+            },
+            "crashed":true
+         },
+         {
+            "id":2,
+            "name":"vjousse",
+            "userId":"j07ws669",
+            "elo":1200,
+            "pos":{
+               "x":12,
+               "y":6
+            },
+            "life":100,
+            "gold":0,
+            "mineCount":0,
+            "spawnPos":{
+               "x":12,
+               "y":6
+            },
+            "crashed":true
+         },
+         {
+            "id":3,
+            "name":"vjousse",
+            "userId":"j07ws669",
+            "elo":1200,
+            "pos":{
+               "x":12,
+               "y":11
+            },
+            "life":80,
+            "gold":0,
+            "mineCount":0,
+            "spawnPos":{
+               "x":12,
+               "y":11
+            },
+            "crashed":true
+         },
+         {
+            "id":4,
+            "name":"vjousse",
+            "userId":"j07ws669",
+            "elo":1200,
+            "pos":{
+               "x":4,
+               "y":8
+            },
+            "life":38,
+            "gold":1078,
+            "mineCount":6,
+            "spawnPos":{
+               "x":5,
+               "y":11
+            },
+            "crashed":false
+         }
+      ],
+      "board":{
+         "size":18,
+         "tiles":"##############        ############################        ##############################    ##############################$4    $4############################  @@4    ########################  @@1##    ##    ####################  []        []  ##################        ####        ####################  $4####$4  ########################  $4####$4  ####################        ####        ##################  []        []  ####################  @@2##    ##@@3  ########################        ############################$-    $-##############################    ##############################        ############################        ##############"
+      },
+      "finished":true
+   },
+   "hero":{
+      "id":4,
+      "name":"vjousse",
+      "userId":"j07ws669",
+      "elo":1200,
+      "pos":{
+         "x":4,
+         "y":8
+      },
+      "life":38,
+      "gold":1078,
+      "mineCount":6,
+      "spawnPos":{
+         "x":5,
+         "y":11
+      },
+      "crashed":false
+   },
+   "token":"lte0",
+   "viewUrl":"http://localhost:9000/s2xh3aig",
+   "playUrl":"http://localhost:9000/api/s2xh3aig/lte0/play"
+}
+</pre>
+            <h3>Game object</h3>
+            <pre>
+   "game":{
+      "id":"s2xh3aig",
+      "turn":1100,
+      "maxTurns":1200,
+      "heroes":[...],
+      "board":{
+         "size":18,
+         "tiles":"##############        ############################        ##############################    ##############################$4    $4############################  @@4    ########################  @@1##    ##    ####################  []        []  ##################        ####        ####################  $4####$4  ########################  $4####$4  ####################        ####        ##################  []        []  ####################  @@2##    ##@@3  ########################        ############################$-    $-##############################    ##############################        ############################        ##############"
+      },
+      "finished":true
+      }</pre>
+
+            <dl>
+                <dt>id<dt><dd>Unique identifier of the game</dd>
+                <dt>turn<dt><dd>Current number of moves since the beginning. This is the total number of moves done at this point. Each turn contains 4 move (one for each player). So if you want to know the "real" turn number, you need to divide this number by 4.</dd>
+                <dt>maxTurns<dt><dd>Maximum number of turns. Same as above, you may need to divide this number by 4.</dd>
+                <dt>heroes<dt><dd>An array of <a href="#json-hero">Hero objects</a>.</dd>
+                <dt>board<dt><dd>A Json object with two values. <strong>size</strong> is the size of the map: the number of horizontal/vertical tiles. As the map is always a square, this number is the same for X and Y. <strong>tiles</strong> is a string representing the map. Each tile is coded using two chars (see the <a href="@routes.App.documentation()#rules-legend">rules legend for more information</a>). As you may already have noticed, to get each line of the map, you just have to use a %size (modulo) on the tiles.</dd>
+                <dt>finished<dt><dd>If the game is finished or not.</dd>
+            </dl>
+            <h3 id="json-hero">Hero object</h3>
+            <pre>
+         {
+            "id":1,
+            "name":"vjousse",
+            "userId":"j07ws669",
+            "elo":1200,
+            "pos":{
+               "x":5,
+               "y":6
+            },
+            "life":60,
+            "gold":0,
+            "mineCount":0,
+            "spawnPos":{
+               "x":5,
+               "y":6
+            },
+            "crashed":true
+         }</pre>
+            <p>Nothing special here, <strong>pos</strong> represents your initial position on the map. <strong>spawnPos</strong> represents the position where you will respawn when you die. For now, it's the same position. <strong>elo</strong> is the current rating of the player (the higher the better).</p>
+            <h3 id="json-url">Urls</h3>
+
+            <pre>
+   "viewUrl":"http://localhost:9000/s2xh3aig",
+   "playUrl":"http://localhost:9000/api/s2xh3aig/lte0/play"</pre>
+
+            <dl>
+                <dt>viewUrl<dt><dd>An URL that you can open in your browser to view a replay of the game.</dd>
+                <dt>playUrl<dt><dd>The URL you need to use to send your move orders to the server.</dd>
+            </dl>
             <h2 id="starter-packs">Starter packs</h2>
             <h3>Scala</h3>
             <p>A scala starter pack is <a href="">downloadable here</a>. Be sure to read the included README to understand how to use it.</p>
