@@ -6,13 +6,5 @@
 
 *And looking for a tavern where to drink their gold*
 
-Game rules: https://bitbucket.org/vjousse/24hcodebot/wiki/Rules
-
----------
-
-db.user.ensureIndex({name:1},{unique:true})
-db.user.ensureIndex({key:1},{unique:true})
-db.user.ensureIndex({elo:-1})
-
-db.replay.ensureIndex({training: 1, date: -1})
-db.replay.ensureIndex({training: 1, names: 1, date: -1})
+Game rules: http://vindinium.jousse.org/doc
+Doc & starter bots: http://vindinium.jousse.org/starters
