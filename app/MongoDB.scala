@@ -1,4 +1,4 @@
-package org.jousse.bot
+package org.vindinium.server
 
 import org.joda.time.DateTime
 import reactivemongo.bson.{ BSONHandler, BSONDateTime }

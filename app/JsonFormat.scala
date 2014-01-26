@@ -1,5 +1,4 @@
-package org.jousse
-package bot
+package org.vindinium.server
 
 import controllers.routes
 import play.api.libs.json._

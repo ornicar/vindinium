@@ -6,5 +6,5 @@
 
 *And looking for a tavern where to drink their gold*
 
-Game rules: http://vindinium.jousse.org/doc
-Doc & starter bots: http://vindinium.jousse.org/starters
+Game rules: http://vindinium.org/doc
+Doc & starter bots: http://vindinium.org/starters

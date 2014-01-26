@@ -1,5 +1,4 @@
-package org.jousse
-package bot
+package org.vindinium.server
 
 import scala.util.{ Random, Try, Success, Failure }
 
@@ -116,5 +115,5 @@ object Generator {
       (traverse contains b.mirrorY(pos))
   }
 
-  private def fail(err: String) = scala.util.Failure(bot.GeneratorException(err))
+  private def fail(err: String) = scala.util.Failure(GeneratorException(err))
 }

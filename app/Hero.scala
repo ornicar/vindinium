@@ -1,5 +1,4 @@
-package org.jousse
-package bot
+package org.vindinium.server
 
 case class Hero(
     id: Int,

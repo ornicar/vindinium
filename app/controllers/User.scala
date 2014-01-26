@@ -1,8 +1,8 @@
 package controllers
 
-import org.jousse.bot._
-import org.jousse.bot.user.{ User => U }
-import org.jousse.bot.system.Replay
+import org.vindinium.server._
+import org.vindinium.server.user.{ User => U }
+import org.vindinium.server.system.Replay
 
 import akka.pattern.{ ask, pipe }
 import play.api._

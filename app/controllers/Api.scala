@@ -1,7 +1,7 @@
 package controllers
 
-import org.jousse.bot._
-import org.jousse.bot.system._
+import org.vindinium.server._
+import org.vindinium.server.system._
 
 import akka.pattern.{ ask, pipe }
 import akka.util.Timeout

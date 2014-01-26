@@ -1,5 +1,4 @@
-package org.jousse
-package bot
+package org.vindinium.server
 
 import scala.util.Random
 

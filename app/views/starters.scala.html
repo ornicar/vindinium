@@ -16,11 +16,11 @@
             <h2 id="starter-packs">Starter packs</h2>
             <p>If you want to know how to write a bot, just have a look at the following starter packs. They implement a bot that is moving in a random direction at each turn. Otherwise, you can read the full tech spec below.</p>
             <h3>Scala</h3>
-            <p>A scala starter pack is <a href="http://data.jousse.org/vindinium/vindinium-starter-scala.tar.gz">downloadable here</a>. Be sure to read the included README to understand how to use it.</p>
+            <p>A Scala starter pack is <a href="http://github.com/ornicar/vindinium-starter-scala">available here</a>. Be sure to read the included README to understand how to use it.</p>
             <h3>Python</h3>
-            <p>A python starter pack is <a href="https://github.com/ornicar/vindinium-starter-python">available here</a>. Be sure to read the included README to understand how to use it.</p>
+            <p>A Python starter pack is <a href="https://github.com/ornicar/vindinium-starter-python">available here</a>. Be sure to read the included README to understand how to use it.</p>
             <h3>Java</h3>
-            <p>A python starter pack is <a href="http://data.jousse.org/vindinium/vindinium-starter-java.tar.gz">downloadable here</a>. Be sure to read the included README to understand how to use it.</p>
+            <p>A Java starter pack is <a href="https://bitbucket.org/cchantep/vindinium-starter-java">available here</a>. Be sure to read the included README to understand how to use it.</p>
 
             <h2>Game architecture</h2>
             <pre>
@@ -46,15 +46,15 @@
 
             <h4>Training</h4>
             <p>In training mode, you can play against some dummy bots, you can specify the number of turns you want to play and, if you want, you can provide a specific map to test your algorithms. The games played in Training mode are not scored, so feel free to use it as much as you want.</p>
-            <p>In training mode, the url you will need to use is: <pre>http://vindinium.jousse.org/api/training</pre></p>
+            <p>In training mode, the url you will need to use is: <pre>http://vindinium.org/api/training</pre></p>
 
             <p>Here are the steps you need to follow to play in training mode</p>
             <ol>
-                <li>Send a POST HTTP request to the <strong>http://vindinium.jousse.org/api/training</strong> URL to get the initial game state. Here are the parameters you can pass in the POST body:
+                <li>Send a POST HTTP request to the <strong>http://vindinium.org/api/training</strong> URL to get the initial game state. Here are the parameters you can pass in the POST body:
                 <dl>
                     <dt>key (required)<dt><dd>The secret key you wrote down after registering at the <a href="@routes.User.registerForm()">register page</a></dd>
                     <dt>turns<dt><dd>The number of turns you want to play. If you don't specify this parameter, 300 turns will be played.</dd>
-                    <dt>map<dt><dd>The map id corresponding to the map you want to use. Possible values are: m1, m2, m3, m4, m5, m6. You can <a href="https://bitbucket.org/vjousse/24hcodebot/src/6ad21de9da64d51592d4ac0b8ebbe86443cb3b2f/app/Maps.scala?at=master#cl-7">have a look at the maps here</a>. If you don't specify this parameter, a random map will be generated for you.</dd>
+                    <dt>map<dt><dd>The map id corresponding to the map you want to use. Possible values are: m1, m2, m3, m4, m5, m6. You can <a href="https://github.com/ornicar/vindinium/blob/master/app/Maps.scala#L15">have a look at the maps here</a>. If you don't specify this parameter, a random map will be generated for you.</dd>
                 </dl>
                 </li>
                 <li>Parse the JSON you've received as a response of the first step. See <a href="#json-doc">Json documentation for more details</a>.</li>
@@ -69,10 +69,10 @@
 
             <h4>Arena</h4>
             <p>In arena mode, you will play against other players. Your games will be rated and your rank will be updated accordingly.</p>
-            <p>In arena mode, the url you will need to use is: <pre>http://vindinium.jousse.org/api/arena</pre></p>
+            <p>In arena mode, the url you will need to use is: <pre>http://vindinium.org/api/arena</pre></p>
             <p>Here are the steps you need to follow to play in arena mode:</p>
             <ol>
-                <li>Send a POST HTTP request to the <strong>http://vindinium.jousse.org/api/arena</strong> URL to get the initial game state. There is only one required parameter to this first call:
+                <li>Send a POST HTTP request to the <strong>http://vindinium.org/api/arena</strong> URL to get the initial game state. There is only one required parameter to this first call:
                 <dl>
                     <dt>key (required)<dt><dd>The secret key you wrote down after registering at the <a href="@routes.User.registerForm()">register page</a></dd>
                 </dl>

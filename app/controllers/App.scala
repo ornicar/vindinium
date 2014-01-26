@@ -1,6 +1,6 @@
 package controllers
 
-import org.jousse.bot._
+import org.vindinium.server._
 
 import play.api._
 import play.api.mvc._

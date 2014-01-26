@@ -1,4 +1,4 @@
-package org.jousse.bot
+package org.vindinium.server
 
 package object system {
 
