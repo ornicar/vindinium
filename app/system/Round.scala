@@ -4,7 +4,7 @@ package system
 import akka.actor._
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Promise
+import scala.concurrent.{ Promise, Await }
 import scala.util.{ Try, Success, Failure }
 import user.User
 
@@ -36,7 +36,7 @@ final class Round(val initGame: Game) extends Actor with CustomLogging {
           replyTo ! Status.Failure(e)
         }
         case Success(g) => {
-          Replay.add(g.id, dir)
+          Await.ready(Replay.add(g.id, dir), 2.seconds)
           client ! Client.WorkDone(inputPromise(replyTo))
           step(g)
         }
