@@ -39,7 +39,7 @@ object Api extends Controller {
   }
 
   def arena = Action.async { implicit req =>
-    implicit val timeout = Timeout(20.minutes)
+    implicit val timeout = Timeout(24.hours)
     form.arena.bindFromRequest.fold(
       err => Future successful BadRequest(
         "Did you forget the key parameter?"
