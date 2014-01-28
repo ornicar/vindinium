@@ -49,7 +49,7 @@ final class Round(val initGame: Game) extends Actor with CustomLogging {
       game = game.withHero(heroId, user.blame)
       // FIXME
       val token = game.hero(heroId).token
-      log.info(s"[game ${game.id}] add user ${user.name} ($token)")
+      log.info(s"[game ${game.id}] add user ${user.name} #$heroId ($token)")
       addClient(token, Props(new HttpClient(token, promise)))
     }
 
@@ -66,7 +66,9 @@ final class Round(val initGame: Game) extends Actor with CustomLogging {
       log.info(s"${game.id}/$token timeout")
       Arbiter.crash(game, token) match {
         case Failure(e) => log.warning(s"Crash fail ${game.id}/$token: ${e.getMessage}")
-        case Success(g) => step(g)
+        case Success(g) =>
+          saveMove(Dir.Stay)
+          step(g)
       }
     }
 
@@ -86,10 +88,9 @@ final class Round(val initGame: Game) extends Actor with CustomLogging {
       log.info(s"[game ${game.id}] start")
       game.hero map (_.token) flatMap clients.get match {
         case None => throw UtterFailException(s"Game ${game.id} started without a hero client")
-        case Some(client) => {
+        case Some(client) =>
           Replay insert game
           client ! game
-        }
       }
     }
   }
