@@ -11,7 +11,6 @@ import user.User
 final class Round(val initGame: Game) extends Actor with CustomLogging {
 
   val clients = collection.mutable.Map[Token, ActorRef]()
-  val moves = collection.mutable.ArrayBuffer[Dir]()
   var game = initGame
 
   import Round._
@@ -95,7 +94,6 @@ final class Round(val initGame: Game) extends Actor with CustomLogging {
   }
 
   def saveMove(dir: Dir) {
-    moves += dir
     Replay.addMove(game.id, dir)
   }
 
@@ -103,7 +101,7 @@ final class Round(val initGame: Game) extends Actor with CustomLogging {
     game = g
     context.system.eventStream publish game
     if (game.finished) {
-      Replay.finish(game.id, moves)
+      Replay finish game.id
       clients.values foreach (_ ! game)
     }
     else game.hero foreach {
