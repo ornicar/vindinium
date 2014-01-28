@@ -10,7 +10,8 @@ import user.User
 
 final class Round(val initGame: Game) extends Actor with CustomLogging {
 
-  val clients = scala.collection.mutable.Map[Token, ActorRef]()
+  val clients = collection.mutable.Map[Token, ActorRef]()
+  val moves = collection.mutable.ArrayBuffer[Dir]()
   var game = initGame
 
   import Round._
@@ -36,7 +37,8 @@ final class Round(val initGame: Game) extends Actor with CustomLogging {
           replyTo ! Status.Failure(e)
         }
         case Success(g) => {
-          Await.ready(Replay.add(g.id, dir), 2.seconds)
+          moves += dir
+          Replay.addMove(g.id, dir)
           client ! Client.WorkDone(inputPromise(replyTo))
           step(g)
         }
@@ -97,7 +99,7 @@ final class Round(val initGame: Game) extends Actor with CustomLogging {
     game = g
     context.system.eventStream publish game
     if (game.finished) {
-      Replay finish game.id
+      Replay.finish(game.id, moves)
       clients.values foreach (_ ! game)
     }
     else game.hero foreach {
