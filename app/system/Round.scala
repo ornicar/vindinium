@@ -21,10 +21,9 @@ final class Round(val initGame: Game) extends Actor with CustomLogging {
   def receive = {
 
     case msg@Play(token, _) => clients get token match {
-      case None => {
+      case None =>
         log.warning(s"No client for ${game.id}/$token")
         sender ! notFound("Wrong or expired token")
-      }
       case Some(client) => client ! ClientPlay(msg, sender)
     }
 
@@ -32,15 +31,13 @@ final class Round(val initGame: Game) extends Actor with CustomLogging {
       val client = sender
       val dir = Dir(d)
       Arbiter.move(game, token, dir) match {
-        case Failure(e) => {
+        case Failure(e) =>
           log.info(s"Play fail ${game.id}/$token: ${e.getMessage}")
           replyTo ! Status.Failure(e)
-        }
-        case Success(g) => {
-          saveMove(dir)
+        case Success(g) =>
           client ! Client.WorkDone(inputPromise(replyTo))
+          saveMove(dir)
           step(g)
-        }
       }
     }
 
@@ -64,10 +61,11 @@ final class Round(val initGame: Game) extends Actor with CustomLogging {
 
     case Client.Timeout(token) => {
       log.info(s"${game.id}/$token timeout")
-      Arbiter.crash(game, token) match {
+      val dir = Dir.Crash
+      Arbiter.move(game, token, dir) match {
         case Failure(e) => log.warning(s"Crash fail ${game.id}/$token: ${e.getMessage}")
         case Success(g) =>
-          saveMove(Dir.Stay)
+          saveMove(dir)
           step(g)
       }
     }
@@ -95,6 +93,13 @@ final class Round(val initGame: Game) extends Actor with CustomLogging {
     }
   }
 
+  def stayCrashed(token: String) = Arbiter.move(game, token, Dir.Stay) match {
+    case Failure(e) => log.info(s"Crashed stay fail ${game.id}/$token: ${e.getMessage}")
+    case Success(g) =>
+      saveMove(Dir.Stay)
+      step(g)
+  }
+
   def saveMove(dir: Dir) {
     moves += dir
     Replay.addMove(game.id, dir)
@@ -108,11 +113,8 @@ final class Round(val initGame: Game) extends Actor with CustomLogging {
       clients.values foreach (_ ! game)
     }
     else game.hero foreach {
-      case h if h.crashed => {
-        saveMove(Dir.Stay)
-        step(game.step)
-      }
-      case h => clients get h.token foreach (_ ! game)
+      case h if h.crashed => stayCrashed(h.token)
+      case h              => clients get h.token foreach (_ ! game)
     }
   }
 }

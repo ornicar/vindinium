@@ -26,7 +26,7 @@ object BSONHandlers {
   }
 
   private val dirMap: Map[Dir, Int] =
-    Map(Dir.Stay -> 0, Dir.North -> 1, Dir.South -> 2, Dir.East -> 3, Dir.West -> 4)
+    Map(Dir.Stay -> 0, Dir.North -> 1, Dir.South -> 2, Dir.East -> 3, Dir.West -> 4, Dir.Crash -> 99)
 
   private lazy val reverseDirMap = dirMap.map(x => x._2 -> x._1).toMap
 

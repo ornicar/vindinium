@@ -12,11 +12,11 @@ case class Pos(x: Int, y: Int) {
   val closeTo = neighbors contains _
 
   def to(dir: Dir) = dir match {
-    case Dir.Stay  => this
     case Dir.North => north
     case Dir.South => south
     case Dir.East  => east
     case Dir.West  => west
+    case _         => this
   }
 
   def isIn(size: Int) = (x >= 0 && x < size && y >= 0 && y < size)
@@ -29,6 +29,7 @@ case object Dir {
   case object South extends Dir
   case object East extends Dir
   case object West extends Dir
+  case object Crash extends Dir
 
   def apply(str: String): Dir = str.toLowerCase.trim match {
     case "north" => North

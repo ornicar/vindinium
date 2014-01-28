@@ -11,19 +11,12 @@ object Arbiter {
       doMove(game, hero.id, dir)
     }
 
-  def crash(game: Game, token: String): Try[Game] =
-    validate(game, token) { hero =>
-      game.setTimedOut.step
-    }
-
   private def validate(game: Game, token: String)(f: Hero => Game): Try[Game] =
     (game.finished, game heroByToken token) match {
       case (true, _) =>
         Failure(RuleViolationException("Game is finished"))
       case (_, None) =>
         Failure(RuleViolationException("Token not found"))
-      case (_, Some(hero)) if hero.crashed =>
-        Failure(RuleViolationException(s"Hero has timed out"))
       case (_, Some(hero)) if game.hero != Some(hero) =>
         Failure(RuleViolationException(s"Not your turn to move"))
       case (_, Some(hero)) => Success(f(hero))
@@ -81,6 +74,7 @@ object Arbiter {
       else g withHero h
     }
 
-    finalize(fights(reach(game.hero(id).pos to dir))).step
+    if (dir == Dir.Crash) finalize(game.setTimedOut).step
+    else finalize(fights(reach(game.hero(id).pos to dir))).step
   }
 }
