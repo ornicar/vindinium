@@ -21,7 +21,7 @@ final class Round(val initGame: Game) extends Actor with CustomLogging {
   def receive = {
 
     case msg@Play(token, _) => clients get token match {
-      case None         => {
+      case None => {
         log.warning(s"No client for ${game.id}/$token")
         sender ! notFound("Wrong or expired token")
       }
@@ -37,8 +37,7 @@ final class Round(val initGame: Game) extends Actor with CustomLogging {
           replyTo ! Status.Failure(e)
         }
         case Success(g) => {
-          moves += dir
-          Replay.addMove(g.id, dir)
+          saveMove(dir)
           client ! Client.WorkDone(inputPromise(replyTo))
           step(g)
         }
@@ -95,6 +94,11 @@ final class Round(val initGame: Game) extends Actor with CustomLogging {
     }
   }
 
+  def saveMove(dir: Dir) {
+    moves += dir
+    Replay.addMove(game.id, dir)
+  }
+
   def step(g: Game) {
     game = g
     context.system.eventStream publish game
@@ -103,8 +107,11 @@ final class Round(val initGame: Game) extends Actor with CustomLogging {
       clients.values foreach (_ ! game)
     }
     else game.hero foreach {
-      case h if h.crashed => step(game.step)
-      case h              => clients get h.token foreach (_ ! game)
+      case h if h.crashed => {
+        saveMove(Dir.Stay)
+        step(game.step)
+      }
+      case h => clients get h.token foreach (_ ! game)
     }
   }
 }
