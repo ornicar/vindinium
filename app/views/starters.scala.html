@@ -9,26 +9,44 @@
       <p>
         First, be sure to join the #vindinium IRC chan on Freenode if you have any questions or if you want to geek around a little bit. Here is a <a href="http://webchat.freenode.net/?channels=vindinium">direct link for people who don't have an IRC client</a>.
       </p>
-      <h2>Registration</h2>
-      <p>First, you will need to register your AI (Artificial Intelligence) on the server using the <a href="@routes.User.registerForm()">register page</a>. You just have to enter a name and we will give you a secret key. Be sure to write it down as there is no way to recover it later. This key will be used to uniquely identify your bot with the name you choosed.</p>
+      <h2>Create a bot</h2>
+      <p>First, you will need to register your AI (Artificial Intelligence) on the server using the <a href="@routes.User.registerForm()">"Create a bot" page</a>. You just have to enter a name and we will give you a secret key. Be sure to write it down as there is no way to recover it later. This key will be used to uniquely identify your bot with the name you choosed.</p>
       <p>Once you have your key, you can already try one of <a href="#starter-packs">the starter packs</a> in training mode if you want. More on <a href="#game-modes">modes in the API section</a>.</p>
 
       <h2 id="starter-packs">Starter packs</h2>
-      <p>If you want to know how to write a bot, just have a look at the following starter packs. They implement a bot that is moving in a random direction at each turn. Otherwise, you can read the full tech spec below.</p>
-      <h3>Scala</h3>
-      <p>A Scala starter pack is <a href="http://github.com/ornicar/vindinium-starter-scala">available here</a>.</p>
-      <h3>Python</h3>
-      <p>A Python starter pack is <a href="https://github.com/ornicar/vindinium-starter-python">available here</a>.</p>
-      <h3>Java</h3>
-      <p>A Java starter pack is <a href="https://bitbucket.org/cchantep/vindinium-starter-java">available here</a>.</p>
-      <h3>Clojure</h3>
-      <p>A Clojure starter pack is <a href="https://github.com/ornicar/vindinium-starter-clojure">available here</a>.</p>
-      <h3>PHP</h3>
-      <p>A PHP starter pack is <a href="https://github.com/kcampion/vindinium-starter-php">available here</a>.</p>
-      <h3>Haskell</h3>
-      <p>A Haskell starter pack is <a href="https://github.com/Herzult/vindinium-starter-haskell">available here</a>.</p>
-      <h3>NodeJS</h3>
-      <p>A NodeJS starter pack is <a href="https://github.com/ozten/vindinium-starter-nodejs">available here</a>.</p>
+
+      <p>
+        Starter packs implement a bot that is moving in a random direction at each turn.
+        They take care of the HTTP and JSON parsing, so you can focus on game logic.
+        Here are the available packs in alphabetical order:
+      </p>
+      <hr />
+      @List(
+      "Ruby" -> "https://github.com/poeks/vindinium-starter-ruby",
+      "Python" -> "https://github.com/ornicar/vindinium-starter-python",
+      "Java" -> "https://bitbucket.org/cchantep/vindinium-starter-java",
+      "Scala" -> "http://github.com/ornicar/vindinium-starter-scala",
+      "Clojure" -> "https://github.com/ornicar/vindinium-starter-clojure",
+      "PHP" -> "https://github.com/kcampion/vindinium-starter-php",
+      "Haskell" -> "https://github.com/Herzult/vindinium-starter-haskell",
+      "NodeJS" -> "https://github.com/ozten/vindinium-starter-nodejs",
+      "F#" -> "https://github.com/Rickasaurus/FSVindinium",
+      "C#" -> "https://github.com/ozten/vindinium-starter-csharp",
+      "Go" -> "https://github.com/Gybes/vindinium-starter-go").sortBy(_._1).map {
+      case (lang, url) => {
+      <p>
+        <a href="@url">
+          <h3>@lang <small>@url</small></h3>
+        </a>
+      </p>
+      }
+      }
+      <hr />
+      <p>
+        If your language of choice does not have a starter pack yet,
+        you will have to make it yourself. It's quite easy really;
+        have a look at the docs below and/or take example from an existing starter.
+      </p>
 
       <h2>Game architecture</h2>
       <pre>
