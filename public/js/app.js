@@ -43,6 +43,14 @@ $(function() {
             return false;
         });
 
+	$(document).keydown(function(e) {
+	    if(e.keyCode == 39) { //Right Arrow
+		$('#next').click();
+	    }else if(e.keyCode == 37) { //Left Arrow
+                $('#prev').click();
+	    }
+	});
+
         //Replay
         //
         $("#replayRange").change(function() {
