@@ -12,7 +12,7 @@ object form {
 
     def config = {
       val c = map.fold(Config.random)(Config.stringMap)
-      turns.fold(c)(t => c.copy(turns = t * 4))
+      turns.fold(c)(t => c.copy(turns = math.min(600, t) * 4))
     }
   }
 
