@@ -28,16 +28,16 @@ object Game extends Controller {
 
   private implicit val timeout = Timeout(1.second)
   private implicit val encoder = CometMessage[String](identity)
-  private def eventSource(data: Enumerator[String]) = Ok.chunked(data &> EventSource()).as("text/event-stream")
+  private def eventSource(data: Enumerator[Game]) = Ok.chunked(data &> asJsonString &> EventSource()).as("text/event-stream")
 
   def events(id: String) = Action.async {
     Replay find id flatMap {
       case None                            => Future successful notFoundPage
-      case Some(replay) if replay.finished => Future successful eventSource(replay.games &> asJsonString)
+      case Some(replay) if replay.finished => Future successful eventSource(replay.games)
       case Some(replay) => Visualization.actor ? GetStream(id) mapTo manifest[Option[Enumerator[Game]]] map {
         case None                 => replay.games 
         case Some(realTimeStream) => replay.games >>> realTimeStream 
-      } map (_ &> asJsonString) map eventSource
+      } map eventSource
     }
   }
 }
