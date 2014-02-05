@@ -35,8 +35,8 @@ object Game extends Controller {
       case None                            => Future successful notFoundPage
       case Some(replay) if replay.finished => Future successful eventSource(replay.games &> asJsonString)
       case Some(replay) => Visualization.actor ? GetStream(id) mapTo manifest[Option[Enumerator[Game]]] map {
-        case None    => replay.games &> asJsonString
-        case Some(s) => (replay.games &> asJsonString) >>> (s &> asJsonString)
+        case None                 => replay.games &> asJsonString
+        case Some(realTimeStream) => (replay.games &> asJsonString) >>> (realTimeStream &> asJsonString)
       } map eventSource
     }
   }
