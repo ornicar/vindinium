@@ -12,7 +12,7 @@ Doc & starter bots: http://vindinium.org/starters
 ### Installation
 
 Feel free to install a local instance for your private tournaments.
-You need MongoDB running, and a Unix machine (only Linux has been tested, tho).
+You need [sbt](http://www.scala-sbt.org/), a MongoDB instance running, and a Unix machine (only Linux has been tested, tho).
 
 ```sh
 git clone git://github.com/ornicar/vindinium
