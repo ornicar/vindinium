@@ -1,0 +1,71 @@
+.hero-stats {
+  @extend .legend-parchement
+
+  position: relative
+  padding-top: 3px;
+
+  a {
+    color: #474747;
+    text-decoration: none;
+  }
+
+  .cross {
+    width: 24px;
+    height: 24px;
+    vertical-align:-4px;
+    position: absolute;
+    left: 0px;
+    top: 2px;
+    z-index: 10;
+    display: none;
+  }
+
+  .player {
+    width: 20px;
+    height: 20px;
+    vertical-align:-4px;
+    position: absolute;
+    left: 2px;
+    top: 2px;
+  }
+
+  .gold-wrapper {
+    text-align: right;
+    padding-right: 5px;
+  }
+
+  .award {
+    position: absolute;
+    top: 2px;
+    left: 22px;
+    width: 20px;
+    height: 20px;
+    vertical-align:-4px;
+    display: none;
+  }
+
+  .name {
+    display: block;
+  }
+  .gold {
+    font-size: 16px;
+    margin-right: 3px;
+  }
+  .elo {
+    font-size: 10px;
+  }
+
+  &.first {
+    color: black;
+    font-weight: bold;
+    .name {
+      text-decoration: underline;
+    }
+    .award {
+      display: block;
+    }
+  }
+  &.crashed .cross {
+    display: block;
+  }
+}

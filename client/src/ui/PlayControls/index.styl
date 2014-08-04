@@ -1,0 +1,75 @@
+.play-controls
+  position: relative
+  text-align: left
+  margin-top: 5px
+
+  .speed-controls
+    font-size: 0.8em
+    vertical-align: top
+    margin-left: 5px
+    display: inline-block
+    height: inherit
+    .action
+      display: inline-block
+      margin-left: 5px
+      margin-right: 5px
+      width: 20px
+      text-align: center
+      position: relative
+      .up, .down
+        position: absolute
+        width: inherit
+        left: 0px
+      .up
+        top: -10px
+      .down
+        bottom: -10px
+
+  .play-pause
+    position: absolute
+    left: -20px
+    font-size: 0.8em
+
+  .time-bar
+    position: relative
+    display: inline-block
+    height: 16px
+
+    .time-bar-overlay
+      position: absolute
+      z-index: 9
+      left: 0
+      top: 0
+      width: 100%
+      height: 100%
+      user-select: none
+      cursor: pointer
+
+    .full, .buffered, .elapsed
+      height: 12px
+      position: absolute
+      top: 2px
+      left: 0
+
+    .full
+      width: 100%
+      background: #111
+      z-index: 0
+
+    .buffered
+      background: #222
+      z-index: 1
+
+    .elapsed
+      background: #932
+      z-index: 2
+
+    .cursor
+      background: #D43
+      position: absolute
+      top: 0
+      left: 0
+      width: 2px
+      height: inherit
+      z-index: 3
+
