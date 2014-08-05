@@ -77,6 +77,22 @@ function Hero (obj) {
 Hero.prototype = Object.create(PIXI.DisplayObjectContainer.prototype);
 Hero.prototype.constructor = Hero;
 
+Hero.prototype.analyzeDiff = function (/* some parameters */) {
+  // TODO
+  return {
+    // All meta data we need should go here
+    myturn: true || false,
+    orientation: 0, // orientation of the current action
+    moved: null || { dx: 1, dy: 0 },
+    reborn: true || false,
+    attack: null || [{ hero: 1, life: 0 }],
+    attacked: null || [{ hero: 1, pos: { x: 0, y: 0 } }],
+    dead: true || false,
+    takeMine: null || { pos: {x:0,y:0}, owner: null||1 },
+    drink: null || { pos: {x:0,y:0} }
+  };
+};
+
 Hero.prototype.refreshHeroSprite = function () {
   var orientation = this.playerOrientation;
   this.heroSprite.setTexture(heroTextures[this.state.id - 1][orientation]);

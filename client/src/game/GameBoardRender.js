@@ -4,53 +4,19 @@ var Hero = require("./Hero");
 var Mine = require("./Mine");
 var Tavern = require("./Tavern");
 var requestAnimationFrame = require("raf");
+var maps = require("./maps");
 
-// Initialize all the textures
+// FIXME that should go somewhere
+var borderSize = 24;
+var tileSize = 24;
 
-function tilePIXI (size) {
-  return function (baseTexture, x, y) {
-    return new PIXI.Texture(baseTexture, { x: x * size, y: y * size, width: size, height: size });
-  };
-}
-var tilePIXI24 = tilePIXI(24);
-
-var groundTilesTexture = PIXI.Texture.fromImage("/assets/img/tilesets/plowed_soil_24.png");
-var groundTexture = tilePIXI24(groundTilesTexture, 0, 5);
-var topLeftCornerTexture = tilePIXI24(groundTilesTexture, 0, 2);
-var bottomLeftCornerTexture = tilePIXI24(groundTilesTexture, 0, 4);
-var bottomRightCornerTexture = tilePIXI24(groundTilesTexture, 2, 4);
-var topRightCornerTexture = tilePIXI24(groundTilesTexture, 2, 2);
-var topBorderTexture = tilePIXI24(groundTilesTexture, 1, 2);
-var bottomBorderTexture = tilePIXI24(groundTilesTexture, 1, 4);
-var leftBorderTexture = tilePIXI24(groundTilesTexture, 0, 3);
-var rightBorderTexture = tilePIXI24(groundTilesTexture, 2, 3);
-
-var grassTilesTexture = PIXI.Texture.fromImage("/assets/img/tilesets/tallgrass_24.png");
-var grassTexture = tilePIXI24(grassTilesTexture, 0, 5);
-var zeldaTree1Texture = PIXI.Texture.fromImage("/assets/img/zelda/tree.png");
-
-var farmingTexture = PIXI.Texture.fromImage("/assets/img/tilesets/farming_fishing_24.png");
-var stuffTexture = PIXI.Texture.fromImage("/assets/img/tilesets/stuff.png");
-
-var possibleWallObjectsTexture = [
-  tilePIXI24(farmingTexture, 1, 1),
-  tilePIXI24(farmingTexture, 5, 1),
-  tilePIXI24(stuffTexture, 0, 0),
-  tilePIXI24(stuffTexture, 0, 1),
-  tilePIXI24(stuffTexture, 0, 2),
-  tilePIXI24(stuffTexture, 0, 3)
-];
 var winnerParchmentTexture = PIXI.Texture.fromImage("/assets/img/winner_parchment.png");
-
 var heroTextures = [
   PIXI.Texture.fromImage("/assets/img/fireheart/player1_life.png"),
   PIXI.Texture.fromImage("/assets/img/fireheart/player2_life.png"),
   PIXI.Texture.fromImage("/assets/img/fireheart/player3_life.png"),
   PIXI.Texture.fromImage("/assets/img/fireheart/player4_life.png")
 ];
-
-var borderSize = 24;
-var tileSize = 24;
 
 function sortSpritesByPosition (a, b) {
   return a.position.y - b.position.y + 0.001 * (a.position.x - b.position.x);
@@ -98,6 +64,7 @@ GameBoardRender.prototype = {
 
   initGame: function (game) {
     this.game = game;
+    this.map = "forest";
     this.initRendering();
     this.initBackground();
     this.initObjects();
@@ -148,6 +115,7 @@ GameBoardRender.prototype = {
     this.renderer = new PIXI.autoDetectRenderer(this.boardWidth, this.boardWidth);
     this.container.appendChild(this.renderer.view);
     this.gameStage = new PIXI.Stage();
+
     this.gameContainer = new PIXI.DisplayObjectContainer();
     this.gameContainer.x = borderSize;
     this.gameContainer.y = borderSize;
@@ -159,64 +127,7 @@ GameBoardRender.prototype = {
   
   // Background: borders, ground, wall
   initBackground: function () {
-    var game = this.game;
-    var size = game.board.size;
-    var topLeft = new PIXI.Sprite(topLeftCornerTexture);
-    topLeft.x = -tileSize;
-    topLeft.y = -tileSize;
-    this.bgContainer.addChild(topLeft);
-
-    var bottomLeft = new PIXI.Sprite(bottomLeftCornerTexture);
-    bottomLeft.x = -tileSize;
-    bottomLeft.y = tileSize * size;
-    this.bgContainer.addChild(bottomLeft);
-
-    var topRight = new PIXI.Sprite(topRightCornerTexture);
-    topRight.x = tileSize * size;
-    topRight.y = -tileSize;
-    this.bgContainer.addChild(topRight);
-
-    var bottomRight = new PIXI.Sprite(bottomRightCornerTexture);
-    bottomRight.x = tileSize * size;
-    bottomRight.y = tileSize * size;
-    this.bgContainer.addChild(bottomRight);
-
-    for (var i=0; i<size; ++i) {
-      var left = new PIXI.Sprite(leftBorderTexture);
-      var right = new PIXI.Sprite(rightBorderTexture);
-      var top = new PIXI.Sprite(topBorderTexture);
-      var bottom = new PIXI.Sprite(bottomBorderTexture);
-      top.y = left.x = -tileSize;
-      bottom.y = right.x = tileSize * size;
-      top.x = bottom.x = left.y = right.y = i * tileSize;
-      this.bgContainer.addChild(top);
-      this.bgContainer.addChild(right);
-      this.bgContainer.addChild(bottom);
-      this.bgContainer.addChild(left);
-    }
-
-    // Map
-    this.game.forEachTile(function (tile, i, x, y) {
-      var group = new PIXI.DisplayObjectContainer();
-      group.position.x = tileSize * x;
-      group.position.y = tileSize * y;
-      group.addChild(new PIXI.Sprite(groundTexture));
-      if (i%10 === 1) {
-        group.addChild(new PIXI.Sprite(grassTexture));
-      }
-      if (tile === "##") {
-        var wallStatus = this.game.getWallStatus(x, y);
-        var wall;
-        if(wallStatus === 'alone') {
-          wall = new PIXI.Sprite(possibleWallObjectsTexture[ i % possibleWallObjectsTexture.length ]);
-        }
-        else {
-          wall = new PIXI.Sprite(zeldaTree1Texture);
-        }
-        group.addChild(wall);
-      }
-      this.bgContainer.addChild(group);
-    }, this);
+    maps[this.map](this.game, this.bgContainer);
   },
 
   // Objects: mines, taverns
