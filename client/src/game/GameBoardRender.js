@@ -52,6 +52,10 @@ var heroTextures = [
 var borderSize = 24;
 var tileSize = 24;
 
+function sortSpritesByPosition (a, b) {
+  return a.position.y - b.position.y;
+}
+
 function GameBoardRender (container) {
   this.container = container;
 }
@@ -76,6 +80,7 @@ GameBoardRender.prototype = {
         this.messageContainer = null;
       }
     }
+    this.objectsContainer.children.sort(sortSpritesByPosition);
     this.renderer.render(this.gameStage);
   },
 
@@ -147,8 +152,8 @@ GameBoardRender.prototype = {
     this.gameContainer.x = borderSize;
     this.gameContainer.y = borderSize;
     this.gameContainer.addChild(this.bgContainer = new PIXI.DisplayObjectContainer());
-    this.gameContainer.addChild(this.objectsContainer = new PIXI.DisplayObjectContainer());
-    this.gameContainer.addChild(this.heroesContainer = new PIXI.DisplayObjectContainer());
+    this.gameContainer.addChild(this.heroesContainer = this.objectsContainer = new PIXI.DisplayObjectContainer());
+    //this.gameContainer.addChild(this.heroesContainer = new PIXI.DisplayObjectContainer());
     this.gameStage.addChild(this.gameContainer);
   },
   
