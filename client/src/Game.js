@@ -29,7 +29,11 @@ var Game = React.createClass({
   },
   componentDidUpdate: function (prevProps) {
     if (prevProps.game.turn !== this.props.game.turn) {
-      this.boardRender.setGame(this.props.game, this.props.refreshRate);
+      var interpolationTime = 
+        prevProps.game.turn !== this.props.game.turn-1 || // only do interpolation if the new game is a following turn
+        this.props.refreshRate < 50 ? // too low interpolation is not significant
+        0 : this.props.refreshRate;
+      this.boardRender.setGame(this.props.game, interpolationTime);
     }
   },
   render: function () {

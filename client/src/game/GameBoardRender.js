@@ -3,6 +3,7 @@ var PIXI = require("pixi.js");
 var Hero = require("./Hero");
 var Mine = require("./Mine");
 var Tavern = require("./Tavern");
+var requestAnimationFrame = require("raf");
 
 // Initialize all the textures
 
@@ -49,12 +50,12 @@ function GameBoardRender (container) {
 }
 
 GameBoardRender.prototype = {
-  setGame: function (game) {
+  setGame: function (game, interpolationTime) {
     if (!this.initialized) {
       this.initGame(game);
       this.initialized = true;
     }
-    this.updateGame(game);
+    this.updateGame(game, interpolationTime);
     if (game.isOver()) {
       if (this.messageContainer) {
         this.gameStage.removeChild(this.messageContainer);
@@ -72,6 +73,8 @@ GameBoardRender.prototype = {
   },
 
   destroy: function () {
+    this.stopRenderLoop();
+    this.container.removeChild(this.renderer.view);
     this.renderer.destroy();
   },
 
@@ -87,17 +90,40 @@ GameBoardRender.prototype = {
     this.initBackground();
     this.initObjects();
     this.initHeroes();
+    this.startRenderLoop();
   },
 
-  updateGame: function (game) {
+  startRenderLoop: function () {
+    var self = this;
+    var stopped = this._stopped = (this._stopped || 0)+1;
+    (function loop () {
+      if (self._stopped !== stopped) return;
+      requestAnimationFrame(loop);
+      self.render();
+    }());
+  },
+
+  stopRenderLoop: function () {
+    this._stopped ++;
+  },
+
+  // Game render loop
+  render: function () {
+    this.heroes.forEach(function (hero) {
+      hero.render();
+    });
+    this.renderer.render(this.gameStage);
+  },
+
+  updateGame: function (game, interpolationTime) {
     this.game = game;
     this.game.heroes.forEach(function (hero, i) {
-      this.heroes[i].updateHero(hero);
+      this.heroes[i].updateHero(hero, interpolationTime);
     }, this);
     var mineIndex = 0;
     this.game.forEachTile(function (tile) {
       if (tile[0] === "$") {
-        this.mines[mineIndex++].updateOwner(tile[1]);
+        this.mines[mineIndex++].updateOwner(tile[1], interpolationTime);
       }
     }, this);
   },
