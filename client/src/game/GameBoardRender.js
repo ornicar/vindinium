@@ -53,7 +53,7 @@ var borderSize = 24;
 var tileSize = 24;
 
 function sortSpritesByPosition (a, b) {
-  return a.position.y - b.position.y + 0.001 * (a.position.x - b.position.y);
+  return a.position.y - b.position.y + 0.001 * (a.position.x - b.position.x);
 }
 
 function GameBoardRender (container) {
