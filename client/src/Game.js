@@ -31,8 +31,11 @@ var Game = React.createClass({
     if (prevProps.game.turn !== this.props.game.turn) {
       var interpolationTime = 
         prevProps.game.turn !== this.props.game.turn-1 || // only do interpolation if the new game is a following turn
-        this.props.refreshRate < 50 ? // too low interpolation is not significant
+        this.props.refreshRate < 20 ? // too low interpolation is not significant
         0 : this.props.refreshRate;
+
+      // interpolationTime *= 4; // This would provide continuous player motion! but there is much work to do fix glitches.
+
       this.boardRender.setGame(this.props.game, interpolationTime);
     }
   },

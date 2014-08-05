@@ -42,6 +42,13 @@ var possibleWallObjectsTexture = [
 ];
 var winnerParchmentTexture = PIXI.Texture.fromImage("/assets/img/winner_parchment.png");
 
+var heroTextures = [
+  PIXI.Texture.fromImage("/assets/img/fireheart/player1_life.png"),
+  PIXI.Texture.fromImage("/assets/img/fireheart/player2_life.png"),
+  PIXI.Texture.fromImage("/assets/img/fireheart/player3_life.png"),
+  PIXI.Texture.fromImage("/assets/img/fireheart/player4_life.png")
+];
+
 var borderSize = 24;
 var tileSize = 24;
 
@@ -111,6 +118,9 @@ GameBoardRender.prototype = {
   render: function () {
     this.heroes.forEach(function (hero) {
       hero.render();
+    });
+    this.mines.forEach(function (mine) {
+      mine.render();
     });
     this.renderer.render(this.gameStage);
   },
@@ -285,7 +295,7 @@ GameBoardRender.prototype = {
       text2.position.x = Math.floor((boardWidth-text2.width)/2);
       text2.position.y = centerY + 40;
       this.messageContainer.addChild(text2);
-      var winnerImage = new PIXI.Sprite(this.heroes[winner - 1].getTexture());
+      var winnerImage = new PIXI.Sprite(heroTextures[winner - 1]);
       winnerImage.position.x = centerX + 103;
       winnerImage.position.y = centerY + 66;
       this.messageContainer.addChild(winnerImage);
