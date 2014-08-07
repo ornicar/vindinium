@@ -18,10 +18,16 @@ var Game = React.createClass({
     jump: React.PropTypes.func,
     playing: React.PropTypes.bool,
     buffered: React.PropTypes.number,
-    keyboardControls: React.PropTypes.bool
+    keyboardControls: React.PropTypes.bool,
+    map: React.PropTypes.string
+  },
+  getDefaultProps: function () {
+    return {
+      map: "lowlands"
+    };
   },
   componentDidMount: function () {
-    this.boardRender = new GameBoardRender(this.refs.boardBox.getDOMNode());
+    this.boardRender = new GameBoardRender(this.refs.boardBox.getDOMNode(), this.props.map);
     this.boardRender.setGame(this.props.game);
   },
   componentDidUnmount: function () {

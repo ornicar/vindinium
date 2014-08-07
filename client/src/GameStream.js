@@ -13,14 +13,18 @@ function bugfixServerPosition (game) {
   return game;
 }
 
-function toGameClass (game) {
-  return new GameModel(game);
+function aggregateGame (previousGame, game) {
+  return new GameModel(game, previousGame);
 }
 
 function GameStream (id) {
+  var previousGame = null;
   return EventSourceObservable("/events/"+id)
     .map(bugfixServerPosition)
-    .map(toGameClass);
+    .map(function (game) {
+      previousGame = aggregateGame(previousGame, game);
+      return previousGame;
+    });
 }
 
 module.exports = GameStream;

@@ -1,9 +1,14 @@
 
-function sortByGold(heroA, heroB) {
-  return heroB.gold - heroA.gold;
-}
+var initialMeta = {
 
-function GameModel (state) {
+};
+/*
+ * idea of meta:
+ * - count the number of death per tile (for making bloody soiled)
+ * - heroes meta
+ */
+
+function GameModel (state, previousState) {
   this.id = state.id;
   this.board = state.board;
   this.finished = state.finished;
@@ -12,9 +17,25 @@ function GameModel (state) {
   this.turn = state.turn;
 
   this.tilesArray = this.board.tiles.match(/.{2}/g);
+
+  if (previousState) {
+    this.meta = this.metaWithPreviousState(previousState);
+  }
+  else {
+    this.meta = initialMeta;
+  }
+}
+
+function sortByGold(heroA, heroB) {
+  return heroB.gold - heroA.gold;
 }
 
 GameModel.prototype = {
+  metaWithPreviousState: function (previousState) {
+    var meta = {};
+    previousState = null;
+    return meta;
+  },
   isOver: function () {
     return this.finished;
   },
@@ -34,6 +55,22 @@ GameModel.prototype = {
     }, ctx || this);
   },
 
+  tileAt: function (x, y) {
+    return this.tilesArray[this.indexForPosition(x, y)];
+  },
+
+  wallAt: function (x, y) {
+    var tile = this.tileAt(x, y);
+    return tile === undefined || tile === "##";
+  },
+
+  indexToPosition: function (i) {
+    return {
+      x: i % this.board.size,
+      y: Math.floor(i / this.board.size)
+    };
+  },
+
   indexForPosition: function (x, y) {
     var size = this.board.size;
     if (x < 0 || x >= size || y < 0 || y >= size)
@@ -48,6 +85,13 @@ GameModel.prototype = {
       this.indexForPosition(x, y+1), // BOTTOM
       this.indexForPosition(x-1, y) // LEFT
     ];
+  },
+
+  neighbors: function (x, y) {
+    return this.neighborsIndexes(x, y).map(function (i) {
+      if (i === null) return null;
+      return this.tilesArray[i];
+    }, this);
   },
 
   getWallStatus: function (x, y) {

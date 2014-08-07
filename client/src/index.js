@@ -38,7 +38,8 @@ function runGame (gameId) {
       pause: pause,
       jump: jump,
       playing: playing,
-      buffered: buffered
+      buffered: buffered,
+      map: url.query.map
     }), mount);
   }
 

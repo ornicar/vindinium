@@ -7,8 +7,10 @@ var requestAnimationFrame = require("raf");
 var maps = require("./maps");
 
 // FIXME that should go somewhere
+/*
 var borderSize = 24;
 var tileSize = 24;
+*/
 
 var winnerParchmentTexture = PIXI.Texture.fromImage("/assets/img/winner_parchment.png");
 var heroTextures = [
@@ -22,8 +24,11 @@ function sortSpritesByPosition (a, b) {
   return a.position.y - b.position.y + 0.001 * (a.position.x - b.position.x);
 }
 
-function GameBoardRender (container) {
+function GameBoardRender (container, mapName) {
   this.container = container;
+  this.map = maps[mapName||"lowlands"]();
+  this.tileSize = this.map.tileSize;
+  this.borderSize = this.map.borderSize;
 }
 
 GameBoardRender.prototype = {
@@ -64,7 +69,6 @@ GameBoardRender.prototype = {
 
   initGame: function (game) {
     this.game = game;
-    this.map = "forest";
     this.initRendering();
     this.initBackground();
     this.initObjects();
@@ -111,14 +115,14 @@ GameBoardRender.prototype = {
   },
 
   initRendering: function () {
-    this.boardWidth = borderSize * 2 + tileSize * this.game.board.size;
+    this.boardWidth = this.borderSize * 2 + this.tileSize * this.game.board.size;
     this.renderer = new PIXI.autoDetectRenderer(this.boardWidth, this.boardWidth);
     this.container.appendChild(this.renderer.view);
     this.gameStage = new PIXI.Stage();
 
     this.gameContainer = new PIXI.DisplayObjectContainer();
-    this.gameContainer.x = borderSize;
-    this.gameContainer.y = borderSize;
+    this.gameContainer.x = this.borderSize;
+    this.gameContainer.y = this.borderSize;
     this.gameContainer.addChild(this.bgContainer = new PIXI.DisplayObjectContainer());
     this.gameContainer.addChild(this.heroesContainer = this.objectsContainer = new PIXI.DisplayObjectContainer());
     //this.gameContainer.addChild(this.heroesContainer = new PIXI.DisplayObjectContainer());
@@ -127,7 +131,7 @@ GameBoardRender.prototype = {
   
   // Background: borders, ground, wall
   initBackground: function () {
-    maps[this.map](this.game, this.bgContainer);
+    this.map.generate(this.game, this.bgContainer);
   },
 
   // Objects: mines, taverns
@@ -148,8 +152,8 @@ GameBoardRender.prototype = {
       }
       if (obj) {
         var group = new PIXI.DisplayObjectContainer();
-        group.position.x = tileSize * x;
-        group.position.y = tileSize * y;
+        group.position.x = this.tileSize * x;
+        group.position.y = this.tileSize * y;
         group.addChild(obj);
         this.objectsContainer.addChild(group);
       }
@@ -158,7 +162,7 @@ GameBoardRender.prototype = {
 
   initHeroes: function () {
     this.heroes = this.game.heroes.map(function (heroObj) {
-      var hero = new Hero(heroObj);
+      var hero = new Hero(heroObj, this.tileSize);
       this.heroesContainer.addChild(hero);
       return hero;
     }, this);

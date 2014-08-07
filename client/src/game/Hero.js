@@ -11,8 +11,6 @@ function mix (a, b, p) {
   return a + (b-a) * p;
 }
 
-var tileSize = 24;
-
 var tilePIXI32 = tilePIXI(32);
 
 var heroesTexture = PIXI.Texture.fromImage("/assets/img/fireheart/heroes.png");
@@ -54,7 +52,8 @@ function createHeroSprite (texture) {
   return heroSprite;
 }
 
-function Hero (obj) {
+function Hero (obj, tileSize) {
+  this.tileSize = tileSize;
   PIXI.DisplayObjectContainer.call(this);
   this.lifeIndicator = new PIXI.Graphics();
   this.lifeIndicator.position.x = -5;
@@ -100,17 +99,17 @@ Hero.prototype.refreshHeroSprite = function () {
 };
 
 Hero.prototype.drawLifeIndicator = function (life) {
-  var lpx = Math.round(tileSize * life / 100);
+  var lpx = Math.round(this.tileSize * life / 100);
   var color = rgb(255 * smoothstep(60, 30, life), 255 * smoothstep(0, 90, life), 50);
   this.lifeIndicator.clear();
   var graphics = this.lifeIndicator;
   graphics.beginFill(color);
-  graphics.drawRect(0, tileSize - lpx, 3, lpx);
+  graphics.drawRect(0, this.tileSize - lpx, 3, lpx);
 };
 
 Hero.prototype.setPosition = function (pos) {
-  this.position.x = pos.x * tileSize;
-  this.position.y = pos.y * tileSize;
+  this.position.x = pos.x * this.tileSize;
+  this.position.y = pos.y * this.tileSize;
 };
 
 Hero.prototype.updateHero = function (obj, interpolationTime) {
