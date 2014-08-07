@@ -8,10 +8,10 @@ var minesTextureTile = PIXI.Texture.fromImage("/assets/img/mines.png");
 var tilePIXI32 = tilePIXI(32);
 var mineTextures = [
   tilePIXI32(minesTextureTile, 0, 0),
-  tilePIXI32(minesTextureTile, 0, 1),
-  tilePIXI32(minesTextureTile, 0, 2),
   tilePIXI32(minesTextureTile, 0, 3),
-  tilePIXI32(minesTextureTile, 0, 4)
+  tilePIXI32(minesTextureTile, 0, 4),
+  tilePIXI32(minesTextureTile, 0, 2),
+  tilePIXI32(minesTextureTile, 0, 1)
 ];
 
 function setSpriteOwner (sprite, owner) {
@@ -21,7 +21,7 @@ function setSpriteOwner (sprite, owner) {
   }
   else {
     sprite.setTexture(mineTextures[parseInt(owner, 10)]);
-    sprite.position.y = -2;
+    sprite.position.y = -8;
   }
 }
 
