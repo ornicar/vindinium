@@ -13,31 +13,34 @@ import play.api.mvc._
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import system.Visualization._
-import system.{ Replay, Visualization }
+import system.{ Server, Replay }
 import user.{ User => U }
 
 object Game extends Controller {
 
   def show(id: String) = Action.async {
     Replay find id map {
-      case Some(replay) ⇒ Ok(views.html.visualize(replay))
-      case None         ⇒ notFoundPage
+      case Some(replay) => Ok(views.html.visualize(replay))
+      case None         => notFoundPage
     }
   }
 
   private implicit val timeout = Timeout(1.second)
   private implicit val encoder = CometMessage[String](identity)
-  private def eventSource(data: Enumerator[Game]) = Ok.chunked(data &> asJsonString &> EventSource()).as("text/event-stream")
+
+  private val asJsonString: Enumeratee[Game, String] =
+    Enumeratee.map[Game](game => Json stringify JsonFormat(game))
+
+  private def eventSource(data: Enumerator[Game]) =
+    Ok.chunked(data &> asJsonString &> EventSource()).as("text/event-stream")
 
   def events(id: String) = Action.async {
-    Replay find id flatMap {
-      case None                            => Future successful notFoundPage
-      case Some(replay) if replay.finished => Future successful eventSource(replay.games)
-      case Some(replay) => Visualization.actor ? GetStream(id) mapTo manifest[Option[Enumerator[Game]]] map {
-        case None                 => replay.games
-        case Some(realTimeStream) => replay.games >>> realTimeStream
-      } map eventSource
+    Server.actor ? Server.GetEnumerator(id) mapTo manifest[Option[Enumerator[Game]]] flatMap {
+      case Some(enumerator) => Future successful eventSource(enumerator)
+      case None => Replay find id map {
+        case None         => notFoundPage
+        case Some(replay) => eventSource(replay.games)
+      }
     }
   }
 }

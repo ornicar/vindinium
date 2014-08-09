@@ -126,3 +126,8 @@ button, input {
     font-size: 18px;
 }
 
+#game canvas {
+  border-radius: 26px;
+  background: #5c8ab9;
+  border: 7px solid #5c8ab9;
+}

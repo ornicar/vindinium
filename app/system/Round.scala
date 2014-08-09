@@ -2,6 +2,7 @@ package org.vindinium.server
 package system
 
 import akka.actor._
+import play.api.libs.iteratee._
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ Promise, Await }
@@ -14,11 +15,17 @@ final class Round(val initGame: Game) extends Actor with CustomLogging {
   val moves = collection.mutable.ArrayBuffer[Dir]()
   var game = initGame
 
+  val (enumerator, channel) = Concurrent.broadcast[Game]
+
   import Round._
 
   context setReceiveTimeout 1.minute
 
   def receive = {
+
+    case SendEnumerator(to) => to ! Some {
+      ((Enumerator enumerate moves) &> Enumeratee.scanLeft(initGame)(Arbiter.replay)) >>> enumerator
+    }
 
     case msg@Play(token, _) => clients get token match {
       case None =>
@@ -70,12 +77,12 @@ final class Round(val initGame: Game) extends Actor with CustomLogging {
       }
     }
 
-    case Terminated(client) ⇒ {
+    case Terminated(client) => {
       context unwatch client
-      clients filter (_._2 == client) foreach { case (id, _) ⇒ clients -= id }
+      clients filter (_._2 == client) foreach { case (id, _) => clients -= id }
     }
 
-    case ReceiveTimeout ⇒ context.parent ! Inactive(game.id)
+    case ReceiveTimeout => context.parent ! Inactive(game.id)
   }
 
   def addClient(token: Token, props: Props) {
@@ -107,6 +114,7 @@ final class Round(val initGame: Game) extends Actor with CustomLogging {
 
   def step(g: Game) {
     game = g
+    channel push game
     context.system.eventStream publish game
     if (game.finished) {
       Replay.finish(game.id, moves)
@@ -128,4 +136,6 @@ object Round {
   case class JoinBot(name: String, driver: Driver)
 
   case class Inactive(id: GameId)
+
+  case class SendEnumerator(to: ActorRef)
 }

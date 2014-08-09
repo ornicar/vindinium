@@ -2,6 +2,7 @@ package org.vindinium.server
 package system
 
 import akka.actor._
+import play.api.libs.iteratee._
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.{ Try, Success, Failure }
@@ -62,6 +63,11 @@ final class Server extends Actor with CustomLogging {
       context unwatch round
       rounds filter (_._2 == round) foreach { case (id, _) => rounds -= id }
     }
+
+    case GetEnumerator(id) => rounds get id match {
+      case None        => sender ! None
+      case Some(round) => round ! Round.SendEnumerator(sender)
+    }
   }
 
   def addRound(config: Config): Try[(GameId, ActorRef)] = config.make map { game =>
@@ -78,6 +84,8 @@ object Server {
   case class RequestToPlayArena(user: User)
 
   case class Play(pov: Pov, dir: String)
+
+  case class GetEnumerator(id: String)
 
   import play.api.libs.concurrent.Akka
   import play.api.Play.current
