@@ -3,3 +3,4 @@ target/
 logs/
 /public/bundle.*
 /client/node_modules/
+node_modules/
