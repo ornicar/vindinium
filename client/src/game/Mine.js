@@ -63,7 +63,7 @@ function Mine (owner) {
   this.addChild(this.currentSprite);
   this.addChild(this.goblin);
   this.updateOwner({ owner: owner, domination: 0 });
-  this.startTime = Date.now();
+  this.startTimeMineSpark = Date.now() - 1000 * Math.PI * 2 * Math.random();
 }
 Mine.prototype = Object.create(PIXI.DisplayObjectContainer.prototype);
 Mine.prototype.constructor = Mine;
@@ -94,7 +94,7 @@ Mine.prototype.updateOwner = function (meta, interpolationTime) {
 };
 
 Mine.prototype.render = function () {
-  this.mineSparkShader.time = (Date.now()-this.startTime) / 1000;
+  this.mineSparkShader.time = (Date.now()-this.startTimeMineSpark) / 1000;
 
   if (this.hasChanged && this.previousOwner && this.interpolationTime) {
     var p = smoothstep(0, this.interpolationTime, Date.now()-this.updatedTime);
