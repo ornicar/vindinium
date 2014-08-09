@@ -8,7 +8,8 @@ var TurnCount = React.createClass({
   },
   render: function(){
     var game = this.props.game;
-    var number = Math.floor((game.turn+ 1) / 4) + '/' + Math.ceil(game.maxTurns/4);
+    // var number = Math.floor((game.turn+ 1) / 4) + '/' + Math.ceil(game.maxTurns/4);
+    var number = (game.turn-1) + '/' + game.maxTurns;
     return <div className="turn-count">
       <div className="legend">
         <strong>Turn</strong>

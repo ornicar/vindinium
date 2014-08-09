@@ -6,12 +6,6 @@ var Tavern = require("./Tavern");
 var requestAnimationFrame = require("raf");
 var maps = require("./maps");
 
-// FIXME that should go somewhere
-/*
-var borderSize = 24;
-var tileSize = 24;
-*/
-
 var winnerParchmentTexture = PIXI.Texture.fromImage("/assets/img/winner_parchment.png");
 var heroTextures = [
   PIXI.Texture.fromImage("/assets/img/fireheart/player1_life.png"),
@@ -104,16 +98,38 @@ GameBoardRender.prototype = {
   updateGame: function (game, interpolationTime) {
     var consecutiveTurn = this.game && game.turn === this.game.turn+1;
     this.game = game;
-    // console.log("Turn "+this.game.turn+" - Hero"+(1+this.game.turn % 4));
-    this.game.meta.heroes.forEach(function (hero, i) {
-      this.heroes[i].updateHero(hero, interpolationTime, consecutiveTurn);
+    //console.log("Turn "+this.game.turn+" - Hero"+(1+this.game.turn % 4));
+    this.game.meta.heroes.forEach(function (meta, i) {
+      var hero = this.heroes[i];
+      //console.log(hero.logMeta(meta));
+      hero.updateHero(meta, interpolationTime, consecutiveTurn);
     }, this);
+
+    // TODO: improve perf of this iteration!
     var mineIndex = 0;
+    var nbPerHero = [0,0,0,0];
+    var mines = [];
+    this.game.forEachTile(function (tile) {
+      if (tile[0] === "$") {
+        if (tile[1] !== "-")
+          nbPerHero[parseInt(tile[1],10)-1] ++;
+        mines.push([ this.mines[mineIndex++], tile[1] ]);
+      }
+    }, this);
+    var nbTotal = nbPerHero.reduce(function (a, b) {
+      return a + b;
+    }, 0);
+    mines.forEach(function (mine) {
+      var i = mine[1] === "-" ? null : parseInt(mine[1],10)-1;
+      mine[0].updateOwner({ owner: mine[1], domination: i===null ? 0 : nbPerHero[i]/nbTotal }, interpolationTime, consecutiveTurn);
+    });
+    /*
     this.game.forEachTile(function (tile) {
       if (tile[0] === "$") {
         this.mines[mineIndex++].updateOwner(tile[1], interpolationTime, consecutiveTurn);
       }
     }, this);
+    */
   },
 
   initRendering: function () {
@@ -127,7 +143,6 @@ GameBoardRender.prototype = {
     this.gameContainer.y = this.borderSize;
     this.gameContainer.addChild(this.bgContainer = new PIXI.DisplayObjectContainer());
     this.gameContainer.addChild(this.heroesContainer = this.objectsContainer = new PIXI.DisplayObjectContainer());
-    //this.gameContainer.addChild(this.heroesContainer = new PIXI.DisplayObjectContainer());
     this.gameStage.addChild(this.gameContainer);
   },
   

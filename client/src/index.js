@@ -46,7 +46,6 @@ function runGame (gameId) {
   }
 
   function restart (startAtTurn) {
-    console.log("RESTART", startAtTurn);
     playing = true;
     gameStream
       .skip(startAtTurn-1)

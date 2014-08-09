@@ -4,6 +4,8 @@ var tilePIXI = require("./tilePIXI");
 var BezierEasing = require("bezier-easing");
 
 var attackEasing = BezierEasing(0.0, 1.33, 0, 1);
+var lifeIndicatorIncreaseEasing = BezierEasing(1, 0, 1, 1);
+var lifeIndicatorDecreaseEasing = BezierEasing(0, 1, 1, 1);
 
 function step (min, max, value) {
   var x = Math.max(0, Math.min(1, (value-min)/(max-min)));
@@ -82,6 +84,8 @@ Hero.prototype = Object.create(PIXI.DisplayObjectContainer.prototype);
 Hero.prototype.constructor = Hero;
 
 Hero.prototype.refreshHeroSprite = function (orientation) {
+  if (this._currentOrientation === orientation) return;
+  this._currentOrientation = orientation;
   this.heroSprite.setTexture(heroTextures[this.id - 1][orientation]);
   this.blinkSprite.setTexture(blinkTextures[orientation]);
 };
@@ -105,27 +109,28 @@ Hero.prototype.updateHero = function (meta, interpolationTime, consecutiveTurn) 
   this.updatedTime = Date.now();
   this.consecutiveTurn = consecutiveTurn;
   this.interpolationTime = interpolationTime;
-  this.refreshHeroSprite(meta.orientation);
-  // console.log(this.logMeta(meta));
 };
 
 Hero.prototype.render = function () {
   var meta = this.meta;
   var t = Date.now() - this.updatedTime;
 
-  // Some updates only make sense for consecutiveTurn
+  // Some animations only make sense for consecutiveTurn
   if (meta.from && this.consecutiveTurn && this.interpolationTime) {
     var p = step(0, this.interpolationTime, t);
-    this.drawLifeIndicator(mix(meta.from.life, meta.to.life, p));
+    var lifeIndicatorEasing = meta.from.life < meta.to.life ? lifeIndicatorIncreaseEasing : lifeIndicatorDecreaseEasing;
+    this.drawLifeIndicator(mix(meta.from.life, meta.to.life, lifeIndicatorEasing(p)));
     var moveProgress = meta.attack ? attackEasing(p) : p;
     this.setPosition(meta.killed || meta.move ? interpolatePosition(meta.from.pos, meta.to.pos, moveProgress) : meta.to.pos);
+    this.refreshHeroSprite(meta.orientation[Math.min(meta.orientation.length-1, Math.floor(p * meta.orientation.length))]);
   }
   else {
     this.drawLifeIndicator(meta.to.life);
     this.setPosition(meta.to.pos);
+    this.refreshHeroSprite(meta.orientation[meta.orientation.length - 1]);
   }
 
-  // Some updates are absolute
+  // Some animations can be done absolutely
   this.blinkSprite.alpha = (meta.killed || (meta.takeMine || meta.attacked) && t < 40) ? 1 : 0;
 };
 
@@ -135,7 +140,7 @@ Hero.prototype.getTexture = function () {
 
 Hero.prototype.logMeta = function (meta) {
   var logs = "Hero"+this.id+": ";
-  var ignored = ["from", "to", "orientation"];
+  var ignored = ["from", "to"];
   for (var k in meta) {
     if (ignored.indexOf(k) === -1) {
       if (meta[k] !== null) {
