@@ -1,11 +1,11 @@
 #!/bin/sh
 
-REMOTE="hollie"
+REMOTE="lizen"
 REMOTE_DIR="/home/vindinium"
 
 echo "Deploy to $REMOTE:$REMOTE_DIR"
 
-sbt ";play;stage"
+sbt ";stage;exit"
 if [ $? != 0 ]; then
   echo "Deploy canceled"
   exit 1
@@ -29,7 +29,7 @@ rsync_command="rsync $RSYNC_OPTIONS $stage/bin $stage/lib public $REMOTE:$REMOTE
 echo "$rsync_command"
 $rsync_command
 
-echo "Restart"
-ssh $REMOTE "service vindinium restart"
+# echo "Restart"
+# ssh $REMOTE "service vindinium restart"
 
-echo "Deploy complete"
+# echo "Deploy complete"
