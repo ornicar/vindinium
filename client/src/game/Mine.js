@@ -15,6 +15,7 @@ var mineTextures = [
 ];
 
 function setSpriteOwner (sprite, owner) {
+  sprite.position.x = -4;
   if (owner === "-") {
     sprite.setTexture(mineTextures[0]);
     sprite.position.y = 0;
@@ -30,6 +31,7 @@ function Mine (owner) {
   this.previousSprite = new PIXI.Sprite(mineTextures[0]);
   this.currentSprite = new PIXI.Sprite(mineTextures[0]);
   this.goblin = new PIXI.Sprite(goblinTexture);
+  this.goblin.position.x = -4;
   this.goblin.position.y = -8;
   setSpriteOwner(this.currentSprite, owner);
   this.addChild(this.previousSprite);
