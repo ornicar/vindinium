@@ -6,9 +6,9 @@ import scala.collection.mutable.Map
 import akka.actor._
 import akka.pattern.{ ask, pipe }
 
-import play.api.libs.json._
 import play.api.libs.iteratee._
 import play.api.libs.iteratee.Concurrent.Channel
+import play.api.libs.json._
 import scala.concurrent.ExecutionContext.Implicits.global
 
 final class Visualization extends Actor {
@@ -21,17 +21,19 @@ final class Visualization extends Actor {
 
   def receive = {
 
-    case Init ⇒
+    case Init =>
 
-    case GetStream(id) ⇒ {
+    case GetStream(id) => {
       sender ! channels.get(id).map(_._1)
     }
 
-    case game: Game ⇒ {
+    case game: Game => {
       channels.get(game.id) match {
-        case Some((enum, chan)) ⇒ chan.push(game)
-
-        case None               ⇒ channels += (game.id -> Concurrent.broadcast[Game])
+        case Some((_, chan)) => chan push game
+        case None =>
+          val chan = Concurrent.broadcast[Game]
+          channels += (game.id -> chan)
+          chan._2 push game
       }
     }
 
@@ -48,7 +50,5 @@ object Visualization {
   import play.api.Play.current
 
   val actor = Akka.system.actorOf(Props[Visualization], name = "visualization")
-  val asJsonString: Enumeratee[Game, String] = 
-    Enumeratee.map[Game](game ⇒ Json stringify JsonFormat(game))
-  // val stringAsJson: Enumeratee[String, JsValue] = Enumeratee.map[String](Json.parse)
+  val asJsonString: Enumeratee[Game, String] = Enumeratee.map[Game](game => Json stringify JsonFormat(game))
 }
