@@ -1,0 +1,44 @@
+.gold-score-bar {
+  display: inline-block;
+  vertical-align: top;
+  .gold-score-bar-coin {
+    background-color: #777777;
+    width: 24px;
+    height: 30px;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    img {
+      padding: 0;
+      margin: 10px 0 0 0;
+      width: 14px;
+      height: 15px;
+    }
+  }
+  .bars {
+    width: 24px;
+    height: 240px;
+    border: 2px solid #777777;
+    position: relative;
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+    display: inline-block;
+    vertical-align: top;
+  }
+  .player-1 {
+    background-color: #ca0000;
+  }
+  .player-2 {
+    background-color: #0000ca;
+   }
+  .player-3 {
+    background-color: #00b700;
+  }
+  .player-4 {
+    background-color: #caca00;
+  }
+
+  .bars .player:last-child {
+    border-bottom-left-radius: 3px;
+    border-bottom-right-radius: 3px;
+  }
+}

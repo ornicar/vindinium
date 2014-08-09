@@ -5,6 +5,10 @@ REMOTE_DIR="/home/vindinium"
 
 echo "Deploy to $REMOTE:$REMOTE_DIR"
 
+cd client
+./build.sh || exit 1
+cd -
+
 sbt ";stage;exit"
 if [ $? != 0 ]; then
   echo "Deploy canceled"

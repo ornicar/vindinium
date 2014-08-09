@@ -12,7 +12,7 @@ Ranked @r
   <ul>
     @replays.map { replay =>
     <li>
-      <a href="@routes.Game.show(replay.id)">
+      <a href="@routes.Game.show(replay.id)@if(!replay.finished){?speed=max}">
         @replay.names.mkString(" vs "),
         @if(replay.finished) { Finished } else { In progress }
       </a>

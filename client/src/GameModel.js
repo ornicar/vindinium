@@ -1,0 +1,264 @@
+
+var bloodySoilPersistence = 20;
+var footprintPersistence = 20;
+
+function GameModel (state, previousState) {
+  this.id = state.id;
+  this.board = state.board;
+  this.finished = state.finished;
+  this.heroes = state.heroes;
+  this.maxTurns = state.maxTurns;
+  this.turn = state.turn;
+
+  this.tilesArray = this.board.tiles.match(/.{2}/g);
+
+  this.previous = previousState;
+  if (previousState) {
+    if (!(previousState instanceof GameModel)) throw new Error("previousState must be an instance of GameModel");
+    this.meta = this.aggregateMeta(previousState);
+  }
+  else {
+    this.meta = this.initialMeta();
+  }
+}
+
+function sortByGold(heroA, heroB) {
+  return heroB.gold - heroA.gold;
+}
+
+function cloneObject (obj) {
+  var copy = {};
+  for (var k in obj) {
+    copy[k] = obj[k];
+  }
+  return copy;
+}
+
+function genEmptyArray (length, fill) {
+  var t = [];
+  for (var i=0; i<length; ++i)
+    t.push(fill);
+  return t;
+}
+
+GameModel.prototype = {
+  initialMeta: function () {
+    var game = this;
+    return {
+      bloodyGroundFactor: genEmptyArray(this.tilesArray.length, 0),
+      footPrintFactor: genEmptyArray(this.tilesArray.length, 0),
+      heroes: [1,2,3,4].map(function (id, i) {
+        return {
+          myturn: false,
+          from: null,
+          to: game.heroes[i],
+          orientation: 0,
+          move: null,
+          attack: null,
+          attacked: null,
+          kill: null,
+          killed: null,
+          takeMine: null,
+          drink: null
+        };
+      })
+    };
+  },
+
+  aggregateMeta: function (previous) {
+    if (previous.turn !== this.turn-1) throw new Error("aggregateMeta: game does not follow! "+previous.turn+"->"+this.turn);
+
+    var meta = cloneObject(previous.meta);
+    meta.heroes = previous.meta.heroes.map(cloneObject);
+    meta.heroes.forEach(function (hero, i) {
+      hero.myturn = false;
+      hero.move = null;
+      hero.takeMine = null;
+      hero.drink = null;
+      hero.kill = null;
+      hero.attack = null;
+      hero.killed = null;
+      hero.attacked = null;
+      hero.from = previous.heroes[i];
+      hero.to = this.heroes[i];
+    }, this);
+
+    // Compute last hero meta
+    var heroIndex = previous.turn % 4;
+    var hero = this.heroes[heroIndex];
+    var previousHero = previous.heroes[heroIndex];
+    var heroMeta = cloneObject(meta.heroes[heroIndex]);
+    var previousHeroMeta = previous.meta.heroes[heroIndex];
+    var previousPositionIndex = previous.indexForPosition(previousHero.pos.x, previousHero.pos.y);
+    var previousNeighborsIndexes = previous.neighborsIndexes(previousHero.pos.x, previousHero.pos.y);
+
+    var touchingTaverns = previousNeighborsIndexes
+      .map(function (i) { return previous.tilesArray[i] === "[]" ? i : null; })
+      .filter(function (tile) { return tile !== null; });
+
+    var touchingMines = previousNeighborsIndexes
+      .map(function (i) {
+        var tile = previous.tilesArray[i];
+        return tile && tile[0] === "$" ? i : null; })
+      .filter(function (tile) { return tile !== null; });
+
+    var takenMines = touchingMines.filter(function (i) {
+      var heroId = hero.id.toString();
+      return previous.tilesArray[i][1] !== heroId && this.tilesArray[i][1] === heroId;
+    }, this);
+
+    var opponents = [1,2,3,4].filter(function (id) {
+      return id !== hero.id;
+    });
+
+    var opponentsInjured = opponents.filter(function (i) {
+      var prevOpponent = previous.heroes[i-1];
+      var opponent = this.heroes[i-1];
+      return opponent.life < prevOpponent.life-1;
+    }, this);
+
+    var opponentsKilled = opponents.filter(function (i) {
+      var prevOpponent = previous.heroes[i-1];
+      var opponent = this.heroes[i-1];
+      return opponent.life === 100 && prevOpponent.life <= 20;
+    }, this);
+
+    var opponentsAttacked = opponentsInjured.concat(opponentsKilled);
+
+    var p;
+    var dx = hero.pos.x - previousHero.pos.x;
+    var dy = hero.pos.y - previousHero.pos.y;
+
+    // Creating the current hero meta
+
+    heroMeta.myturn = true;
+
+    heroMeta.drink = touchingTaverns.length && hero.life > previousHero.life && touchingTaverns || null;
+    heroMeta.move = !(dx===0 && dy===0) && { dx: dx, dy: dy } || null;
+    heroMeta.takeMine = takenMines.length && takenMines || null;
+    heroMeta.attack = opponentsAttacked.length && opponentsAttacked || null;
+    heroMeta.kill = opponentsKilled.length && opponentsKilled || null;
+
+    var orientation = previousHeroMeta.orientation;
+    if (heroMeta.drink) {
+      // FIXME does this work?
+      p = previous.indexToPosition(touchingTaverns[0]);
+      dx = p.x + previousHero.pos.x;
+      dy = p.y + previousHero.pos.y;
+    }
+    if (heroMeta.attack) {
+      // FIXME does this work?
+      p = previous.heroes[opponentsAttacked[0]-1].pos;
+      dx = p.x - previousHero.pos.x;
+      dy = p.y - previousHero.pos.y;
+    }
+    
+    if (dx === 1 && dy === 0) {
+      orientation = 1;
+    }
+    else if (dx === -1 && dy === 0) {
+      orientation = 3;
+    }
+    else if (dx === 0 && dy === 1) {
+      orientation = 2;
+    }
+    else if (dx === 0 && dy === -1) {
+      orientation = 0;
+    }
+    heroMeta.orientation = orientation;
+
+    // Record metas
+
+    meta.heroes[hero.id-1] = heroMeta;
+    opponentsAttacked.forEach(function (id) {
+      meta.heroes[id-1].attacked = hero.id;
+    });
+    opponentsKilled.forEach(function (id) {
+      meta.heroes[id-1].killed = hero.id;
+    });
+
+
+    meta.bloodyGroundFactor = meta.bloodyGroundFactor.map(function (v) {
+      return Math.max(0, v - 1 / bloodySoilPersistence);
+    });
+    opponentsKilled.forEach(function (id) {
+      var pos = previous.indexForPosition(previous.heroes[id-1].pos);
+      meta.bloodyGroundFactor[pos] ++;
+    });
+
+    meta.footPrintFactor = meta.footPrintFactor.map(function (v) {
+      return Math.max(0, v - 1 / footprintPersistence);
+    });
+    meta.footPrintFactor[previousPositionIndex] = 1;
+
+    return meta;
+  },
+  isOver: function () {
+    return this.finished;
+  },
+  getWinner: function () {
+    var heroes = this.heroes.slice();
+    heroes.sort(sortByGold);
+    if(heroes[0].gold === heroes[1].gold) return -1;
+    else return heroes[0].id;
+  },
+
+  forEachTile: function (f, ctx) {
+    var size = this.board.size;
+    this.tilesArray.forEach(function (tile, i) {
+      var x = i % size;
+      var y = Math.floor(i / size);
+      f.call(this, tile, i, x, y);
+    }, ctx || this);
+  },
+
+  tileAt: function (x, y) {
+    return this.tilesArray[this.indexForPosition(x, y)];
+  },
+
+  wallAt: function (x, y) {
+    var tile = this.tileAt(x, y);
+    return tile === undefined || tile === "##";
+  },
+
+  indexToPosition: function (i) {
+    return {
+      x: i % this.board.size,
+      y: Math.floor(i / this.board.size)
+    };
+  },
+
+  indexForPosition: function (x, y) {
+    var size = this.board.size;
+    if (x < 0 || x >= size || y < 0 || y >= size)
+      return null;
+    return x + size * y;
+  },
+
+  neighborsIndexes: function (x, y) {
+    return [
+      this.indexForPosition(x, y-1), // TOP
+      this.indexForPosition(x+1, y), // RIGHT
+      this.indexForPosition(x, y+1), // BOTTOM
+      this.indexForPosition(x-1, y) // LEFT
+    ];
+  },
+
+  neighbors: function (x, y) {
+    return this.neighborsIndexes(x, y).map(function (i) {
+      if (i === null) return null;
+      return this.tilesArray[i];
+    }, this);
+  },
+
+  getWallStatus: function (x, y) {
+    var hasWallNeighbors =
+      this.neighborsIndexes(x, y)
+      .filter(function (i) { return i !== null && this.tilesArray[i] === "##"; }, this)
+      .length > 0;
+    return !hasWallNeighbors ? "alone" : "";
+  }
+
+};
+
+module.exports = GameModel;

@@ -1,2 +1,5 @@
+.DS_Store
 target/
 logs/
+/public/bundle.*
+/client/node_modules/
