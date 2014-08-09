@@ -4,6 +4,7 @@
   "description": "Source code of vindinium (client side)",
   "private": true,
   "dependencies": {
+    "bezier-easing": "^0.4.2",
     "performance-now": "0.1.3",
     "perlin-noise": "0.0.1",
     "pixi.js": "1.6.1",

@@ -5,6 +5,8 @@ var GameStream = require("./GameStream");
 var Game = require("./Game");
 
 var SPEEDS = [1, 2, 5, 10, 20, 50, 75, 100, 150, 200];
+var DEFAULT_SPEED = 10;
+
 var url = Url.parse(window.location.href, true);
 var mount = document.getElementById("game");
 
@@ -44,6 +46,7 @@ function runGame (gameId) {
   }
 
   function restart (startAtTurn) {
+    console.log("RESTART", startAtTurn);
     playing = true;
     gameStream
       .skip(startAtTurn-1)
@@ -61,7 +64,7 @@ function runGame (gameId) {
   }
 
   function setSpeed (s) {
-    speed = s === "max" ? s : isNaN(s) ? 20 : parseInt(s, 10);
+    speed = s === "max" ? s : isNaN(s) ? DEFAULT_SPEED : parseInt(s, 10);
     refreshRate = speed==="max" ? 0 :  1000 / speed;
   }
 

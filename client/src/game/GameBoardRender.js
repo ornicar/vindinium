@@ -102,14 +102,16 @@ GameBoardRender.prototype = {
   },
 
   updateGame: function (game, interpolationTime) {
+    var consecutiveTurn = this.game && game.turn === this.game.turn+1;
     this.game = game;
-    this.game.heroes.forEach(function (hero, i) {
-      this.heroes[i].updateHero(hero, interpolationTime);
+    // console.log("Turn "+this.game.turn+" - Hero"+(1+this.game.turn % 4));
+    this.game.meta.heroes.forEach(function (hero, i) {
+      this.heroes[i].updateHero(hero, interpolationTime, consecutiveTurn);
     }, this);
     var mineIndex = 0;
     this.game.forEachTile(function (tile) {
       if (tile[0] === "$") {
-        this.mines[mineIndex++].updateOwner(tile[1], interpolationTime);
+        this.mines[mineIndex++].updateOwner(tile[1], interpolationTime, consecutiveTurn);
       }
     }, this);
   },
@@ -161,8 +163,8 @@ GameBoardRender.prototype = {
   },
 
   initHeroes: function () {
-    this.heroes = this.game.heroes.map(function (heroObj) {
-      var hero = new Hero(heroObj, this.tileSize);
+    this.heroes = this.game.meta.heroes.map(function (heroObj, i) {
+      var hero = new Hero(i+1, heroObj, this.tileSize);
       this.heroesContainer.addChild(hero);
       return hero;
     }, this);

@@ -41,16 +41,19 @@ Mine.prototype = Object.create(PIXI.DisplayObjectContainer.prototype);
 Mine.prototype.constructor = Mine;
 
 Mine.prototype.updateOwner = function (owner, interpolationTime) {
+  // TODO : improve that with meta ?
   if (owner === this.currentOwner) return;
   this.previousOwner = this.currentOwner;
   this.currentOwner = owner;
   this.updatedTime = Date.now();
   this.interpolationTime = this.previousOwner && interpolationTime;
 
-  if (this.interpolationTime) {
-    setSpriteOwner(this.previousSprite, this.previousOwner);
-  }
   setSpriteOwner(this.currentSprite, this.currentOwner);
+  setSpriteOwner(this.previousSprite, this.previousOwner);
+  if (!this.interpolationTime) {
+    this.previousSprite.alpha = 0;
+    this.currentSprite.alpha = 1;
+  }
   this.goblin.alpha = (this.currentOwner === "-" ? 1 : 0);
 };
 

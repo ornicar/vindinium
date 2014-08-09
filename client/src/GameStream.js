@@ -18,13 +18,9 @@ function aggregateGame (previousGame, game) {
 }
 
 function GameStream (id) {
-  var previousGame = null;
   return EventSourceObservable("/events/"+id)
     .map(bugfixServerPosition)
-    .map(function (game) {
-      previousGame = aggregateGame(previousGame, game);
-      return previousGame;
-    });
+    .scan(null, aggregateGame);
 }
 
 module.exports = GameStream;

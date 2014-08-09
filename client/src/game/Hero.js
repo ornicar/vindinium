@@ -1,6 +1,9 @@
 var PIXI = require("pixi.js");
 var smoothstep = require("smoothstep");
 var tilePIXI = require("./tilePIXI");
+var BezierEasing = require("bezier-easing");
+
+var attackEasing = BezierEasing(0.0, 1.33, 0, 1);
 
 function step (min, max, value) {
   var x = Math.max(0, Math.min(1, (value-min)/(max-min)));
@@ -27,9 +30,11 @@ var blinkTextures = orientations.map(function (o) {
   return tilePIXI32(heroesTexture, 4, o);
 });
 
+/*
 function manhattan (a, b) {
   return Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
 }
+*/
 
 function interpolatePosition (a, b, p) {
   return {
@@ -52,7 +57,8 @@ function createHeroSprite (texture) {
   return heroSprite;
 }
 
-function Hero (obj, tileSize) {
+function Hero (id, obj, tileSize) {
+  this.id = id;
   this.tileSize = tileSize;
   PIXI.DisplayObjectContainer.call(this);
   this.lifeIndicator = new PIXI.Graphics();
@@ -60,7 +66,7 @@ function Hero (obj, tileSize) {
   this.lifeIndicator.position.y = 0;
   this.addChild(this.lifeIndicator);
 
-  this.heroSprite = createHeroSprite(heroTextures[obj.id - 1][0]);
+  this.heroSprite = createHeroSprite(heroTextures[id - 1][0]);
   this.blinkSprite = createHeroSprite(blinkTextures[0]);
   this.blinkSprite.alpha = 0;
 
@@ -68,7 +74,6 @@ function Hero (obj, tileSize) {
   this.addChild(this.blinkSprite);
 
   this.interpolationEndTime = 0;
-  this.playerOrientation = 0;
 
   this.updateHero(obj);
 }
@@ -76,25 +81,8 @@ function Hero (obj, tileSize) {
 Hero.prototype = Object.create(PIXI.DisplayObjectContainer.prototype);
 Hero.prototype.constructor = Hero;
 
-Hero.prototype.analyzeDiff = function (/* some parameters */) {
-  // TODO
-  return {
-    // All meta data we need should go here
-    myturn: true || false,
-    orientation: 0, // orientation of the current action
-    moved: null || { dx: 1, dy: 0 },
-    reborn: true || false,
-    attack: null || [{ hero: 1, life: 0 }],
-    attacked: null || [{ hero: 1, pos: { x: 0, y: 0 } }],
-    dead: true || false,
-    takeMine: null || { pos: {x:0,y:0}, owner: null||1 },
-    drink: null || { pos: {x:0,y:0} }
-  };
-};
-
-Hero.prototype.refreshHeroSprite = function () {
-  var orientation = this.playerOrientation;
-  this.heroSprite.setTexture(heroTextures[this.state.id - 1][orientation]);
+Hero.prototype.refreshHeroSprite = function (orientation) {
+  this.heroSprite.setTexture(heroTextures[this.id - 1][orientation]);
   this.blinkSprite.setTexture(blinkTextures[orientation]);
 };
 
@@ -112,69 +100,57 @@ Hero.prototype.setPosition = function (pos) {
   this.position.y = pos.y * this.tileSize;
 };
 
-Hero.prototype.updateHero = function (obj, interpolationTime) {
-  // if (Date.now() < this.interpolationEndTime) return; // we'll need something like that when interpolationTime > refreshRate
-  this.previousState = this.state;
-  this.state = obj;
+Hero.prototype.updateHero = function (meta, interpolationTime, consecutiveTurn) {
+  this.meta = meta;
   this.updatedTime = Date.now();
-  this.refreshHeroSprite();
-
-  if (!this.previousState || !interpolationTime) {
-    this.setPosition(this.state.pos);
-    this.drawLifeIndicator(this.state.life);
-    this.interpolationTime = 0;
-    this.interpolationEndTime = this.updatedTime;
-  }
-  else {
-    this.interpolationTime = interpolationTime;
-    this.interpolationEndTime = this.updatedTime + this.interpolationTime;
-    this.interpolatePosition = manhattan(this.state.pos, this.previousState.pos) === 1;
-  }
-
-  if (this.previousState) {
-    this.wasDamaged = this.state.life < this.previousState.life - 1;
-    var dx = this.state.pos.x - this.previousState.pos.x;
-    var dy = this.state.pos.y - this.previousState.pos.y;
-    if (dx === 1 && dy === 0) {
-      this.playerOrientation = 1;
-    }
-    else if (dx === -1 && dy === 0) {
-      this.playerOrientation = 3;
-    }
-    else if (dx === 0 && dy === 1) {
-
-      this.playerOrientation = 2;
-    }
-    else if (dx === 0 && dy === -1) {
-      this.playerOrientation = 0;
-    }
-  }
-  else {
-    this.wasDamaged = false;
-  }
-
-  if (this.wasDamaged) {
-    this.blinkSprite.alpha = 1;
-  }
-  else {
-    this.blinkSprite.alpha = 0;
-  }
+  this.consecutiveTurn = consecutiveTurn;
+  this.interpolationTime = interpolationTime;
+  this.refreshHeroSprite(meta.orientation);
+  // console.log(this.logMeta(meta));
 };
 
 Hero.prototype.render = function () {
-  if (!this.interpolationTime) return;
-  var p = step(this.updatedTime, this.updatedTime+this.interpolationTime, Date.now());
-  if (this.interpolatePosition) {
-    this.setPosition(interpolatePosition(this.previousState.pos, this.state.pos, p));
+  var meta = this.meta;
+  var t = Date.now() - this.updatedTime;
+
+  // Some updates only make sense for consecutiveTurn
+  if (meta.from && this.consecutiveTurn && this.interpolationTime) {
+    var p = step(0, this.interpolationTime, t);
+    this.drawLifeIndicator(mix(meta.from.life, meta.to.life, p));
+    var moveProgress = meta.attack ? attackEasing(p) : p;
+    this.setPosition(meta.killed || meta.move ? interpolatePosition(meta.from.pos, meta.to.pos, moveProgress) : meta.to.pos);
   }
-  this.drawLifeIndicator(mix(this.previousState.life, this.state.life, p));
-  if (this.wasDamaged) {
-    this.blinkSprite.alpha = p < 0.2 ? 1 : 0;
+  else {
+    this.drawLifeIndicator(meta.to.life);
+    this.setPosition(meta.to.pos);
   }
+
+  // Some updates are absolute
+  this.blinkSprite.alpha = (meta.killed || (meta.takeMine || meta.attacked) && t < 40) ? 1 : 0;
 };
 
 Hero.prototype.getTexture = function () {
   return heroTextures[this.state.id - 1][0];
+};
+
+Hero.prototype.logMeta = function (meta) {
+  var logs = "Hero"+this.id+": ";
+  var ignored = ["from", "to", "orientation"];
+  for (var k in meta) {
+    if (ignored.indexOf(k) === -1) {
+      if (meta[k] !== null) {
+        var value = meta[k];
+        var typ = typeof meta[k];
+        if (typ === "object" && !(meta[k] instanceof Array))
+          value = JSON.stringify(value);
+        if (typ === "boolean")
+          logs += (value ? k+" " : "");
+        else
+          logs += k+"="+value+" ";
+      }
+    }
+  }
+  return logs;
 };
 
 module.exports = Hero;

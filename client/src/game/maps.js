@@ -274,7 +274,7 @@ module.exports = {
         tavernFactor /= nbTaverns;
         mineFactor /= nbMines;
 
-        value = value * 0.8 + 1.5 * (mineFactor - tavernFactor);
+        value = value * 0.8 + 2.4 * (mineFactor - tavernFactor);
 
         allTilesType.push(value < 0.3 ? "earth" : value > 0.7 ? "rock" : "plain" );
       }
