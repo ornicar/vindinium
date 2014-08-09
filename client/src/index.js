@@ -50,9 +50,11 @@ function runGame (gameId) {
     gameStream
       .skip(startAtTurn-1)
       .zip(refreshRateStream, identity)
+      .bufferWithTime(1000 / 60)
       .takeUntil(gameInterruptions)
       .subscribe(function (g) {
-        game = g;
+        if (g.length === 0) return; // The buffer is empty
+        game = g[g.length-1];
         render();
       }, function (err) {
         console.error(err);
@@ -102,7 +104,7 @@ function runGame (gameId) {
 
   function jump (turn) {
     turn -= 1;
-    if (turn < 0 || turn > game.maxTurns) return;
+    if (turn < 0 || game && turn > game.maxTurns) return;
     gameInterruptions.onNext("jumped");
     gameStream
       .skip(turn)
