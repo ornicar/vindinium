@@ -1,5 +1,5 @@
 
-var bloodySoilPersistence = 100;
+var bloodySoilPersistence = 150;
 var footprintPersistence = 40;
 
 function GameModel (state, previousState) {
