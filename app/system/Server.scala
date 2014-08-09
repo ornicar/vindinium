@@ -58,9 +58,9 @@ final class Server extends Actor with CustomLogging {
 
     case Round.Inactive(id) => if (nextArenaRoundId != Some(id)) sender ! PoisonPill
 
-    case Terminated(round) ⇒ {
+    case Terminated(round) => {
       context unwatch round
-      rounds filter (_._2 == round) foreach { case (id, _) ⇒ rounds -= id }
+      rounds filter (_._2 == round) foreach { case (id, _) => rounds -= id }
     }
   }
 

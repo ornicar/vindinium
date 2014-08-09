@@ -9,8 +9,6 @@ import scala.concurrent.Future
 
 final class Elo extends Actor with ActorLogging {
 
-  val gameBonus = 1
-
   import Elo._
 
   context.system.eventStream.subscribe(self, classOf[Game])
@@ -18,6 +16,7 @@ final class Elo extends Actor with ActorLogging {
   def receive = {
 
     case game: Game if game.finished && game.arena && game.hasManyNames => playersOf(game) foreach { players =>
+      val gameBonus = if (scala.util.Random.nextInt(10) == 0) 1 else 0
       players.groupBy(_.user) foreach {
         case (user, userPlayers) => {
           val diff = userPlayers.foldLeft(0) {

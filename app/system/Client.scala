@@ -3,6 +3,7 @@ package system
 
 import akka.actor._
 import akka.pattern.{ ask, pipe }
+import org.joda.time.DateTime
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ Future, Promise, promise }
@@ -21,7 +22,7 @@ final class HttpClient(token: Token, initialPromise: Promise[PlayerInput]) exten
     case Event(game: Game, Response(promise)) => {
       promise success PlayerInput(game, token)
       if (game.finished) goto(GameFinished)
-      else goto(Working) using Nothing
+      else goto(Working) using Since(DateTime.now)
     }
 
     case Event(Round.ClientPlay(_, replyTo), _) => {
@@ -32,17 +33,23 @@ final class HttpClient(token: Token, initialPromise: Promise[PlayerInput]) exten
 
   when(Working, stateTimeout = aiTimeout) {
 
-    case Event(msg: Round.ClientPlay, _) => {
-      sender ! msg
+    case Event(msg: Round.ClientPlay, Since(since)) => {
+      val time = DateTime.now.getMillisOfDay - since.getMillisOfDay
+      if (time >= playerMinTimeOfPlay) sender ! msg
+      else context.system.scheduler.scheduleOnce((playerMinTimeOfPlay - time).millis, sender, msg)
       stay
     }
 
-    case Event(WorkDone(promise), Nothing) => goto(Waiting) using Response(promise)
+    case Event(WorkDone(promise), _) => goto(Waiting) using Response(promise)
 
     case Event(StateTimeout, _) => {
       context.parent ! Timeout(token)
       goto(TimedOut)
     }
+
+    case Event(x, y) =>
+      println(x, y)
+      stay
   }
 
   when(TimedOut) {
@@ -71,7 +78,7 @@ final class BotClient(token: Token, driver: Driver) extends Client {
 
   import Client._
 
-  startWith(Waiting, Nothing)
+  startWith(Waiting, Since(DateTime.now))
 
   when(Waiting) {
 
@@ -86,15 +93,18 @@ final class BotClient(token: Token, driver: Driver) extends Client {
   when(Working) {
 
     case Event(msg: Round.ClientPlay, _) => {
-      sender ! msg
+      context.system.scheduler.scheduleOnce(botMinTimeOfPlay.millis, sender, msg)
       stay
     }
 
-    case Event(WorkDone(promise), Nothing) => goto(Waiting)
+    case Event(WorkDone(promise), _) => goto(Waiting)
   }
 }
 
 object Client {
+
+  val playerMinTimeOfPlay = 60
+  val botMinTimeOfPlay = 50
 
   import play.api.Play.current
   val botDelay = play.api.Play.configuration
@@ -116,6 +126,6 @@ object Client {
   case object GameFinished extends State
 
   sealed trait Data
-  case object Nothing extends Data
+  case class Since(date: DateTime) extends Data
   case class Response(promise: Promise[PlayerInput]) extends Data
 }
