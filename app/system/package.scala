@@ -8,7 +8,7 @@ package object system {
   def notFound(msg: String) = akka.actor.Status.Failure(NotFoundException(msg))
 
   def inputPromise(to: akka.actor.ActorRef)(implicit ctx: scala.concurrent.ExecutionContext) = {
-    val p = scala.concurrent.promise[PlayerInput]
+    val p = scala.concurrent.Promise[PlayerInput]
     p.future onSuccess {
       case x => to ! x
     }
