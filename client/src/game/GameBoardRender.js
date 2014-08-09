@@ -137,8 +137,8 @@ GameBoardRender.prototype = {
 
   updateBloodySoil: function () {
     this.game.meta.bloodyGroundFactor.forEach(function (level, i) {
-      if (level) {
-        var sprite = this._bloodySoil[i];
+      var sprite = this._bloodySoil[i];
+      if (level || sprite) {
         if (!sprite) {
           sprite = this._bloodySoil[i] = new BloodySoil(level);
           var pos = this.game.indexToPosition(i);
