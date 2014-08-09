@@ -1,6 +1,6 @@
 
-var bloodySoilPersistence = 20;
-var footprintPersistence = 20;
+var bloodySoilPersistence = 150;
+var footprintPersistence = 40;
 
 function GameModel (state, previousState) {
   this.id = state.id;
@@ -185,9 +185,13 @@ GameModel.prototype = {
     meta.bloodyGroundFactor = meta.bloodyGroundFactor.map(function (v) {
       return Math.max(0, v - 1 / bloodySoilPersistence);
     });
+    opponentsInjured.forEach(function (id) {
+      var pos = previous.heroes[id-1].pos;
+      meta.bloodyGroundFactor[previous.indexForPosition(pos.x, pos.y)] += 1;
+    });
     opponentsKilled.forEach(function (id) {
-      var pos = previous.indexForPosition(previous.heroes[id-1].pos);
-      meta.bloodyGroundFactor[pos] ++;
+      var pos = previous.heroes[id-1].pos;
+      meta.bloodyGroundFactor[previous.indexForPosition(pos.x, pos.y)] += 2;
     });
 
     meta.footPrintFactor = meta.footPrintFactor.map(function (v) {

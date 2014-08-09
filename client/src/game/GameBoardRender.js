@@ -5,6 +5,7 @@ var Mine = require("./Mine");
 var Tavern = require("./Tavern");
 var requestAnimationFrame = require("raf");
 var maps = require("./maps");
+var BloodySoil = require("./BloodySoil");
 
 var winnerParchmentTexture = PIXI.Texture.fromImage("/assets/img/winner_parchment.png");
 var heroTextures = [
@@ -105,6 +106,8 @@ GameBoardRender.prototype = {
       hero.updateHero(meta, interpolationTime, consecutiveTurn);
     }, this);
 
+    this.updateBloodySoil();
+
     // TODO: improve perf of this iteration!
     var mineIndex = 0;
     var nbPerHero = [0,0,0,0];
@@ -132,16 +135,44 @@ GameBoardRender.prototype = {
     */
   },
 
+  updateBloodySoil: function () {
+    this.game.meta.bloodyGroundFactor.forEach(function (level, i) {
+      var sprite = this._bloodySoil[i];
+      if (level || sprite) {
+        if (!sprite) {
+          sprite = this._bloodySoil[i] = new BloodySoil(level);
+          var pos = this.game.indexToPosition(i);
+          sprite.pivot.x = (8+this.tileSize)/2;
+          sprite.pivot.y = (8+this.tileSize)/2;
+          sprite.position.x = pos.x * this.tileSize - 4 + sprite.pivot.x + Math.round(6 * (Math.random()-0.5));
+          sprite.position.y = pos.y * this.tileSize - 4 + sprite.pivot.y + Math.round(6 * (Math.random()-0.5));
+          sprite.rotation = Math.PI * 2 * Math.random();
+          this.bloodySoilContainer.addChild(sprite);
+        }
+        else {
+          sprite.update(level);
+        }
+      }
+    }, this);
+  },
+
   initRendering: function () {
-    this.boardWidth = this.borderSize * 2 + this.tileSize * this.game.board.size;
+    var size = this.game.board.size;
+    this.boardWidth = this.borderSize * 2 + this.tileSize * size;
     this.renderer = new PIXI.autoDetectRenderer(this.boardWidth, this.boardWidth);
     this.container.appendChild(this.renderer.view);
     this.gameStage = new PIXI.Stage();
+
+    this._bloodySoil = [];
+    for (var i=0; i<size*size; ++i) {
+      this._bloodySoil[i] = null;
+    }
 
     this.gameContainer = new PIXI.DisplayObjectContainer();
     this.gameContainer.x = this.borderSize;
     this.gameContainer.y = this.borderSize;
     this.gameContainer.addChild(this.bgContainer = new PIXI.DisplayObjectContainer());
+    this.gameContainer.addChild(this.bloodySoilContainer = new PIXI.DisplayObjectContainer());
     this.gameContainer.addChild(this.heroesContainer = this.objectsContainer = new PIXI.DisplayObjectContainer());
     this.gameStage.addChild(this.gameContainer);
   },
