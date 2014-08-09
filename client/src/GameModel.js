@@ -41,6 +41,22 @@ function genEmptyArray (length, fill) {
   return t;
 }
 
+function orientationForDelta (dx, dy) {
+  if (dx === 1 && dy === 0) {
+    return 1;
+  }
+  else if (dx === -1 && dy === 0) {
+    return 3;
+  }
+  else if (dx === 0 && dy === 1) {
+    return 2;
+  }
+  else if (dx === 0 && dy === -1) {
+    return 0;
+  }
+  return null;
+}
+
 GameModel.prototype = {
   initialMeta: function () {
     var game = this;
@@ -52,7 +68,7 @@ GameModel.prototype = {
           myturn: false,
           from: null,
           to: game.heroes[i],
-          orientation: 0,
+          orientation: [0],
           move: null,
           attack: null,
           attacked: null,
@@ -79,6 +95,7 @@ GameModel.prototype = {
       hero.attack = null;
       hero.killed = null;
       hero.attacked = null;
+      hero.orientation = [hero.orientation[hero.orientation.length-1]];
       hero.from = previous.heroes[i];
       hero.to = this.heroes[i];
     }, this);
@@ -139,32 +156,19 @@ GameModel.prototype = {
     heroMeta.attack = opponentsAttacked.length && opponentsAttacked || null;
     heroMeta.kill = opponentsKilled.length && opponentsKilled || null;
 
-    var orientation = previousHeroMeta.orientation;
-    if (heroMeta.drink) {
-      // FIXME does this work?
-      p = previous.indexToPosition(touchingTaverns[0]);
-      dx = p.x + previousHero.pos.x;
-      dy = p.y + previousHero.pos.y;
-    }
+    var orientation = [];
+    orientation.push(orientationForDelta(dx, dy));
     if (heroMeta.attack) {
-      // FIXME does this work?
       p = previous.heroes[opponentsAttacked[0]-1].pos;
-      dx = p.x - previousHero.pos.x;
-      dy = p.y - previousHero.pos.y;
+      orientation.push(orientationForDelta(p.x - previousHero.pos.x, p.y - previousHero.pos.y));
     }
+    if (heroMeta.drink) {
+      p = previous.indexToPosition(touchingTaverns[0]);
+      orientation.push(orientationForDelta(p.x - previousHero.pos.x, p.y - previousHero.pos.y));
+    }
+    orientation = orientation.filter(function (o) { return o !== null; });
+    if (orientation.length === 0) orientation.push(previousHeroMeta.orientation[previousHeroMeta.orientation.length-1]);
     
-    if (dx === 1 && dy === 0) {
-      orientation = 1;
-    }
-    else if (dx === -1 && dy === 0) {
-      orientation = 3;
-    }
-    else if (dx === 0 && dy === 1) {
-      orientation = 2;
-    }
-    else if (dx === 0 && dy === -1) {
-      orientation = 0;
-    }
     heroMeta.orientation = orientation;
 
     // Record metas

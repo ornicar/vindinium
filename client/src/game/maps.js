@@ -238,6 +238,9 @@ module.exports = {
         persistense: 0.3
       });
 
+      var terrainRandomnessFactor = 0.7 + 0.2 * Math.random();
+      var terrainMineTavernFactor = 1.4 + 0.8 * Math.random();
+
       function indexesDistance (i, j) {
         var a = game.indexToPosition(i);
         var b = game.indexToPosition(j);
@@ -274,9 +277,9 @@ module.exports = {
         tavernFactor /= nbTaverns;
         mineFactor /= nbMines;
 
-        value = value * 0.8 + 2.4 * (mineFactor - tavernFactor);
+        value = value * terrainRandomnessFactor + terrainMineTavernFactor * (mineFactor - tavernFactor);
 
-        allTilesType.push(value < 0.3 ? "earth" : value > 0.7 ? "rock" : "plain" );
+        allTilesType.push(value < 0.3 ? "earth" : value > 0.8 - 0.1 * Math.random() ? "rock" : "plain" );
       }
 
       var initialTilesForWaterSearch = withInnerWater ? allTiles : borderTiles;
