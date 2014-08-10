@@ -24,7 +24,15 @@ final class Round(val initGame: Game) extends Actor with CustomLogging {
   def receive = {
 
     case SendEnumerator(to) => to ! Some {
-      ((Enumerator enumerate moves) &> Enumeratee.scanLeft(initGame)(Arbiter.replay)) >>> enumerator
+      Concurrent.unicast[Game](
+        onStart = { ch =>
+          ch push moves.foldLeft(initGame) {
+            case (g, m) =>
+              ch push g
+              Arbiter.replay(g, m)
+          }
+          enumerator(Iteratee.foreach[Game](ch.push))
+        })
     }
 
     case msg@Play(token, _) => clients get token match {
