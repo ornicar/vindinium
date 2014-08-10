@@ -1,5 +1,9 @@
 
 var bloodySoilPersistence = 150;
+var bloodWhenTakeMine = 0.3;
+var bloodWhenInjured = 0.7;
+var bloodWhenKilled = 1.4;
+
 var footprintPersistence = 40;
 
 function GameModel (state, previousState) {
@@ -187,12 +191,15 @@ GameModel.prototype = {
     });
     opponentsInjured.forEach(function (id) {
       var pos = previous.heroes[id-1].pos;
-      meta.bloodyGroundFactor[previous.indexForPosition(pos.x, pos.y)] += 1;
+      meta.bloodyGroundFactor[previous.indexForPosition(pos.x, pos.y)] += bloodWhenInjured;
     });
     opponentsKilled.forEach(function (id) {
       var pos = previous.heroes[id-1].pos;
-      meta.bloodyGroundFactor[previous.indexForPosition(pos.x, pos.y)] += 2;
+      meta.bloodyGroundFactor[previous.indexForPosition(pos.x, pos.y)] += bloodWhenKilled;
     });
+    if (heroMeta.takeMine) {
+      meta.bloodyGroundFactor[previousPositionIndex] += bloodWhenTakeMine;
+    }
 
     meta.footPrintFactor = meta.footPrintFactor.map(function (v) {
       return Math.max(0, v - 1 / footprintPersistence);
