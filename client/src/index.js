@@ -49,6 +49,9 @@ function runGame (gameId) {
       buffered: buffered,
       map: url.query.map
     }), mount);
+    // sorry for the ugly hack! Where should that go?
+    if (game.turn >= game.maxTurns && window.location.pathname === '/tv')
+      setTimeout(function() { window.location.reload(); }, 2000);
   }
 
   function restart (startAtTurn) {

@@ -18,6 +18,15 @@ import user.{ User => U }
 
 object Game extends Controller {
 
+  def tv = Action.async {
+    Replay recent 3 map { replays =>
+      replays find (!_.finished) orElse replays.headOption match {
+        case None         => Redirect(routes.App.index)
+        case Some(replay) => Ok(views.html.visualize(replay))
+      }
+    }
+  }
+
   def map(delay: Int) = Action {
     system.RandomMap() match {
       case Some(replay) => Ok(views.html.visualize(replay, Some(delay)))
