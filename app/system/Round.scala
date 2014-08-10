@@ -32,7 +32,7 @@ final class Round(val initGame: Game) extends Actor with CustomLogging {
               ch push g
               Arbiter.replay(g, m)
           }
-          enumerator(Iteratee.foreach[Game](ch.push))
+          enumerator.onDoneEnumerating(ch.eofAndEnd) |>>> Iteratee.foreach[Game](ch.push)
         })
     }
 
@@ -129,6 +129,7 @@ final class Round(val initGame: Game) extends Actor with CustomLogging {
     if (game.finished) {
       Replay.finish(game.id, moves)
       clients.values foreach (_ ! game)
+      channel.eofAndEnd
     }
     else game.hero foreach {
       case h if h.crashed => stayCrashed(h.token)
