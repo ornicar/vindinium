@@ -75,22 +75,27 @@ Mine.prototype.updateOwner = function (meta, interpolationTime) {
   this.interpolationTime = interpolationTime;
   this.mineSparkShader.brightness = owner === "-" ? 0.0 : 0.5 + 3.0 * meta.domination;
 
-  this.hasChanged = false;
-  if (owner === this.currentOwner) return;
-  this.hasChanged = true;
-  this.previousOwner = this.currentOwner;
-  this.currentOwner = owner;
+  this.hasChanged = owner !== this.currentOwner;
+  if (this.hasChanged) {
+    this.hasChanged = true;
+    this.previousOwner = this.currentOwner;
+    this.currentOwner = owner;
 
-  this.mineSparkShader.goldcolor = goldColorForOwner(owner);
-  this.mineSparkShader.colordistance = colorDistanceForOwner(owner);
+    this.mineSparkShader.goldcolor = goldColorForOwner(owner);
+    this.mineSparkShader.colordistance = colorDistanceForOwner(owner);
 
-  setSpriteOwner(this.currentSprite, this.currentOwner);
-  setSpriteOwner(this.previousSprite, this.previousOwner);
-  if (!this.interpolationTime) {
+    setSpriteOwner(this.currentSprite, this.currentOwner);
+    setSpriteOwner(this.previousSprite, this.previousOwner);
+    if (!this.interpolationTime) {
+      this.previousSprite.alpha = 0;
+      this.currentSprite.alpha = 1;
+    }
+    this.goblin.alpha = (this.currentOwner === "-" ? 1 : 0);
+  }
+  else {
     this.previousSprite.alpha = 0;
     this.currentSprite.alpha = 1;
   }
-  this.goblin.alpha = (this.currentOwner === "-" ? 1 : 0);
 };
 
 Mine.prototype.render = function () {
