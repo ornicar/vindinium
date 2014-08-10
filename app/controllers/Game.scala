@@ -29,7 +29,7 @@ object Game extends Controller {
   private implicit val encoder = CometMessage[String](identity)
 
   private val asJsonString: Enumeratee[Game, String] =
-    Enumeratee.map[Game](game => Json stringify JsonFormat(game))
+    Enumeratee.map[Game](game => Json stringify JsonFormat(game, compressed = true))
 
   private def eventSource(data: Enumerator[Game]) =
     Ok.chunked(data &> asJsonString &> EventSource()).as("text/event-stream")
