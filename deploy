@@ -1,6 +1,6 @@
 #!/bin/sh
 
-REMOTE="lizen"
+REMOTE="vindinium"
 REMOTE_DIR="/home/vindinium"
 
 echo "Deploy to $REMOTE:$REMOTE_DIR"
