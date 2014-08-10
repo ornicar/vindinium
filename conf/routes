@@ -11,6 +11,8 @@ POST    /register                       controllers.User.register
 GET     /ai/$id<[\w]{8}>                controllers.User.show(id: String)
 GET     /ai                             controllers.User.list
 
+GET     /map/:delay                     controllers.Game.map(delay: Int)
+
 GET     /events/$id<[\w]{8}>            controllers.Game.events(id: String)
 GET     /$id<[\w]{8}>                   controllers.Game.show(id: String)
 

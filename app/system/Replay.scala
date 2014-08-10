@@ -30,6 +30,15 @@ object Replay {
 
   import BSONHandlers._
 
+  def make(game: Game) = Replay(
+    _id = game.id,
+    init = game,
+    moves = Nil,
+    training = game.training,
+    names = game.names,
+    finished = game.finished,
+    date = DateTime.now)
+
   def find(id: String): Future[Option[Replay]] =
     coll.find(BSONDocument("_id" -> id)).one[Replay]
 
@@ -56,14 +65,7 @@ object Replay {
     ))
   )
 
-  def insert(game: Game) = coll.insert(Replay(
-    _id = game.id,
-    init = game,
-    moves = Nil,
-    training = game.training,
-    names = game.names,
-    finished = game.finished,
-    date = DateTime.now))
+  def insert(game: Game) = coll.insert(make(game))
 
   private val db = play.modules.reactivemongo.ReactiveMongoPlugin.db
   private val coll = db("replay")

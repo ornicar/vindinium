@@ -18,6 +18,13 @@ import user.{ User => U }
 
 object Game extends Controller {
 
+  def map(delay: Int) = Action {
+    system.RandomMap() match {
+      case Some(replay) => Ok(views.html.visualize(replay, Some(delay)))
+      case _            => Redirect(routes.Game.map(delay))
+    }
+  }
+
   def show(id: String) = Action.async {
     Replay find id map {
       case Some(replay) => Ok(views.html.visualize(replay))
@@ -35,11 +42,14 @@ object Game extends Controller {
     Ok.chunked(data &> asJsonString &> EventSource()).as("text/event-stream")
 
   def events(id: String) = Action.async {
-    Server.actor ? Server.GetEnumerator(id) mapTo manifest[Option[Enumerator[Game]]] flatMap {
-      case Some(enumerator) => Future successful eventSource(enumerator)
-      case None => Replay find id map {
-        case None         => notFoundPage
-        case Some(replay) => eventSource(replay.games)
+    system.RandomMap get id match {
+      case Some(replay) => Future successful eventSource(replay.games)
+      case None => Server.actor ? Server.GetEnumerator(id) mapTo manifest[Option[Enumerator[Game]]] flatMap {
+        case Some(enumerator) => Future successful eventSource(enumerator)
+        case None => Replay find id map {
+          case None         => notFoundPage
+          case Some(replay) => eventSource(replay.games)
+        }
       }
     }
   }
