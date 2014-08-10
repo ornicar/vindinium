@@ -1,47 +1,16 @@
-@(replay: Replay)
+@(replay: Replay, reloadIn: Option[Int] = None)
 
 @import play.api.libs.json.Json
 
 @main("Game " + replay.id) {
 
 
-<div id="game">
-    <div><strong>Pro tip</strong>: use your scroll wheel or arrow keys to move through the replay!</div>
-    <div id="boardBox"></div>
-
-    <div id="scoreBar">
-
-        <div id="scoreBarCoin"><img src="@routes.Assets.at("img/coin.png")" class="coin"/></div>
-        <div id="bars">
-            <div id="scoreBarPlayer1" class="player"></div>
-            <div id="scoreBarPlayer2" class="player"></div>
-            <div id="scoreBarPlayer3" class="player"></div>
-            <div id="scoreBarPlayer4" class="player"></div>
-        </div>
-    </div>
-    <div id="infos">
-        <ul id="legend">
-            <li id="turn"><p><strong>Turn</strong> <span class="number"></span></p></li>
-        </ul>
-
-        <ul id="gold">
-            <li id="player1"><img class="cross" src="@routes.Assets.at("img/cross.png")" /><img class="player" src="@routes.Assets.at("img/fireheart/player1.png")"/><img class="award" src="@routes.Assets.at("img/award.png")"/><div class="goldWrapper"><span class="gold">100</span><img src="@routes.Assets.at("img/coin.png")" class="coin"/></div><a><span class="name" title=""></span></a>Elo: <span class="elo"></span></li>
-            <li id="player2"><img class="cross" src="@routes.Assets.at("img/cross.png")" /><img class="player" src="@routes.Assets.at("img/fireheart/player2.png")"/><img class="award" src="@routes.Assets.at("img/award.png")"/><div class="goldWrapper"><span class="gold">100</span><img src="@routes.Assets.at("img/coin.png")" class="coin"/></div><a><span class="name" title=""></span></a>Elo: <span class="elo"></span></li>
-            <li id="player3"><img class="cross" src="@routes.Assets.at("img/cross.png")" /><img class="player" src="@routes.Assets.at("img/fireheart/player3.png")"/><img class="award" src="@routes.Assets.at("img/award.png")"/><div class="goldWrapper"><span class="gold">100</span><img src="@routes.Assets.at("img/coin.png")" class="coin"/></div><a><span class="name" title=""></span></a>Elo: <span class="elo"></span></li>
-            <li id="player4"><img class="cross" src="@routes.Assets.at("img/cross.png")" /><img class="player" src="@routes.Assets.at("img/fireheart/player4.png")"/><img class="award" src="@routes.Assets.at("img/award.png")"/><div class="goldWrapper"><span class="gold">100</span><img src="@routes.Assets.at("img/coin.png")" class="coin"/></div><a><span class="name" title=""></span></a>Elo: <span class="elo"></span></li>
-        </ul>
-
-    </div>
-
-    <div id="replay">
-        <div id="nav"><span id="prev">&lt;</span>&nbsp;&nbsp;&nbsp;<span id="next">&gt;</span></div>
-        <div id="yourturn"></div>
-        <input type="range" id="replayRange" value="15" max="300" min="0" step="1" />
-    </div>
-
-</div>
+<div id="game"></div>
 
 <script>
   var GAME_ID = "@replay.id";
+  @reloadIn.map { delay =>
+    setTimeout(function() { location.href = "@routes.Game.map(delay)"; }, @delay * 1000);
+  }
 </script>
 }
