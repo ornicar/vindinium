@@ -13,6 +13,7 @@ final class Round(val initGame: Game) extends Actor with CustomLogging {
 
   val clients = collection.mutable.Map[Token, ActorRef]()
   val moves = collection.mutable.ArrayBuffer[Dir]()
+  var gameAtStart = initGame
   var game = initGame
 
   val (enumerator, channel) = Concurrent.broadcast[Game]
@@ -26,7 +27,7 @@ final class Round(val initGame: Game) extends Actor with CustomLogging {
     case SendEnumerator(to) => to ! Some {
       Concurrent.unicast[Game](
         onStart = { ch =>
-          ch push moves.foldLeft(initGame) {
+          ch push moves.foldLeft(gameAtStart) {
             case (g, m) =>
               ch push g
               Arbiter.replay(g, m)
@@ -99,6 +100,7 @@ final class Round(val initGame: Game) extends Actor with CustomLogging {
     context watch client
     if (clients.size == 4) {
       log.info(s"[game ${game.id}] start")
+      gameAtStart = game
       game.hero map (_.token) flatMap clients.get match {
         case None => throw UtterFailException(s"Game ${game.id} started without a hero client")
         case Some(client) =>
