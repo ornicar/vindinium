@@ -14,17 +14,23 @@ function alwaysTrue () { return true; }
 function increment (x) { return x + 1; }
 function identity (x) { return x; }
 
+function isNotEmptyArray (array) {
+  return array.length > 0;
+}
+
 function runGame (gameId) {
-  // States
+  /// States ///
   var speed, refreshRate;
   var playing = false;
   var game = null;
   var buffered = 0;
 
-  // Streams
+  /// Streams ///
+
+  // The game stream is cached once forever
   var gameStream = new Rx.ReplaySubject();
   GameStream(gameId).subscribe(gameStream);
-  //var bufferedTurnsStream = gameStream.count();
+
   var gameInterruptions = new Rx.Subject();
   var refreshRateStream = Rx.Observable.generateWithRelativeTime(0, alwaysTrue, increment, identity, function () { return refreshRate; });
 
@@ -48,16 +54,18 @@ function runGame (gameId) {
   function restart (startAtTurn) {
     playing = true;
     gameStream
-      .skip(startAtTurn-1)
-      .zip(refreshRateStream, identity)
-      .bufferWithTime(1000 / 60)
-      .takeUntil(gameInterruptions)
+      .skip(startAtTurn-1) // Jump at startAtTurn
+      .zip(refreshRateStream, identity) // Schedule the game stream to the dynamic refreshRate
+      .bufferWithTime(1000 / 60) // Throttle the game states to allow very fast play
+      .takeUntil(gameInterruptions) // Stop once there is a game interruption (pause / jump)
+      .filter(isNotEmptyArray) // Filter empty buffers
       .subscribe(function (g) {
-        if (g.length === 0) return; // The buffer is empty
-        game = g[g.length-1];
+        game = g[g.length-1]; // The most recent game in the buffer
         render();
       }, function (err) {
         console.error(err);
+        playing = false;
+        render();
       }, function () {
         playing = false;
         render();
