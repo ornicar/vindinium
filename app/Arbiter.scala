@@ -29,55 +29,47 @@ object Arbiter {
       case Some(tile) => (game hero destPos) match {
         case Some(_) => game
         case None => tile match {
-          case Tile.Air                      => walk(destPos)
-          case Tile.Tavern                   => drink
-          case Tile.Mine(n) if n != Some(id) => mine(destPos)
-          case Tile.Mine(n)                  => game
-          case Tile.Wall                     => game
+          case Tile.Air    => game.withHero(id, _ moveTo destPos)
+          case Tile.Tavern => game.withHero(id, _.drinkBeer)
+          case Tile.Mine(n) if n != Some(id) =>
+            val h = game.hero(id).fightMine
+            if (h.isAlive) game.withHero(h).withBoard(_.transferMine(destPos, Some(h.id)))
+            else reSpawn(game.withBoard(_.transferMines(h.id, None)), h)
+          case Tile.Mine(n) => game
+          case Tile.Wall    => game
         }
       }
     }
 
-    def walk(pos: Pos) = game.withHero(id, _ moveTo pos)
+    if (dir == Dir.Crash) finalize(game.setTimedOut, id).step
+    else finalize(fights(reach(game.hero(id).pos to dir), id), id).step
+  }
 
-    def drink = game.withHero(id, _.drinkBeer)
+  private def reSpawn(game: Game, h: Hero, rec: Int = 0): Game = {
+    val pos = game spawnPosOf h
+    (game hero pos match {
+      case Some(opponent) if opponent.id != h.id =>
+        // play.api.Logger("Arbiter").info(s"reSpawn rec:$rec game:${game.id} hero:${h.id} ${h.pos} -> $pos")
+        if (rec > 4) throw new Exception(s"Arbiter.reSpawn recursion")
+        reSpawn(game.withBoard(_.transferMines(opponent.id, Some(h.id))), opponent, rec + 1)
+      case _ => game
+    }) withHero (h reSpawn pos)
+  }
 
-    def mine(pos: Pos) = {
-      val h = game.hero(id).fightMine
-      if (h.isAlive) game.withHero(h).withBoard(_.transferMine(pos, Some(h.id)))
-      else reSpawn(game, h).withBoard(_.transferMines(h.id, None))
-    }
+  private def fights(game: Game, id: Int): Game =
+    (game.hero(id).pos.neighbors map game.hero).flatten.foldLeft(game)(attack(id))
 
-    def reSpawn(g: Game, h: Hero, rec: Int = 0): Game = {
-      val pos = g spawnPosOf h
-      (g hero pos match {
-        case Some(opponent) if opponent.id != h.id =>
-          play.api.Logger("Arbiter").info(s"reSpawn rec:$rec game:${game.id} hero:${h.id} ${h.pos} -> $pos")
-          if (rec > 4) throw new Exception(s"Arbiter.reSpawn recursion")
-          reSpawn(g, opponent, rec + 1)
-        case _ => g
-      }) withHero (h reSpawn pos)
-    }
+  private def attack(id: Int)(game: Game, enemy: Hero): Game = {
+    val (h1, h2) = game hero id attack enemy
+    val g = game.withHero(h1).withHero(h2)
+    if (h1.isDead) reSpawn(g.withBoard(_.transferMines(h1.id, Some(h2.id))), h1)
+    else if (h2.isDead) reSpawn(g.withBoard(_.transferMines(h2.id, Some(h1.id))), h2)
+    else g
+  }
 
-    def fights(g: Game): Game =
-      (g.hero(id).pos.neighbors map g.hero).flatten.foldLeft(g)(attack)
-
-    def attack(g: Game, enemy: Hero): Game = {
-      val (h1, h2) = g hero id attack enemy
-      List(h1 -> h2, h2 -> h1).foldLeft(g) {
-        case (game, (x, y)) =>
-          if (x.isDead) reSpawn(game, x).withBoard(_.transferMines(x.id, if (y.isAlive) Some(y.id) else None))
-          else game withHero x
-      }
-    }
-
-    def finalize(g: Game) = {
-      val h = (g hero id).day withGold g.board.countMines(id)
-      if (h.isDead) reSpawn(g, h).withBoard(_.transferMines(id, None))
-      else g withHero h
-    }
-
-    if (dir == Dir.Crash) finalize(game.setTimedOut).step
-    else finalize(fights(reach(game.hero(id).pos to dir))).step
+  def finalize(game: Game, id: Int) = {
+    val h = (game hero id).day withGold game.board.countMines(id)
+    if (h.isDead) reSpawn(game, h).withBoard(_.transferMines(id, None))
+    else game withHero h
   }
 }
