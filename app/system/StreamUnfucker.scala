@@ -4,13 +4,14 @@ package system
 import play.api.libs.iteratee._, Enumeratee._
 import scala.concurrent.{ Future, ExecutionContext }
 
+// Re-ordonate events based on game turn
 object StreamUnfucker {
 
   private type From = Game
   private type To = Game
 
   def apply()(implicit ec: ExecutionContext): Enumeratee[From, To] = {
-    var turn = 0
+    var turn = 1
     val prematureGames = scala.collection.mutable.Map[Int, Game]()
     Enumeratee.mapConcat[Game] {
       case g if g.turn == turn =>

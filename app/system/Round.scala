@@ -25,15 +25,9 @@ final class Round(val initGame: Game) extends Actor with CustomLogging {
   def receive = {
 
     case SendEnumerator(to) => to ! Some {
-      Concurrent.unicast[Game](
-        onStart = { ch =>
-          enumerator.onDoneEnumerating(ch.eofAndEnd) |>>> Iteratee.foreach[Game](ch.push)
-          ch push moves.foldLeft(gameAtStart) {
-            case (g, m) =>
-              ch push g
-              Arbiter.replay(g, m)
-          }
-        }) &> StreamUnfucker()
+      (enumerator interleave {
+        (Enumerator enumerate moves) &> Enumeratee.scanLeft(gameAtStart)(Arbiter.replay)
+      }) &> StreamUnfucker()
     }
 
     case msg@Play(token, _) => clients get token match {
