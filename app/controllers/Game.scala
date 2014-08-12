@@ -3,7 +3,6 @@ package controllers
 import org.vindinium.server._
 
 import akka.pattern.{ ask, pipe }
-import akka.util.Timeout
 import play.api._
 import play.api.libs.Comet.CometMessage
 import play.api.libs.EventSource
@@ -17,6 +16,16 @@ import system.{ Server, Replay }
 import user.{ User => U }
 
 object Game extends Controller {
+
+  def nowPlaying = Action.async {
+    system.NowPlaying.actor ? system.NowPlaying.GetEnumerator mapTo
+      manifest[Enumerator[List[String]]] map { enumerator =>
+        val toJsonArray = Enumeratee.map[List[String]] { ids =>
+          Json stringify JsArray(ids map JsString.apply)
+        }
+        Ok.chunked(enumerator &> toJsonArray &> EventSource()).as("text/event-stream")
+      }
+  }
 
   def tv = Action.async {
     Replay recent 3 map { replays =>
@@ -41,7 +50,7 @@ object Game extends Controller {
     }
   }
 
-  private implicit val timeout = Timeout(1.second)
+  private implicit val timeout = akka.util.Timeout(1.second)
   private implicit val encoder = CometMessage[String](identity)
 
   private val asJsonString: Enumeratee[Game, String] =

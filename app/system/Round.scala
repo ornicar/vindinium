@@ -94,6 +94,7 @@ final class Round(val initGame: Game) extends Actor with CustomLogging {
     context watch client
     if (clients.size == 4) {
       log.info(s"[game ${game.id}] start")
+      game = game.start
       gameAtStart = game
       game.hero map (_.token) flatMap clients.get match {
         case None => throw UtterFailException(s"Game ${game.id} started without a hero client")

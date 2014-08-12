@@ -1,14 +1,16 @@
 package controllers
 
 import org.vindinium.server._
-import org.vindinium.server.user.{ User => U }
 import org.vindinium.server.system.Replay
+import org.vindinium.server.user.{ User => U }
 
 import akka.pattern.{ ask, pipe }
 import play.api._
 import play.api.data._
 import play.api.data.Forms._
-import play.api.libs.json.Json
+import play.api.libs.EventSource
+import play.api.libs.iteratee._
+import play.api.libs.json._
 import play.api.mvc._
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -36,9 +38,21 @@ object User extends Controller {
     )
   }
 
+  private implicit val timeout = akka.util.Timeout(1.second)
+
+  def nowPlaying(id: String) = Action.async {
+    system.NowPlaying.actor ? system.NowPlaying.GetEnumeratorFor(id) mapTo
+      manifest[Enumerator[List[String]]] map { enumerator =>
+        val toJsonArray = Enumeratee.map[List[String]] { ids =>
+          Json stringify JsArray(ids map JsString.apply)
+        }
+        Ok.chunked(enumerator &> toJsonArray &> EventSource()).as("text/event-stream")
+      }
+  }
+
   def show(id: String) = Action.async { req =>
     U find id flatMap {
-      case None       => Future successful notFoundPage
+      case None => Future successful notFoundPage
       case Some(user) => Replay.recentByUserName(user.name, 100) map { replays =>
         Ok(views.html.user.show(user, replays, None))
       }
