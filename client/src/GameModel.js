@@ -85,6 +85,7 @@ GameModel.prototype = {
           killed: null,
           takeMine: null,
           drink: null,
+          winning: false,
           bloodUnderFoot: 0
         };
       })
@@ -94,9 +95,13 @@ GameModel.prototype = {
   aggregateMeta: function (previous) {
     if (previous.turn !== this.turn-1) throw new Error("aggregateMeta: game does not follow! "+previous.turn+"->"+this.turn);
 
+    var winner = this.getWinner();
+
     var meta = cloneObject(previous.meta);
     meta.heroes = previous.meta.heroes.map(cloneObject);
     meta.heroes.forEach(function (hero, i) {
+      if (this.turn % 4 === 0) // We only refresh at the end of a turn to avoid blink effect
+        hero.winning = winner === i+1;
       hero.myturn = false;
       hero.move = null;
       hero.takeMine = null;

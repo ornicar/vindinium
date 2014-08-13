@@ -26,7 +26,7 @@ Ghost.prototype.destroy = function () {
 Ghost.prototype.render = function () {
   var progress = Math.min((Date.now() - this.startTime) / this.duration, 1);
   this.effect.progress = progress;
-  this.alpha = 0.8 * smoothstep(1.0, 0.6, progress);
+  this.alpha = 0.7 * smoothstep(1.0, 0.6, progress);
   if (progress === 1)
     this.destroy();
 };

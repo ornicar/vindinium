@@ -28,6 +28,11 @@ var heroTextures = [3, 2, 1, 0].map(function (p) {
     return tilePIXI32(heroesTexture, o, p);
   });
 });
+var heroCrownTextures = [3, 2, 1, 0].map(function (p) {
+  return orientations.map(function (o) {
+    return tilePIXI32(heroesTexture, o+5, p);
+  });
+});
 
 var blinkTextures = orientations.map(function (o) {
   return tilePIXI32(heroesTexture, o, 4);
@@ -67,7 +72,8 @@ function Hero (id, obj, tileSize) {
   this.lifeIndicator.position.y = 0;
   this.addChild(this.lifeIndicator);
 
-  this.heroSprite = createHeroSprite(heroTextures[id - 1][0]);
+  this.heroTextures = heroTextures;
+  this.heroSprite = createHeroSprite(this.heroTextures[id - 1][0]);
   this.blinkSprite = createHeroSprite(blinkTextures[0]);
   this.blinkSprite.alpha = 0;
 
@@ -83,9 +89,10 @@ Hero.prototype = Object.create(PIXI.DisplayObjectContainer.prototype);
 Hero.prototype.constructor = Hero;
 
 Hero.prototype.refreshHeroSprite = function (orientation) {
-  if (this._currentOrientation === orientation) return;
+  if (this._currentOrientation === orientation && this._currentHeroTextures === this.heroTextures) return;
+  this._currentHeroTextures = this.heroesTexture;
   this._currentOrientation = orientation;
-  this.heroSprite.setTexture(heroTextures[this.id - 1][orientation]);
+  this.heroSprite.setTexture(this.heroTextures[this.id - 1][orientation]);
   this.blinkSprite.setTexture(blinkTextures[orientation]);
 };
 
@@ -105,6 +112,7 @@ Hero.prototype.setPosition = function (pos) {
 
 Hero.prototype.updateHero = function (meta, interpolationTime, consecutiveTurn) {
   this.meta = meta;
+  this.heroTextures = meta.winning ? heroCrownTextures : heroTextures;
   this.updatedTime = Date.now();
   this.consecutiveTurn = consecutiveTurn;
   this.interpolationTime = interpolationTime;
@@ -134,7 +142,7 @@ Hero.prototype.render = function () {
 };
 
 Hero.prototype.getTexture = function () {
-  return heroTextures[this.id - 1][2];
+  return this.heroTextures[this.id - 1][2];
 };
 
 Hero.prototype.logMeta = function (meta) {
