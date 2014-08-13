@@ -6,6 +6,7 @@ var Mine = require("./Mine");
 var Tavern = require("./Tavern");
 var maps = require("./maps");
 var BloodySoil = require("./BloodySoil");
+var Footprint = require("./Footprint");
 var loadTexture = require("./loadTexture");
 
 var winnerParchmentTexture = loadTexture("winner_parchment.png");
@@ -102,6 +103,7 @@ GameBoardRender.prototype = {
     }, this);
 
     this.updateBloodySoil();
+    this.updateFootprints();
 
     // TODO: improve perf of this iteration!
     var mineIndex = 0;
@@ -151,6 +153,25 @@ GameBoardRender.prototype = {
     }, this);
   },
 
+  updateFootprints: function () {
+    this.game.meta.footprintFactor.forEach(function (level, i) {
+      var sprite = this._footprints[i];
+      if (level || sprite) {
+        if (!sprite) {
+          sprite = this._footprints[i] = new Footprint(level, this.opacityForFootprint(i));
+          sprite.opacity = 5*0.2;
+          var pos = this.game.indexToPosition(i);
+          sprite.position.x = pos.x * this.tileSize;
+          sprite.position.y = pos.y * this.tileSize;
+          this.footprintsContainer.addChild(sprite);
+        }
+        else {
+          sprite.update(level);
+        }
+      }
+    }, this);
+  },
+
   initRendering: function () {
     var size = this.game.board.size;
     this.boardWidth = this.borderSize * 2 + this.tileSize * size;
@@ -159,8 +180,10 @@ GameBoardRender.prototype = {
     this.gameStage = new PIXI.Stage();
 
     this._bloodySoil = [];
+    this._footprints = [];
     for (var i=0; i<size*size; ++i) {
       this._bloodySoil[i] = null;
+      this._footprints[i] = null;
     }
 
     this.gameContainer = new PIXI.DisplayObjectContainer();
@@ -169,13 +192,15 @@ GameBoardRender.prototype = {
     this.gameContainer.addChild(this.terrainContainer = new PIXI.DisplayObjectContainer());
     this.gameContainer.addChild(this.terrainContainer2 = new PIXI.DisplayObjectContainer());
     this.gameContainer.addChild(this.bloodySoilContainer = new PIXI.DisplayObjectContainer());
+    this.gameContainer.addChild(this.footprintsContainer = new PIXI.DisplayObjectContainer());
     this.gameContainer.addChild(this.heroesContainer = this.objectsContainer = new PIXI.DisplayObjectContainer());
     this.gameStage.addChild(this.gameContainer);
   },
   
   // Background: borders, ground, wall
   initBackground: function () {
-    this.map.generate(this.game, this.terrainContainer, this.terrainContainer2, this.objectsContainer);
+    this.mapGenerationResult = this.map.generate(this.game, this.terrainContainer, this.terrainContainer2, this.objectsContainer);
+    this.opacityForFootprint = this.mapGenerationResult.opacityForFootprint || function(){ return 1; };
   },
 
   // Objects: mines, taverns

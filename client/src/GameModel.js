@@ -1,10 +1,15 @@
 
-var bloodySoilPersistence = 200;
 var bloodWhenTakeMine = 0.3;
 var bloodWhenInjured = 0.7;
 var bloodWhenKilled = 1.4;
 
+// In move number
+var bloodUnderFootPersistence = 2;
+
+// In turn number
+var bloodySoilPersistence = 200;
 var footprintPersistence = 40;
+var footprintBloodPersistence = 40;
 
 function GameModel (state, previousState) {
   this.id = state.id;
@@ -66,7 +71,7 @@ GameModel.prototype = {
     var game = this;
     return {
       bloodyGroundFactor: genEmptyArray(this.tilesArray.length, 0),
-      footPrintFactor: genEmptyArray(this.tilesArray.length, 0),
+      footprintFactor: genEmptyArray(this.tilesArray.length, { orientation: 0, foot: 0, blood: 0 }),
       heroes: [1,2,3,4].map(function (id, i) {
         return {
           myturn: false,
@@ -79,7 +84,8 @@ GameModel.prototype = {
           kill: null,
           killed: null,
           takeMine: null,
-          drink: null
+          drink: null,
+          bloodUnderFoot: 0
         };
       })
     };
@@ -160,8 +166,9 @@ GameModel.prototype = {
     heroMeta.attack = opponentsAttacked.length && opponentsAttacked || null;
     heroMeta.kill = opponentsKilled.length && opponentsKilled || null;
 
+    var motionOrientation = orientationForDelta(dx, dy);
     var orientation = [];
-    orientation.push(orientationForDelta(dx, dy));
+    orientation.push(motionOrientation);
     if (heroMeta.attack) {
       p = previous.heroes[opponentsAttacked[0]-1].pos;
       orientation.push(orientationForDelta(p.x - previousHero.pos.x, p.y - previousHero.pos.y));
@@ -183,6 +190,7 @@ GameModel.prototype = {
     });
     opponentsKilled.forEach(function (id) {
       meta.heroes[id-1].killed = hero.id;
+      meta.heroes[id-1].bloodUnderFoot = 0;
     });
 
 
@@ -201,10 +209,23 @@ GameModel.prototype = {
       meta.bloodyGroundFactor[previousPositionIndex] += bloodWhenTakeMine;
     }
 
-    meta.footPrintFactor = meta.footPrintFactor.map(function (v) {
-      return Math.max(0, v - 1 / footprintPersistence);
+    meta.footprintFactor = meta.footprintFactor.map(function (v) {
+      var foot = Math.max(0, v.foot - 1 / footprintPersistence);
+      var blood = Math.max(0, v.blood - 1 / footprintBloodPersistence);
+      return {
+        orientation: v.orientation,
+        foot: foot,
+        blood: blood
+      };
     });
-    meta.footPrintFactor[previousPositionIndex] = 1;
+    if (heroMeta.move) {
+      heroMeta.bloodUnderFoot = Math.max(meta.bloodyGroundFactor[previousPositionIndex], heroMeta.bloodUnderFoot - 1 / bloodUnderFootPersistence);
+      meta.footprintFactor[previousPositionIndex] = {
+        orientation: motionOrientation,
+        foot: 1,
+        blood: heroMeta.bloodUnderFoot
+      };
+    }
 
     return meta;
   },

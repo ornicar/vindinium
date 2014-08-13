@@ -348,6 +348,8 @@ module.exports = {
 
       var plainCount = 0;
 
+      var groundNamesByIndex = [];
+
       for (var y=-1; y<=size; ++y) {
         for (var x=-1; x<=size; ++x) {
           var isWater = x===-1||x===size||y===-1||y===size||waterTiles.indexOf(game.indexForPosition(x, y)) !== -1;
@@ -381,6 +383,8 @@ module.exports = {
               name = choices[Math.floor(Math.random() * Math.random() * 4)];
             }
           }
+
+          groundNamesByIndex[y * size + x] = name;
           sprite = new PIXI.Sprite(tiles[name]);
           group.addChild(sprite);
 
@@ -406,6 +410,12 @@ module.exports = {
           if (group2.children.length) terrainContainer2.addChild(group2);
         }
       }
+
+      return {
+        opacityForFootprint: function (i) {
+          return groundNamesByIndex[i].indexOf("plain") === 0 ? 1.0 : 0.0;
+        }
+      };
 
     }
 
