@@ -1,15 +1,15 @@
 
 var bloodWhenTakeMine = 0.3;
-var bloodWhenInjured = 0.7;
-var bloodWhenKilled = 1.4;
+var bloodWhenInjured = 0.8;
+var bloodWhenKilled = 1.6;
 
 // In move number
 var bloodUnderFootPersistence = 2;
 
 // In turn number
-var bloodySoilPersistence = 200;
-var footprintPersistence = 40;
-var footprintBloodPersistence = 40;
+var bloodySoilPersistence = 300;
+var footprintPersistence = 80;
+var footprintBloodPersistence = 60;
 
 function GameModel (state, previousState) {
   this.id = state.id;
