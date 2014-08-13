@@ -9,6 +9,7 @@ object Global extends GlobalSettings {
 
   override def onStart(app: Application) {
     Elo.actor ! Elo.Init
+    NowPlaying.actor ! NowPlaying.Init
   }
 
   override def onHandlerNotFound(req: RequestHeader) = {

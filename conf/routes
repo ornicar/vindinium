@@ -9,9 +9,11 @@ POST    /api/:gameId/:token/play        controllers.Api.move(gameId: String, tok
 GET     /register                       controllers.User.registerForm
 POST    /register                       controllers.User.register
 GET     /ai/$id<[\w]{8}>                controllers.User.show(id: String)
+GET     /ai/$id<[\w]{8}>/now-playing    controllers.User.nowPlaying(id: String)
 GET     /ai                             controllers.User.list
 
 GET     /tv                             controllers.Game.tv
+GET     /now-playing                    controllers.Game.nowPlaying
 
 GET     /map/:delay                     controllers.Game.map(delay: Int)
 

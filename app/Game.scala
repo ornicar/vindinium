@@ -62,11 +62,16 @@ case class Game(
 
   def withBoard(f: Board => Board) = copy(board = f(board))
 
+  def start = copy(status = Status.Started)
+
+  def started = status == Status.Started
   def finished = status.finished
 
   def arena = !training
 
+  def hasUserId(userId: String) = heroes.exists(_.userId == Some(userId))
+
   override def toString = s"Game[$id]: $status, turn $turn"
 
-  def render = board.render 
+  def render = board.render
 }
