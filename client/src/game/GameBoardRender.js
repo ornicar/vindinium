@@ -215,6 +215,7 @@ GameBoardRender.prototype = {
     this.gameContainer.addChild(this.footprintsContainer = new PIXI.DisplayObjectContainer());
     this.gameContainer.addChild(this.heroesContainer = this.objectsContainer = new PIXI.DisplayObjectContainer());
     this.gameContainer.addChild(this.ghostsContainer = new PIXI.DisplayObjectContainer());
+    this.gameContainer.addChild(this.effectsContainer = new PIXI.DisplayObjectContainer());
     this.gameStage.addChild(this.gameContainer);
   },
   
@@ -252,7 +253,7 @@ GameBoardRender.prototype = {
 
   initHeroes: function () {
     this.heroes = this.game.meta.heroes.map(function (heroObj, i) {
-      var hero = new Hero(i+1, heroObj, this.tileSize);
+      var hero = new Hero(i+1, heroObj, this.tileSize, this.effectsContainer);
       this.heroesContainer.addChild(hero);
       return hero;
     }, this);

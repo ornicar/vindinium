@@ -80,6 +80,7 @@ GameModel.prototype = {
           orientation: [0],
           move: null,
           attack: null,
+          attackOrientations: [],
           attacked: null,
           kill: null,
           killed: null,
@@ -111,6 +112,7 @@ GameModel.prototype = {
       hero.killed = null;
       hero.attacked = null;
       hero.orientation = [hero.orientation[hero.orientation.length-1]];
+      hero.attackOrientations = [];
       hero.from = previous.heroes[i];
       hero.to = this.heroes[i];
     }, this);
@@ -171,21 +173,36 @@ GameModel.prototype = {
     heroMeta.attack = opponentsAttacked.length && opponentsAttacked || null;
     heroMeta.kill = opponentsKilled.length && opponentsKilled || null;
 
+
+    var attackOrientations = [];
+
     var motionOrientation = orientationForDelta(dx, dy);
     var orientation = [];
+    var or;
     orientation.push(motionOrientation);
     if (heroMeta.attack) {
-      p = previous.heroes[opponentsAttacked[0]-1].pos;
-      orientation.push(orientationForDelta(p.x - previousHero.pos.x, p.y - previousHero.pos.y));
+      opponentsAttacked.forEach(function (o) {
+        p = previous.heroes[o-1].pos;
+        or = orientationForDelta(p.x - hero.pos.x, p.y - hero.pos.y);
+        attackOrientations.push(or);
+        orientation.push(or);
+      });
+    }
+    if (heroMeta.takeMine) {
+      p = previous.indexToPosition(takenMines[0]);
+      or = orientationForDelta(p.x - hero.pos.x, p.y - hero.pos.y);
+      attackOrientations.push(or);
+      orientation.push(or);
     }
     if (heroMeta.drink) {
       p = previous.indexToPosition(touchingTaverns[0]);
-      orientation.push(orientationForDelta(p.x - previousHero.pos.x, p.y - previousHero.pos.y));
+      orientation.push(orientationForDelta(p.x - hero.pos.x, p.y - hero.pos.y));
     }
     orientation = orientation.filter(function (o) { return o !== null; });
     if (orientation.length === 0) orientation.push(previousHeroMeta.orientation[previousHeroMeta.orientation.length-1]);
     
     heroMeta.orientation = orientation;
+    heroMeta.attackOrientations = attackOrientations;
 
     // Record metas
 

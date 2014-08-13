@@ -21,6 +21,8 @@ var tilePIXI32 = tilePIXI(32);
 
 var heroesTexture = loadTexture("heroes.png");
 
+var blastTexture = loadTexture("blast.png");
+
 var orientations = [3, 2, 0, 1]; // N E S W
 
 var heroTextures = [3, 2, 1, 0].map(function (p) {
@@ -63,7 +65,7 @@ function createHeroSprite (texture) {
   return heroSprite;
 }
 
-function Hero (id, obj, tileSize) {
+function Hero (id, obj, tileSize, effectsContainer) {
   this.id = id;
   this.tileSize = tileSize;
   PIXI.DisplayObjectContainer.call(this);
@@ -77,11 +79,24 @@ function Hero (id, obj, tileSize) {
   this.blinkSprite = createHeroSprite(blinkTextures[0]);
   this.blinkSprite.alpha = 0;
 
+  this.blastSprite = new PIXI.Sprite(blastTexture);
+  this.blastSprite.alpha = 0;
+  this.blastSprite.position.x = 14;
+  this.blastSprite.position.y = 14;
+  this.blastSprite.pivot.x = 20;
+  this.blastSprite.pivot.y = 20;
+
+  this.effectsGroup = new PIXI.DisplayObjectContainer();
+  this.effectsGroup.position = this.position;
+  this.effectsGroup.addChild(this.blastSprite);
+  effectsContainer.addChild(this.effectsGroup);
+
   this.addChild(this.heroSprite);
   this.addChild(this.blinkSprite);
 
   this.interpolationEndTime = 0;
 
+  this._offsetRotation = 0.0;
   this.updateHero(obj);
 }
 
@@ -116,6 +131,8 @@ Hero.prototype.updateHero = function (meta, interpolationTime, consecutiveTurn) 
   this.updatedTime = Date.now();
   this.consecutiveTurn = consecutiveTurn;
   this.interpolationTime = interpolationTime;
+
+  this._offsetRotation = (Math.random()-0.5) * Math.PI / 6;
 };
 
 Hero.prototype.render = function () {
@@ -129,7 +146,15 @@ Hero.prototype.render = function () {
     this.drawLifeIndicator(mix(meta.from.life, meta.to.life, lifeIndicatorEasing(p)));
     var moveProgress = meta.attack ? attackEasing(p) : p;
     this.setPosition(meta.killed || meta.move ? interpolatePosition(meta.from.pos, meta.to.pos, moveProgress) : meta.to.pos);
-    this.refreshHeroSprite(meta.orientation[Math.min(meta.orientation.length-1, Math.floor(p * meta.orientation.length))]);
+    var or = meta.orientation[Math.min(meta.orientation.length-1, Math.floor(p * meta.orientation.length))];
+    this.refreshHeroSprite(or);
+    if (meta.attackOrientations.indexOf(or)!==-1) {
+      this.blastSprite.rotation = this._offsetRotation + (or-1) * Math.PI / 2;
+      this.blastSprite.alpha = ((meta.attack || meta.takeMine) && t < 50) ? 1 : 0;
+    }
+    else {
+      this.blastSprite.alpha = 0;
+    }
   }
   else {
     this.drawLifeIndicator(meta.to.life);
@@ -139,6 +164,7 @@ Hero.prototype.render = function () {
 
   // Some animations can be done absolutely
   this.blinkSprite.alpha = (meta.killed || (meta.takeMine || meta.attacked) && t < 80) ? 1 : 0;
+
 };
 
 Hero.prototype.getTexture = function () {
