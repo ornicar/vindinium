@@ -1,5 +1,5 @@
 
-var bloodySoilPersistence = 150;
+var bloodySoilPersistence = 200;
 var bloodWhenTakeMine = 0.3;
 var bloodWhenInjured = 0.7;
 var bloodWhenKilled = 1.4;

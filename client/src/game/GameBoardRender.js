@@ -1,19 +1,14 @@
 var PIXI = require("pixi.js");
+var requestAnimationFrame = require("raf");
 
 var Hero = require("./Hero");
 var Mine = require("./Mine");
 var Tavern = require("./Tavern");
-var requestAnimationFrame = require("raf");
 var maps = require("./maps");
 var BloodySoil = require("./BloodySoil");
+var loadTexture = require("./loadTexture");
 
-var winnerParchmentTexture = PIXI.Texture.fromImage("/assets/img/winner_parchment.png");
-var heroTextures = [
-  PIXI.Texture.fromImage("/assets/img/fireheart/player1_life.png"),
-  PIXI.Texture.fromImage("/assets/img/fireheart/player2_life.png"),
-  PIXI.Texture.fromImage("/assets/img/fireheart/player3_life.png"),
-  PIXI.Texture.fromImage("/assets/img/fireheart/player4_life.png")
-];
+var winnerParchmentTexture = loadTexture("winner_parchment.png");
 
 function sortSpritesByPosition (a, b) {
   return a.position.y - b.position.y + 0.001 * (a.position.x - b.position.x);
@@ -171,7 +166,8 @@ GameBoardRender.prototype = {
     this.gameContainer = new PIXI.DisplayObjectContainer();
     this.gameContainer.x = this.borderSize;
     this.gameContainer.y = this.borderSize;
-    this.gameContainer.addChild(this.bgContainer = new PIXI.DisplayObjectContainer());
+    this.gameContainer.addChild(this.terrainContainer = new PIXI.DisplayObjectContainer());
+    this.gameContainer.addChild(this.terrainContainer2 = new PIXI.DisplayObjectContainer());
     this.gameContainer.addChild(this.bloodySoilContainer = new PIXI.DisplayObjectContainer());
     this.gameContainer.addChild(this.heroesContainer = this.objectsContainer = new PIXI.DisplayObjectContainer());
     this.gameStage.addChild(this.gameContainer);
@@ -179,7 +175,7 @@ GameBoardRender.prototype = {
   
   // Background: borders, ground, wall
   initBackground: function () {
-    this.map.generate(this.game, this.bgContainer);
+    this.map.generate(this.game, this.terrainContainer, this.terrainContainer2, this.objectsContainer);
   },
 
   // Objects: mines, taverns
@@ -263,7 +259,8 @@ GameBoardRender.prototype = {
       text2.position.x = Math.floor((boardWidth-text2.width)/2);
       text2.position.y = centerY + 40;
       this.messageContainer.addChild(text2);
-      var winnerImage = new PIXI.Sprite(heroTextures[winner - 1]);
+
+      var winnerImage = new PIXI.Sprite(this.heroes[winner - 1].getTexture());
       winnerImage.position.x = centerX + 103;
       winnerImage.position.y = centerY + 66;
       this.messageContainer.addChild(winnerImage);

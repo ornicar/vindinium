@@ -1,6 +1,7 @@
 var PIXI = require("pixi.js");
+var loadTexture = require("./loadTexture");
 
-var beerTexture = PIXI.Texture.fromImage("/assets/img/beer2.png");
+var beerTexture = loadTexture("beer2.png");
 
 function Tavern () {
   PIXI.Sprite.call(this, beerTexture);

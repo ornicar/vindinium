@@ -2,9 +2,10 @@ var PIXI = require("pixi.js");
 var smoothstep = require("smoothstep");
 var tilePIXI = require("./tilePIXI");
 var MineSparkShader = require("./shaders/MineSpark");
+var loadTexture = require("./loadTexture");
 
-var goblinTexture = PIXI.Texture.fromImage("/assets/img/goblin.png");
-var minesTextureTile = PIXI.Texture.fromImage("/assets/img/mines.png");
+var goblinTexture = loadTexture("goblin.png");
+var minesTextureTile = loadTexture("mines.png");
 
 var tilePIXI32 = tilePIXI(32);
 var mineTextures = [

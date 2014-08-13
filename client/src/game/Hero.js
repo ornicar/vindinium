@@ -1,7 +1,8 @@
 var PIXI = require("pixi.js");
 var smoothstep = require("smoothstep");
-var tilePIXI = require("./tilePIXI");
 var BezierEasing = require("bezier-easing");
+var tilePIXI = require("./tilePIXI");
+var loadTexture = require("./loadTexture");
 
 var attackEasing = BezierEasing(0.0, 1.33, 0, 1);
 var lifeIndicatorIncreaseEasing = BezierEasing(1, 0, 1, 1);
@@ -18,18 +19,18 @@ function mix (a, b, p) {
 
 var tilePIXI32 = tilePIXI(32);
 
-var heroesTexture = PIXI.Texture.fromImage("/assets/img/fireheart/heroes.png");
+var heroesTexture = loadTexture("heroes.png");
 
 var orientations = [3, 2, 0, 1]; // N E S W
 
-var heroTextures = [0, 1, 2, 3].map(function (p) {
+var heroTextures = [3, 2, 1, 0].map(function (p) {
   return orientations.map(function (o) {
-    return tilePIXI32(heroesTexture, p, o);
+    return tilePIXI32(heroesTexture, o, p);
   });
 });
 
 var blinkTextures = orientations.map(function (o) {
-  return tilePIXI32(heroesTexture, 4, o);
+  return tilePIXI32(heroesTexture, o, 4);
 });
 
 /*
@@ -52,8 +53,6 @@ function rgb (r, g, b) {
 
 function createHeroSprite (texture) {
   var heroSprite = new PIXI.Sprite(texture);
-  heroSprite.rotation = -Math.PI/2;
-  heroSprite.pivot.x = 32;
   heroSprite.position.x = -4;
   heroSprite.position.y = -8;
   return heroSprite;
@@ -131,11 +130,11 @@ Hero.prototype.render = function () {
   }
 
   // Some animations can be done absolutely
-  this.blinkSprite.alpha = (meta.killed || (meta.takeMine || meta.attacked) && t < 40) ? 1 : 0;
+  this.blinkSprite.alpha = (meta.killed || (meta.takeMine || meta.attacked) && t < 80) ? 1 : 0;
 };
 
 Hero.prototype.getTexture = function () {
-  return heroTextures[this.state.id - 1][0];
+  return heroTextures[this.id - 1][2];
 };
 
 Hero.prototype.logMeta = function (meta) {
