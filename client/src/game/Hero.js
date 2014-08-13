@@ -157,4 +157,6 @@ Hero.prototype.logMeta = function (meta) {
   return logs;
 };
 
+Hero.blinkTextures = blinkTextures;
+
 module.exports = Hero;

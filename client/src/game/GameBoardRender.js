@@ -2,6 +2,7 @@ var PIXI = require("pixi.js");
 var requestAnimationFrame = require("raf");
 
 var Hero = require("./Hero");
+var Ghost = require("./Ghost");
 var Mine = require("./Mine");
 var Tavern = require("./Tavern");
 var maps = require("./maps");
@@ -89,17 +90,29 @@ GameBoardRender.prototype = {
     this.mines.forEach(function (mine) {
       mine.render();
     });
+    this.ghostsContainer.children.forEach(function (ghost) {
+      ghost.render();
+    }, this);
     this.renderer.render(this.gameStage);
   },
 
   updateGame: function (game, interpolationTime) {
     var consecutiveTurn = this.game && game.turn === this.game.turn+1;
+    if (!consecutiveTurn) {
+      this.ghostsContainer.children.forEach(function (ghost) {
+        ghost.destroy();
+      });
+    }
+
     this.game = game;
     //console.log("Turn "+this.game.turn+" - Hero"+(1+this.game.turn % 4));
     this.game.meta.heroes.forEach(function (meta, i) {
       var hero = this.heroes[i];
-      //console.log(hero.logMeta(meta));
       hero.updateHero(meta, interpolationTime, consecutiveTurn);
+      if (meta.killed) {
+        this.createGhostForHero(hero, interpolationTime);
+      }
+      //console.log(hero.logMeta(meta));
     }, this);
 
     this.updateBloodySoil();
@@ -130,6 +143,13 @@ GameBoardRender.prototype = {
       }
     }, this);
     */
+  },
+
+  createGhostForHero: function (hero, interpolationTime) {
+    var sprite = new Ghost(hero, interpolationTime);
+    sprite.position.x = hero.x;
+    sprite.position.y = hero.y;
+    this.ghostsContainer.addChild(sprite);
   },
 
   updateBloodySoil: function () {
@@ -194,6 +214,7 @@ GameBoardRender.prototype = {
     this.gameContainer.addChild(this.bloodySoilContainer = new PIXI.DisplayObjectContainer());
     this.gameContainer.addChild(this.footprintsContainer = new PIXI.DisplayObjectContainer());
     this.gameContainer.addChild(this.heroesContainer = this.objectsContainer = new PIXI.DisplayObjectContainer());
+    this.gameContainer.addChild(this.ghostsContainer = new PIXI.DisplayObjectContainer());
     this.gameStage.addChild(this.gameContainer);
   },
   
