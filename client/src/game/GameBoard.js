@@ -126,31 +126,12 @@ GameBoardRender.prototype = {
     this.updateBloodySoil();
     this.updateFootprints();
 
-    // TODO: improve perf of this iteration!
-    var mineIndex = 0;
-    var nbPerHero = [0,0,0,0];
-    var mines = [];
-    this.game.forEachTile(function (tile) {
-      if (tile[0] === "$") {
-        if (tile[1] !== "-")
-          nbPerHero[parseInt(tile[1],10)-1] ++;
-        mines.push([ this.mines[mineIndex++], tile[1] ]);
-      }
+    this.game.meta.mines.forEach(function (mineOwner, i) {
+      this.mines[i].updateOwner({
+        owner: mineOwner || "-",
+        domination: !mineOwner ? 0 : this.game.meta.heroes[mineOwner-1].nbMines / this.game.meta.nbMines
+      }, interpolationTime, consecutiveTurn);
     }, this);
-    var nbTotal = nbPerHero.reduce(function (a, b) {
-      return a + b;
-    }, 0);
-    mines.forEach(function (mine) {
-      var i = mine[1] === "-" ? null : parseInt(mine[1],10)-1;
-      mine[0].updateOwner({ owner: mine[1], domination: i===null ? 0 : nbPerHero[i]/nbTotal }, interpolationTime, consecutiveTurn);
-    });
-    /*
-    this.game.forEachTile(function (tile) {
-      if (tile[0] === "$") {
-        this.mines[mineIndex++].updateOwner(tile[1], interpolationTime, consecutiveTurn);
-      }
-    }, this);
-    */
   },
 
   createGhostForHero: function (hero, interpolationTime) {

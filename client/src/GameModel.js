@@ -69,9 +69,17 @@ function orientationForDelta (dx, dy) {
 GameModel.prototype = {
   initialMeta: function () {
     var game = this;
+    var nbMines = 0;
+    this.forEachTile(function (tile) {
+      if (tile[0] === "$") {
+        ++ nbMines;
+      }
+    });
     return {
       bloodyGroundFactor: genEmptyArray(this.tilesArray.length, 0),
       footprintFactor: genEmptyArray(this.tilesArray.length, { orientation: 0, foot: 0, blood: 0 }),
+      nbMines: nbMines,
+      mines: genEmptyArray(nbMines, 0),
       heroes: [1,2,3,4].map(function (id, i) {
         return {
           myturn: false,
@@ -87,7 +95,8 @@ GameModel.prototype = {
           takeMine: null,
           drink: null,
           winning: false,
-          bloodUnderFoot: 0
+          bloodUnderFoot: 0,
+          nbMines: 0
         };
       })
     };
@@ -103,6 +112,7 @@ GameModel.prototype = {
     meta.heroes.forEach(function (hero, i) {
       if (this.turn % 4 === 0) // We only refresh at the end of a turn to avoid blink effect
         hero.winning = winner === i+1;
+      hero.nbMines = 0;
       hero.myturn = false;
       hero.move = null;
       hero.takeMine = null;
@@ -115,6 +125,16 @@ GameModel.prototype = {
       hero.attackOrientations = [];
       hero.from = previous.heroes[i];
       hero.to = this.heroes[i];
+    }, this);
+
+    meta.mines = [].concat(meta.mines);
+    var mineIndex = 0;
+    this.forEachTile(function (tile) {
+      if (tile[0] === "$") {
+        var owner = tile[1]==="-" ? 0 : parseInt(tile[1], 10);
+        if (owner) meta.heroes[owner-1].nbMines ++;
+        meta.mines[mineIndex++] = owner;
+      }
     }, this);
 
     // Compute last hero meta
