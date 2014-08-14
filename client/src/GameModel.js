@@ -1,13 +1,13 @@
 
-var bloodWhenTakeMine = 0.3;
+var bloodWhenTakeMine = 0.4;
 var bloodWhenInjured = 0.8;
-var bloodWhenKilled = 1.6;
+var bloodWhenKilled = 1.7;
 
 // In move number
 var bloodUnderFootPersistence = 2;
 
 // In turn number
-var bloodySoilPersistence = 300;
+var bloodySoilPersistence = 350;
 var footprintPersistence = 80;
 var footprintBloodPersistence = 60;
 

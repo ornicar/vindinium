@@ -3,7 +3,7 @@ var smoothstep = require("smoothstep");
 var GhostEffect = require("./shaders/GhostEffect");
 var Hero = require("./Hero");
 
-function Ghost (hero, interpolationTime) {
+function Ghost (hero, duration) {
   PIXI.DisplayObjectContainer.call(this);
   this.dead = false;
   this.phantomSprite = new PIXI.Sprite(Hero.blinkTextures[hero.meta.orientation || 0]);
@@ -12,7 +12,7 @@ function Ghost (hero, interpolationTime) {
   this.effect = new GhostEffect();
   this.phantomSprite.filters = [ this.effect ];
   this.startTime = Date.now();
-  this.duration = 1500 + 10 * interpolationTime;
+  this.duration = duration;
   this.addChild(this.phantomSprite);
 }
 

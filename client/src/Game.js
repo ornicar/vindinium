@@ -1,7 +1,7 @@
 /** @jsx React.DOM */
 var React = require("react");
 var GameModel = require("./GameModel");
-var GameBoardRender = require("./game/GameBoardRender");
+var GameBoardRender = require("./game/GameBoard");
 var GoldScoreBar = require("./ui/GoldScoreBar");
 var HeroStats = require("./ui/HeroStats");
 var PlayControls = require("./ui/PlayControls");
@@ -19,15 +19,17 @@ var Game = React.createClass({
     playing: React.PropTypes.bool,
     buffered: React.PropTypes.number,
     keyboardControls: React.PropTypes.bool,
-    map: React.PropTypes.string
+    map: React.PropTypes.string,
+    debug: React.PropTypes.bool
   },
   getDefaultProps: function () {
     return {
-      map: "lowlands"
+      map: "lowlands",
+      debug: false
     };
   },
   componentDidMount: function () {
-    this.boardRender = new GameBoardRender(this.refs.boardBox.getDOMNode(), this.props.map);
+    this.boardRender = new GameBoardRender(this.refs.boardBox.getDOMNode(), this.props.map, this.props.debug);
     this.boardRender.setGame(this.props.game);
   },
   componentDidUnmount: function () {

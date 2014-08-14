@@ -65,7 +65,7 @@ function createHeroSprite (texture) {
   return heroSprite;
 }
 
-function Hero (id, obj, tileSize, effectsContainer) {
+function Hero (id, obj, tileSize, effectsContainer, triggerBloodParticle) {
   this.id = id;
   this.tileSize = tileSize;
   PIXI.DisplayObjectContainer.call(this);
@@ -81,10 +81,10 @@ function Hero (id, obj, tileSize, effectsContainer) {
 
   this.blastSprite = new PIXI.Sprite(blastTexture);
   this.blastSprite.alpha = 0;
-  this.blastSprite.position.x = 14;
-  this.blastSprite.position.y = 14;
-  this.blastSprite.pivot.x = 20;
-  this.blastSprite.pivot.y = 20;
+  this.blastSprite.position.x = 12;
+  this.blastSprite.position.y = 10;
+  this.blastSprite.pivot.x = 25;
+  this.blastSprite.pivot.y = 25;
 
   this.effectsGroup = new PIXI.DisplayObjectContainer();
   this.effectsGroup.position = this.position;
@@ -93,6 +93,8 @@ function Hero (id, obj, tileSize, effectsContainer) {
 
   this.addChild(this.heroSprite);
   this.addChild(this.blinkSprite);
+
+  this.triggerBloodParticle = triggerBloodParticle;
 
   this.interpolationEndTime = 0;
 
@@ -132,7 +134,14 @@ Hero.prototype.updateHero = function (meta, interpolationTime, consecutiveTurn) 
   this.consecutiveTurn = consecutiveTurn;
   this.interpolationTime = interpolationTime;
 
-  this._offsetRotation = (Math.random()-0.5) * Math.PI / 6;
+  this.blastSprite.alpha = 0;
+  this._offsetRotation = (Math.random()-0.5) * Math.PI / 4;
+
+  if (meta.attack) {
+    meta.attack.forEach(function (p) {
+      this.triggerBloodParticle(this.id, p, interpolationTime);
+    }, this);
+  }
 };
 
 Hero.prototype.render = function () {
@@ -146,14 +155,23 @@ Hero.prototype.render = function () {
     this.drawLifeIndicator(mix(meta.from.life, meta.to.life, lifeIndicatorEasing(p)));
     var moveProgress = meta.attack ? attackEasing(p) : p;
     this.setPosition(meta.killed || meta.move ? interpolatePosition(meta.from.pos, meta.to.pos, moveProgress) : meta.to.pos);
-    var or = meta.orientation[Math.min(meta.orientation.length-1, Math.floor(p * meta.orientation.length))];
+
+    var orientationDividers = this.updatedTime / meta.orientation.length;
+    var orientationIndex = Math.min(meta.orientation.length-1, Math.floor(p * meta.orientation.length));
+    var tRelativeToOrientation = t - orientationIndex * orientationDividers;
+    var or = meta.orientation[orientationIndex];
+
     this.refreshHeroSprite(or);
     if (meta.attackOrientations.indexOf(or)!==-1) {
       this.blastSprite.rotation = this._offsetRotation + (or-1) * Math.PI / 2;
-      this.blastSprite.alpha = ((meta.attack || meta.takeMine) && t < 50) ? 1 : 0;
+      this.blastSprite.alpha = ((meta.attack || meta.takeMine) && tRelativeToOrientation < 50) ? 1 : 0;
     }
     else {
       this.blastSprite.alpha = 0;
+      /*
+      this.blastSprite.alpha = 1;
+      this.blastSprite.rotation = 10 * Math.random();
+      */
     }
   }
   else {
@@ -179,11 +197,12 @@ Hero.prototype.logMeta = function (meta) {
       if (meta[k] !== null) {
         var value = meta[k];
         var typ = typeof meta[k];
-        if (typ === "object" && !(meta[k] instanceof Array))
+        var isArray = meta[k] instanceof Array;
+        if (typ === "object" && !isArray)
           value = JSON.stringify(value);
         if (typ === "boolean")
           logs += (value ? k+" " : "");
-        else
+        else if (!isArray || value.length)
           logs += k+"="+value+" ";
       }
     }

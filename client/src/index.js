@@ -47,7 +47,8 @@ function runGame (gameId) {
       jump: jump,
       playing: playing,
       buffered: buffered,
-      map: url.query.map
+      map: url.query.map,
+      debug: url.query.debug==="true"
     }), mount);
     // sorry for the ugly hack! Where should that go?
     if (game.turn >= game.maxTurns && window.location.pathname === '/tv')

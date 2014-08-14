@@ -7,6 +7,7 @@ var Mine = require("./Mine");
 var Tavern = require("./Tavern");
 var maps = require("./maps");
 var BloodySoil = require("./BloodySoil");
+var BloodParticles = require("./BloodParticles");
 var Footprint = require("./Footprint");
 var loadTexture = require("./loadTexture");
 
@@ -16,11 +17,12 @@ function sortSpritesByPosition (a, b) {
   return a.position.y - b.position.y + 0.001 * (a.position.x - b.position.x);
 }
 
-function GameBoardRender (container, mapName) {
+function GameBoardRender (container, mapName, debug) {
   this.container = container;
   this.map = maps[mapName||"lowlands"]();
   this.tileSize = this.map.tileSize;
   this.borderSize = this.map.borderSize;
+  this.debug = debug;
 }
 
 GameBoardRender.prototype = {
@@ -93,26 +95,32 @@ GameBoardRender.prototype = {
     this.ghostsContainer.children.forEach(function (ghost) {
       ghost.render();
     }, this);
+    this.bloodParticlesContainer.children.forEach(function (bloodParticles) {
+      bloodParticles.render();
+    }, this);
     this.renderer.render(this.gameStage);
   },
 
   updateGame: function (game, interpolationTime) {
     var consecutiveTurn = this.game && game.turn === this.game.turn+1;
     if (!consecutiveTurn) {
+      this.bloodParticlesContainer.children.forEach(function (ghost) {
+        ghost.destroy();
+      });
       this.ghostsContainer.children.forEach(function (ghost) {
         ghost.destroy();
       });
     }
 
     this.game = game;
-    //console.log("Turn "+this.game.turn+" - Hero"+(1+this.game.turn % 4));
+    if (this.debug) console.log("Turn "+this.game.turn+" - Hero"+(1+this.game.turn % 4));
     this.game.meta.heroes.forEach(function (meta, i) {
       var hero = this.heroes[i];
       hero.updateHero(meta, interpolationTime, consecutiveTurn);
       if (meta.killed) {
         this.createGhostForHero(hero, interpolationTime);
       }
-      //console.log(hero.logMeta(meta));
+      if (this.debug) console.log(hero.logMeta(meta));
     }, this);
 
     this.updateBloodySoil();
@@ -146,11 +154,22 @@ GameBoardRender.prototype = {
   },
 
   createGhostForHero: function (hero, interpolationTime) {
-    var sprite = new Ghost(hero, interpolationTime);
+    var sprite = new Ghost(hero, 5000 + 4 * interpolationTime);
     sprite.position.x = hero.x;
     sprite.position.y = hero.y;
     this.ghostsContainer.addChild(sprite);
   },
+
+  triggerBloodParticle: function (attacker, target, interpolationTime) {
+    var positionAttacker = this.heroes[attacker-1].position.clone();
+    var positionTarget = this.heroes[target-1].position.clone();
+    positionAttacker.x += this.tileSize / 2;
+    positionAttacker.y += this.tileSize / 2;
+    positionTarget.x += this.tileSize / 2;
+    positionTarget.y += this.tileSize / 2;
+    this.bloodParticlesContainer.addChild(new BloodParticles(positionAttacker, positionTarget, 500 + interpolationTime));
+  },
+
 
   updateBloodySoil: function () {
     this.game.meta.bloodyGroundFactor.forEach(function (level, i) {
@@ -215,6 +234,7 @@ GameBoardRender.prototype = {
     this.gameContainer.addChild(this.footprintsContainer = new PIXI.DisplayObjectContainer());
     this.gameContainer.addChild(this.heroesContainer = this.objectsContainer = new PIXI.DisplayObjectContainer());
     this.gameContainer.addChild(this.ghostsContainer = new PIXI.DisplayObjectContainer());
+    this.gameContainer.addChild(this.bloodParticlesContainer = new PIXI.DisplayObjectContainer());
     this.gameContainer.addChild(this.effectsContainer = new PIXI.DisplayObjectContainer());
     this.gameStage.addChild(this.gameContainer);
   },
@@ -253,7 +273,7 @@ GameBoardRender.prototype = {
 
   initHeroes: function () {
     this.heroes = this.game.meta.heroes.map(function (heroObj, i) {
-      var hero = new Hero(i+1, heroObj, this.tileSize, this.effectsContainer);
+      var hero = new Hero(i+1, heroObj, this.tileSize, this.effectsContainer, this.triggerBloodParticle.bind(this));
       this.heroesContainer.addChild(hero);
       return hero;
     }, this);
