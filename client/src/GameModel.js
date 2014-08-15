@@ -1,7 +1,7 @@
 
 var bloodWhenTakeMine = 0.4;
 var bloodWhenInjured = 0.7;
-var bloodWhenKilled = 1.4;
+var bloodWhenKilled = 2.0;
 
 // In move number
 var bloodUnderFootPersistence = 2;
