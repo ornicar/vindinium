@@ -150,10 +150,12 @@ GameBoardRender.prototype = {
   triggerBloodParticle: function (attacker, target, killed, interpolationTime) {
     var positionAttacker = this.heroes[attacker-1].position.clone();
     var positionTarget = this.heroes[target-1].position.clone();
-    positionAttacker.x += this.tileSize / 2;
-    positionAttacker.y += this.tileSize / 2;
-    positionTarget.x += this.tileSize / 2;
-    positionTarget.y += this.tileSize / 2;
+    var dx = 8;
+    var dy = 6;
+    positionAttacker.x += dx;
+    positionAttacker.y += dy;
+    positionTarget.x += dx;
+    positionTarget.y += dy;
     var duration = (killed ? 1000 : 500) + interpolationTime;
     var nbParticles = killed ? 32 : 16;
     this.bloodParticlesContainer.addChild(new BloodParticles(positionAttacker, positionTarget, duration, nbParticles));

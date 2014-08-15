@@ -147,7 +147,7 @@ function runTV (mount, ai) {
     }), mount);
   }
 
-  // For now we flatten it to one TV.
+  // For now we flatten all running games to one TV.
 
   GameIdStream(ai) // A stream of game ids
     .map(GameStream) // A stream of stream of game!
