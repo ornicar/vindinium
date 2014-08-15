@@ -18,6 +18,7 @@ var Game = React.createClass({
     jump: React.PropTypes.func,
     playing: React.PropTypes.bool,
     buffered: React.PropTypes.number,
+    withControls: React.PropTypes.bool,
     keyboardControls: React.PropTypes.bool,
     map: React.PropTypes.string,
     debug: React.PropTypes.bool
@@ -25,7 +26,9 @@ var Game = React.createClass({
   getDefaultProps: function () {
     return {
       map: "lowlands",
-      debug: false
+      debug: false,
+      withControls: true,
+      keyboardControls: true
     };
   },
   componentDidMount: function () {
@@ -37,12 +40,10 @@ var Game = React.createClass({
   },
   componentDidUpdate: function (prevProps) {
     if (prevProps.game.turn !== this.props.game.turn) {
-      var interpolationTime = 
+      var interpolationTime =
         prevProps.game.turn !== this.props.game.turn-1 || // only do interpolation if the new game is a following turn
         this.props.refreshRate < 20 ? // too low interpolation is not significant
         0 : this.props.refreshRate;
-
-      // interpolationTime *= 4; // This would provide continuous player motion! but there is much work to do fix glitches.
 
       this.boardRender.setGame(this.props.game, interpolationTime);
     }
@@ -67,7 +68,9 @@ var Game = React.createClass({
         }
         </div>
       </div>
+      { this.props.withControls ?
       <PlayControls game={game} timeBarWidth={boardSize} speed={speed} increaseSpeed={this.props.increaseSpeed} decreaseSpeed={this.props.decreaseSpeed} play={this.props.play} pause={this.props.pause} jump={this.props.jump} keyboard={this.props.keyboardControls} playing={this.props.playing} buffered={this.props.buffered} />
+      : ''}
     </div>;
   }
 });

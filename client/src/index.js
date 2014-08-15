@@ -2,13 +2,13 @@ var Url = require("url");
 var Rx = require("rx");
 var React = require("react");
 var GameStream = require("./GameStream");
+var GameIdStream = require("./GameIdStream");
 var Game = require("./Game");
 
 var SPEEDS = [1, 2, 5, 10, 20, 50, 75, 100, 150, 200];
 var DEFAULT_SPEED = 10;
 
 var url = Url.parse(window.location.href, true);
-var mount = document.getElementById("game");
 
 function alwaysTrue () { return true; }
 function increment (x) { return x + 1; }
@@ -18,7 +18,7 @@ function isNotEmptyArray (array) {
   return array.length > 0;
 }
 
-function runGame (gameId) {
+function runGame (mount, gameId) {
   /// States ///
   var speed, refreshRate;
   var playing = false;
@@ -136,9 +136,27 @@ function runGame (gameId) {
   play();
 }
 
+function runTV (mount, ai) {
+
+  var gameIdStream = GameIdStream(ai);
+
+  gameIdStream.subscribe(function (id) {
+    console.log("ID", id);
+  });
+}
+
 // The entry point
 function main () {
-  if (window.GAME_ID) runGame(window.GAME_ID);
+  var mountGame = document.getElementById("game");
+  var mountTV = document.getElementById("gametv");
+  if (window.GAME_ID && mountGame) {
+    runGame(mountGame, window.GAME_ID);
+  }
+  else if (mountTV) {
+    var maybeMatchAI = url.path.match(/\/ai\/([a-zA-Z0-9]+)/);
+    var ai = maybeMatchAI && maybeMatchAI.length===2 && maybeMatchAI[1] || null;
+    runTV(mountTV, ai);
+  }
 }
 
 main();
