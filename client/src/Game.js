@@ -5,6 +5,7 @@ var GameBoardRender = require("./game/GameBoard");
 var GoldScoreBar = require("./ui/GoldScoreBar");
 var HeroStats = require("./ui/HeroStats");
 var PlayControls = require("./ui/PlayControls");
+var Live = require("./ui/Live");
 var TurnCount = require("./ui/TurnCount");
 
 var Game = React.createClass({
@@ -20,6 +21,7 @@ var Game = React.createClass({
     buffered: React.PropTypes.number,
     withControls: React.PropTypes.bool,
     keyboardControls: React.PropTypes.bool,
+    live: React.PropTypes.bool,
     map: React.PropTypes.string,
     debug: React.PropTypes.bool
   },
@@ -31,15 +33,25 @@ var Game = React.createClass({
       keyboardControls: true
     };
   },
-  componentDidMount: function () {
+  resetGameBoard: function () {
+    if (this.boardRender) {
+      this.boardRender.destroy();
+    }
     this.boardRender = new GameBoardRender(this.refs.boardBox.getDOMNode(), this.props.map, this.props.debug);
+  },
+  componentDidMount: function () {
+    this.resetGameBoard();
     this.boardRender.setGame(this.props.game);
   },
   componentDidUnmount: function () {
     this.boardRender.destroy();
   },
   componentDidUpdate: function (prevProps) {
-    if (prevProps.game.turn !== this.props.game.turn) {
+    if (prevProps.game.id !== this.props.game.id) {
+      this.resetGameBoard();
+      this.boardRender.setGame(this.props.game);
+    }
+    else if (prevProps.game.turn !== this.props.game.turn) {
       var interpolationTime =
         prevProps.game.turn !== this.props.game.turn-1 || // only do interpolation if the new game is a following turn
         this.props.refreshRate < 20 ? // too low interpolation is not significant
@@ -56,6 +68,7 @@ var Game = React.createClass({
     var speed = refreshRate ? ""+Math.round(1000 / refreshRate) : "max";
 
     return <div className="game">
+      {this.props.live ? <Live /> : ''}
       <div className="boardBox" ref="boardBox"></div>
       <GoldScoreBar game={game} height={boardSize} />
       <div className="infos">

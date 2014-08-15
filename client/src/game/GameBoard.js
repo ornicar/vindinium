@@ -52,7 +52,13 @@ GameBoardRender.prototype = {
   destroy: function () {
     this.stopRenderLoop();
     this.container.removeChild(this.renderer.view);
-    this.renderer.destroy();
+    try {
+      // FIXME This seems to breaks... bug in Pixi.js?
+      this.renderer.destroy();
+    }
+    catch (e) {
+      console.error(e);
+    }
   },
 
   getHeight: function () {

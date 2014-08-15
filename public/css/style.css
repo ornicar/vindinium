@@ -6,7 +6,7 @@ body {
     font-family: monospace;
 }
 
-body h1, body h2, body h3, body h4, #logo, #main-menu, #game {
+body h1, body h2, body h3, body h4, #logo, #main-menu, #game, #gametv {
     font-family: 'VT323', cursive;
 }
 
@@ -120,14 +120,3 @@ button, input {
     cursor: pointer;
 }
 
-#game {
-    position: relative;
-    display: inline-block;
-    font-size: 18px;
-}
-
-#game .boardBox {
-  border-radius: 26px;
-  background: #5c8ab9;
-  border: 7px solid #5c8ab9;
-}

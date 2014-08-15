@@ -99,7 +99,7 @@ function Hero (id, obj, tileSize, effectsContainer, triggerBloodParticle) {
   this.interpolationEndTime = 0;
 
   this._offsetRotation = 0.0;
-  this.updateHero(obj);
+  this.updateHero(obj, 0, false);
 }
 
 Hero.prototype = Object.create(PIXI.DisplayObjectContainer.prototype);
@@ -137,7 +137,7 @@ Hero.prototype.updateHero = function (meta, interpolationTime, consecutiveTurn) 
   this.blastSprite.alpha = 0;
   this._offsetRotation = (Math.random()-0.5) * Math.PI / 4;
 
-  if (meta.attack) {
+  if (meta.attack && consecutiveTurn) {
     meta.attack.forEach(function (p) {
       this.triggerBloodParticle(this.id, p, meta.kill, interpolationTime);
     }, this);

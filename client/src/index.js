@@ -50,9 +50,6 @@ function runGame (mount, gameId) {
       map: url.query.map,
       debug: url.query.debug==="true"
     }), mount);
-    // sorry for the ugly hack! Where should that go?
-    if (game.turn >= game.maxTurns && window.location.pathname === '/tv')
-      setTimeout(function() { window.location.reload(); }, 2000);
   }
 
   function restart (startAtTurn) {
@@ -138,11 +135,27 @@ function runGame (mount, gameId) {
 
 function runTV (mount, ai) {
 
-  var gameIdStream = GameIdStream(ai);
+  function render (game) {
+    var refreshRate = 0; // FIXME we need to bufferize a bit and figure out about how to make a dynamic refreshRate.
+    React.renderComponent(Game({
+      game: game,
+      refreshRate: refreshRate,
+      withControls: false,
+      map: url.query.map,
+      debug: url.query.debug==="true",
+      live: true
+    }), mount);
+  }
 
-  gameIdStream.subscribe(function (id) {
-    console.log("ID", id);
-  });
+  // For now we flatten it to one TV.
+
+  GameIdStream(ai) // A stream of game ids
+    .map(GameStream) // A stream of stream of game!
+    .map(function (gameStream) {
+      return gameStream.skipUntilWithTime(500); // Skip the past events to avoid crazy rendering
+    })
+    .concatAll() // Flattened to one TV for now
+    .subscribe(render); // Render the game
 }
 
 // The entry point
