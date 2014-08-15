@@ -1,10 +1,11 @@
 /** @jsx React.DOM */
 var React = require("react");
 var GameModel = require("./GameModel");
-var GameBoardRender = require("./game/GameBoardRender");
+var GameBoardRender = require("./game/GameBoard");
 var GoldScoreBar = require("./ui/GoldScoreBar");
 var HeroStats = require("./ui/HeroStats");
 var PlayControls = require("./ui/PlayControls");
+var Live = require("./ui/Live");
 var TurnCount = require("./ui/TurnCount");
 
 var Game = React.createClass({
@@ -18,29 +19,43 @@ var Game = React.createClass({
     jump: React.PropTypes.func,
     playing: React.PropTypes.bool,
     buffered: React.PropTypes.number,
+    withControls: React.PropTypes.bool,
     keyboardControls: React.PropTypes.bool,
-    map: React.PropTypes.string
+    live: React.PropTypes.bool,
+    map: React.PropTypes.string,
+    debug: React.PropTypes.bool
   },
   getDefaultProps: function () {
     return {
-      map: "lowlands"
+      map: "lowlands",
+      debug: false,
+      withControls: true,
+      keyboardControls: true
     };
   },
+  resetGameBoard: function () {
+    if (this.boardRender) {
+      this.boardRender.destroy();
+    }
+    this.boardRender = new GameBoardRender(this.refs.boardBox.getDOMNode(), this.props.map, this.props.debug);
+  },
   componentDidMount: function () {
-    this.boardRender = new GameBoardRender(this.refs.boardBox.getDOMNode(), this.props.map);
+    this.resetGameBoard();
     this.boardRender.setGame(this.props.game);
   },
   componentDidUnmount: function () {
     this.boardRender.destroy();
   },
   componentDidUpdate: function (prevProps) {
-    if (prevProps.game.turn !== this.props.game.turn) {
-      var interpolationTime = 
+    if (prevProps.game.id !== this.props.game.id) {
+      this.resetGameBoard();
+      this.boardRender.setGame(this.props.game);
+    }
+    else if (prevProps.game.turn !== this.props.game.turn) {
+      var interpolationTime =
         prevProps.game.turn !== this.props.game.turn-1 || // only do interpolation if the new game is a following turn
         this.props.refreshRate < 20 ? // too low interpolation is not significant
         0 : this.props.refreshRate;
-
-      // interpolationTime *= 4; // This would provide continuous player motion! but there is much work to do fix glitches.
 
       this.boardRender.setGame(this.props.game, interpolationTime);
     }
@@ -53,6 +68,7 @@ var Game = React.createClass({
     var speed = refreshRate ? ""+Math.round(1000 / refreshRate) : "max";
 
     return <div className="game">
+      {this.props.live ? <Live /> : ''}
       <div className="boardBox" ref="boardBox"></div>
       <GoldScoreBar game={game} height={boardSize} />
       <div className="infos">
@@ -65,7 +81,9 @@ var Game = React.createClass({
         }
         </div>
       </div>
+      { this.props.withControls ?
       <PlayControls game={game} timeBarWidth={boardSize} speed={speed} increaseSpeed={this.props.increaseSpeed} decreaseSpeed={this.props.decreaseSpeed} play={this.props.play} pause={this.props.pause} jump={this.props.jump} keyboard={this.props.keyboardControls} playing={this.props.playing} buffered={this.props.buffered} />
+      : ''}
     </div>;
   }
 });

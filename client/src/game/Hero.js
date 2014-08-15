@@ -1,7 +1,8 @@
 var PIXI = require("pixi.js");
 var smoothstep = require("smoothstep");
-var tilePIXI = require("./tilePIXI");
 var BezierEasing = require("bezier-easing");
+var tilePIXI = require("./tilePIXI");
+var loadTexture = require("./loadTexture");
 
 var attackEasing = BezierEasing(0.0, 1.33, 0, 1);
 var lifeIndicatorIncreaseEasing = BezierEasing(1, 0, 1, 1);
@@ -18,18 +19,25 @@ function mix (a, b, p) {
 
 var tilePIXI32 = tilePIXI(32);
 
-var heroesTexture = PIXI.Texture.fromImage("/assets/img/fireheart/heroes.png");
+var heroesTexture = loadTexture("heroes.png");
+
+var blastTexture = loadTexture("blast.png");
 
 var orientations = [3, 2, 0, 1]; // N E S W
 
-var heroTextures = [0, 1, 2, 3].map(function (p) {
+var heroTextures = [3, 2, 1, 0].map(function (p) {
   return orientations.map(function (o) {
-    return tilePIXI32(heroesTexture, p, o);
+    return tilePIXI32(heroesTexture, o, p);
+  });
+});
+var heroCrownTextures = [3, 2, 1, 0].map(function (p) {
+  return orientations.map(function (o) {
+    return tilePIXI32(heroesTexture, o+5, p);
   });
 });
 
 var blinkTextures = orientations.map(function (o) {
-  return tilePIXI32(heroesTexture, 4, o);
+  return tilePIXI32(heroesTexture, o, 4);
 });
 
 /*
@@ -52,14 +60,12 @@ function rgb (r, g, b) {
 
 function createHeroSprite (texture) {
   var heroSprite = new PIXI.Sprite(texture);
-  heroSprite.rotation = -Math.PI/2;
-  heroSprite.pivot.x = 32;
   heroSprite.position.x = -4;
   heroSprite.position.y = -8;
   return heroSprite;
 }
 
-function Hero (id, obj, tileSize) {
+function Hero (id, obj, tileSize, effectsContainer, triggerBloodParticle) {
   this.id = id;
   this.tileSize = tileSize;
   PIXI.DisplayObjectContainer.call(this);
@@ -68,25 +74,42 @@ function Hero (id, obj, tileSize) {
   this.lifeIndicator.position.y = 0;
   this.addChild(this.lifeIndicator);
 
-  this.heroSprite = createHeroSprite(heroTextures[id - 1][0]);
+  this.heroTextures = heroTextures;
+  this.heroSprite = createHeroSprite(this.heroTextures[id - 1][0]);
   this.blinkSprite = createHeroSprite(blinkTextures[0]);
   this.blinkSprite.alpha = 0;
+
+  this.blastSprite = new PIXI.Sprite(blastTexture);
+  this.blastSprite.alpha = 0;
+  this.blastSprite.position.x = 12;
+  this.blastSprite.position.y = 10;
+  this.blastSprite.pivot.x = 25;
+  this.blastSprite.pivot.y = 25;
+
+  this.effectsGroup = new PIXI.DisplayObjectContainer();
+  this.effectsGroup.position = this.position;
+  this.effectsGroup.addChild(this.blastSprite);
+  effectsContainer.addChild(this.effectsGroup);
 
   this.addChild(this.heroSprite);
   this.addChild(this.blinkSprite);
 
+  this.triggerBloodParticle = triggerBloodParticle;
+
   this.interpolationEndTime = 0;
 
-  this.updateHero(obj);
+  this._offsetRotation = 0.0;
+  this.updateHero(obj, 0, false);
 }
 
 Hero.prototype = Object.create(PIXI.DisplayObjectContainer.prototype);
 Hero.prototype.constructor = Hero;
 
 Hero.prototype.refreshHeroSprite = function (orientation) {
-  if (this._currentOrientation === orientation) return;
+  if (this._currentOrientation === orientation && this._currentHeroTextures === this.heroTextures) return;
+  this._currentHeroTextures = this.heroesTexture;
   this._currentOrientation = orientation;
-  this.heroSprite.setTexture(heroTextures[this.id - 1][orientation]);
+  this.heroSprite.setTexture(this.heroTextures[this.id - 1][orientation]);
   this.blinkSprite.setTexture(blinkTextures[orientation]);
 };
 
@@ -106,9 +129,19 @@ Hero.prototype.setPosition = function (pos) {
 
 Hero.prototype.updateHero = function (meta, interpolationTime, consecutiveTurn) {
   this.meta = meta;
+  this.heroTextures = meta.winning ? heroCrownTextures : heroTextures;
   this.updatedTime = Date.now();
   this.consecutiveTurn = consecutiveTurn;
   this.interpolationTime = interpolationTime;
+
+  this.blastSprite.alpha = 0;
+  this._offsetRotation = (Math.random()-0.5) * Math.PI / 4;
+
+  if (meta.attack && consecutiveTurn) {
+    meta.attack.forEach(function (p) {
+      this.triggerBloodParticle(this.id, p, meta.kill, interpolationTime);
+    }, this);
+  }
 };
 
 Hero.prototype.render = function () {
@@ -122,7 +155,24 @@ Hero.prototype.render = function () {
     this.drawLifeIndicator(mix(meta.from.life, meta.to.life, lifeIndicatorEasing(p)));
     var moveProgress = meta.attack ? attackEasing(p) : p;
     this.setPosition(meta.killed || meta.move ? interpolatePosition(meta.from.pos, meta.to.pos, moveProgress) : meta.to.pos);
-    this.refreshHeroSprite(meta.orientation[Math.min(meta.orientation.length-1, Math.floor(p * meta.orientation.length))]);
+
+    var orientationDividers = this.updatedTime / meta.orientation.length;
+    var orientationIndex = Math.min(meta.orientation.length-1, Math.floor(p * meta.orientation.length));
+    var tRelativeToOrientation = t - orientationIndex * orientationDividers;
+    var or = meta.orientation[orientationIndex];
+
+    this.refreshHeroSprite(or);
+    if (meta.attackOrientations.indexOf(or)!==-1) {
+      this.blastSprite.rotation = this._offsetRotation + (or-1) * Math.PI / 2;
+      this.blastSprite.alpha = ((meta.attack || meta.takeMine) && tRelativeToOrientation < 50) ? 1 : 0;
+    }
+    else {
+      this.blastSprite.alpha = 0;
+      /*
+      this.blastSprite.alpha = 1;
+      this.blastSprite.rotation = 10 * Math.random();
+      */
+    }
   }
   else {
     this.drawLifeIndicator(meta.to.life);
@@ -131,11 +181,12 @@ Hero.prototype.render = function () {
   }
 
   // Some animations can be done absolutely
-  this.blinkSprite.alpha = (meta.killed || (meta.takeMine || meta.attacked) && t < 40) ? 1 : 0;
+  this.blinkSprite.alpha = (meta.killed || (meta.takeMine || meta.attacked) && t < 80) ? 1 : 0;
+
 };
 
 Hero.prototype.getTexture = function () {
-  return heroTextures[this.state.id - 1][0];
+  return this.heroTextures[this.id - 1][2];
 };
 
 Hero.prototype.logMeta = function (meta) {
@@ -146,16 +197,19 @@ Hero.prototype.logMeta = function (meta) {
       if (meta[k] !== null) {
         var value = meta[k];
         var typ = typeof meta[k];
-        if (typ === "object" && !(meta[k] instanceof Array))
+        var isArray = meta[k] instanceof Array;
+        if (typ === "object" && !isArray)
           value = JSON.stringify(value);
         if (typ === "boolean")
           logs += (value ? k+" " : "");
-        else
+        else if (!isArray || value.length)
           logs += k+"="+value+" ";
       }
     }
   }
   return logs;
 };
+
+Hero.blinkTextures = blinkTextures;
 
 module.exports = Hero;

@@ -2,13 +2,13 @@ var Url = require("url");
 var Rx = require("rx");
 var React = require("react");
 var GameStream = require("./GameStream");
+var GameIdStream = require("./GameIdStream");
 var Game = require("./Game");
 
 var SPEEDS = [1, 2, 5, 10, 20, 50, 75, 100, 150, 200];
 var DEFAULT_SPEED = 10;
 
 var url = Url.parse(window.location.href, true);
-var mount = document.getElementById("game");
 
 function alwaysTrue () { return true; }
 function increment (x) { return x + 1; }
@@ -18,7 +18,7 @@ function isNotEmptyArray (array) {
   return array.length > 0;
 }
 
-function runGame (gameId) {
+function runGame (mount, gameId) {
   /// States ///
   var speed, refreshRate;
   var playing = false;
@@ -47,11 +47,9 @@ function runGame (gameId) {
       jump: jump,
       playing: playing,
       buffered: buffered,
-      map: url.query.map
+      map: url.query.map,
+      debug: url.query.debug==="true"
     }), mount);
-    // sorry for the ugly hack! Where should that go?
-    if (game.turn >= game.maxTurns && window.location.pathname === '/tv')
-      setTimeout(function() { window.location.reload(); }, 2000);
   }
 
   function restart (startAtTurn) {
@@ -135,9 +133,43 @@ function runGame (gameId) {
   play();
 }
 
+function runTV (mount, ai) {
+
+  function render (game) {
+    var refreshRate = 80;
+    React.renderComponent(Game({
+      game: game,
+      refreshRate: refreshRate,
+      withControls: false,
+      map: url.query.map,
+      debug: url.query.debug==="true",
+      live: true
+    }), mount);
+  }
+
+  // For now we flatten all running games to one TV.
+
+  GameIdStream(ai) // A stream of game ids
+    .map(GameStream) // A stream of stream of game!
+    .map(function (gameStream) {
+      return gameStream.skipUntilWithTime(500); // Skip the past events to avoid crazy rendering
+    })
+    .concatAll() // Flattened to one TV for now
+    .subscribe(render); // Render the game
+}
+
 // The entry point
 function main () {
-  if (window.GAME_ID) runGame(window.GAME_ID);
+  var mountGame = document.getElementById("game");
+  var mountTV = document.getElementById("gametv");
+  if (window.GAME_ID && mountGame) {
+    runGame(mountGame, window.GAME_ID);
+  }
+  else if (mountTV) {
+    var maybeMatchAI = url.path.match(/\/ai\/([a-zA-Z0-9]+)/);
+    var ai = maybeMatchAI && maybeMatchAI.length===2 && maybeMatchAI[1] || null;
+    runTV(mountTV, ai);
+  }
 }
 
 main();

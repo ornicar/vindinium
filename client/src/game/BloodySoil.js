@@ -1,7 +1,8 @@
 var PIXI = require("pixi.js");
 var tilePIXI = require("./tilePIXI");
+var loadTexture = require("./loadTexture");
 
-var bloodSoilTexture = PIXI.Texture.fromImage("/assets/img/blood.png");
+var bloodSoilTexture = loadTexture("blood.png");
 var bloodsAll = [];
 for (var i=0; i<4; ++i) {
   var b = [];

@@ -1,8 +1,14 @@
 var PIXI = require("pixi.js");
-var tilePIXI = require("./tilePIXI");
 var PerlinNoise = require("perlin-noise");
 var seedrandom = require("seedrandom");
 var smoothstep = require("smoothstep");
+var tilePIXI = require("./tilePIXI");
+var loadTexture = require("./loadTexture");
+
+var heroesTexture = loadTexture("heroes.png"); // FIXME we need proper way to centralize the textures
+var rezMarks = [3,2,1,0].map(function (p) {
+  return tilePIXI(32)(heroesTexture, 4, p);
+});
 
 function lazyF (f) {
   var result;
@@ -78,7 +84,7 @@ module.exports = {
     var tileSize = 24;
     var tilePixi = tilePIXI(tileSize);
 
-    var lowlandsTexture = PIXI.Texture.fromImage("/assets/img/lowlands/tileset_24.png");
+    var lowlandsTexture = loadTexture("lowlands_24.png");
 
     var tilesConf = [
     // Primitive tiles
@@ -184,8 +190,8 @@ module.exports = {
       tiles[tuple[0]] = tilePixi(lowlandsTexture, tuple[1], tuple[2]);
     });
 
-    var farmingTexture = PIXI.Texture.fromImage("/assets/img/tilesets/farming_fishing_24.png");
-    var stuffTexture = PIXI.Texture.fromImage("/assets/img/tilesets/stuff.png");
+    var farmingTexture = loadTexture("farming_fishing_24.png");
+    var stuffTexture = loadTexture("stuff.png");
     var earthStuffs = [ // sorted by priority
       tilePixi(farmingTexture, 5, 1), // medium wood
       tilePixi(farmingTexture, 1, 1), // big wood
@@ -208,14 +214,14 @@ module.exports = {
       tilePixi(stuffTexture, 0, 3)
     ];
     var trees = [
-      PIXI.Texture.fromImage("/assets/img/zelda/tree.png")
+      loadTexture("tree.png")
     ];
 
     function tileExists (id) {
       return id in tiles;
     }
 
-    function appropriateTextureForTerrain (terrain) {
+    function appropriateObjectForTerrain (terrain) {
       if (terrain.indexOf("earth") !== -1) {
         return earthStuffs[Math.floor(Math.random()*Math.random()*earthStuffs.length)];
       }
@@ -225,7 +231,7 @@ module.exports = {
       return trees[Math.floor(Math.random()*trees.length)];
     }
 
-    function generate (game, container) {
+    function generate (game, terrainContainer, terrainContainer2, objectContainer) {
       seedrandom(game.id, { global: true /* this overrides Math.random! :-D */ });
 
       var withInnerWater = true;
@@ -342,14 +348,18 @@ module.exports = {
 
       var plainCount = 0;
 
+      var groundNamesByIndex = [];
+
       for (var y=-1; y<=size; ++y) {
         for (var x=-1; x<=size; ++x) {
           var isWater = x===-1||x===size||y===-1||y===size||waterTiles.indexOf(game.indexForPosition(x, y)) !== -1;
           var resolver, name, sprite;
 
           var group = new PIXI.DisplayObjectContainer();
-          group.x = x * tileSize;
-          group.y = y * tileSize;
+          var group2 = new PIXI.DisplayObjectContainer();
+          var groupObject = new PIXI.DisplayObjectContainer();
+          groupObject.x = group2.x = group.x = x * tileSize;
+          groupObject.y = group2.y = group.y = y * tileSize;
 
           resolver = compassWaterCoast;
           name = resolver(x, y);
@@ -373,18 +383,39 @@ module.exports = {
               name = choices[Math.floor(Math.random() * Math.random() * 4)];
             }
           }
+
+          groundNamesByIndex[y * size + x] = name;
           sprite = new PIXI.Sprite(tiles[name]);
           group.addChild(sprite);
 
           if (!isWater && game.wallAt(x, y)) {
-            var texture = appropriateTextureForTerrain(name, x, y);
+            var texture = appropriateObjectForTerrain(name, x, y);
             sprite = new PIXI.Sprite(texture);
-            group.addChild(sprite);
+            groupObject.addChild(sprite);
           }
 
-          container.addChild(group);
+          for (var h = 0; h < game.heroes.length; ++h) {
+            var spawnPos = game.heroes[h].spawnPos;
+            if (spawnPos.x === x && spawnPos.y === y) {
+              sprite = new PIXI.Sprite(rezMarks[h]);
+              sprite.position.x = -4;
+              sprite.position.y = -8;
+              sprite.alpha = 0.8;
+              group2.addChild(sprite);
+            }
+          }
+
+          if (group.children.length) terrainContainer.addChild(group);
+          if (groupObject.children.length) objectContainer.addChild(groupObject);
+          if (group2.children.length) terrainContainer2.addChild(group2);
         }
       }
+
+      return {
+        opacityForFootprint: function (i) {
+          return groundNamesByIndex[i].indexOf("plain") === 0 ? 1.0 : 0.0;
+        }
+      };
 
     }
 
@@ -400,7 +431,7 @@ module.exports = {
     var tileSize = 24;
     var tilePIXI24 = tilePIXI(24);
 
-    var groundTilesTexture = PIXI.Texture.fromImage("/assets/img/tilesets/plowed_soil_24.png");
+    var groundTilesTexture = loadTexture("plowed_soil_24.png");
     var groundTexture = tilePIXI24(groundTilesTexture, 0, 5);
     var topLeftCornerTexture = tilePIXI24(groundTilesTexture, 0, 2);
     var bottomLeftCornerTexture = tilePIXI24(groundTilesTexture, 0, 4);
@@ -410,11 +441,11 @@ module.exports = {
     var bottomBorderTexture = tilePIXI24(groundTilesTexture, 1, 4);
     var leftBorderTexture = tilePIXI24(groundTilesTexture, 0, 3);
     var rightBorderTexture = tilePIXI24(groundTilesTexture, 2, 3);
-    var grassTilesTexture = PIXI.Texture.fromImage("/assets/img/tilesets/tallgrass_24.png");
+    var grassTilesTexture = loadTexture("tallgrass_24.png");
     var grassTexture = tilePIXI24(grassTilesTexture, 0, 5);
-    var zeldaTree1Texture = PIXI.Texture.fromImage("/assets/img/zelda/tree.png");
-    var farmingTexture = PIXI.Texture.fromImage("/assets/img/tilesets/farming_fishing_24.png");
-    var stuffTexture = PIXI.Texture.fromImage("/assets/img/tilesets/stuff.png");
+    var zeldaTree1Texture = loadTexture("tree.png");
+    var farmingTexture = loadTexture("farming_fishing_24.png");
+    var stuffTexture = loadTexture("stuff.png");
     var possibleWallObjectsTexture = [
       tilePIXI24(farmingTexture, 1, 1),
       tilePIXI24(farmingTexture, 5, 1),
@@ -424,27 +455,27 @@ module.exports = {
       tilePIXI24(stuffTexture, 0, 3)
     ];
 
-    function generate (game, container) {
+    function generate (game, terrainContainer) {
       var size = game.board.size;
       var topLeft = new PIXI.Sprite(topLeftCornerTexture);
       topLeft.x = -borderSize;
       topLeft.y = -borderSize;
-      container.addChild(topLeft);
+      terrainContainer.addChild(topLeft);
 
       var bottomLeft = new PIXI.Sprite(bottomLeftCornerTexture);
       bottomLeft.x = -borderSize;
       bottomLeft.y = borderSize * size;
-      container.addChild(bottomLeft);
+      terrainContainer.addChild(bottomLeft);
 
       var topRight = new PIXI.Sprite(topRightCornerTexture);
       topRight.x = borderSize * size;
       topRight.y = -borderSize;
-      container.addChild(topRight);
+      terrainContainer.addChild(topRight);
 
       var bottomRight = new PIXI.Sprite(bottomRightCornerTexture);
       bottomRight.x = borderSize * size;
       bottomRight.y = borderSize * size;
-      container.addChild(bottomRight);
+      terrainContainer.addChild(bottomRight);
 
       for (var i=0; i<size; ++i) {
         var left = new PIXI.Sprite(leftBorderTexture);
@@ -454,10 +485,10 @@ module.exports = {
         top.y = left.x = -borderSize;
         bottom.y = right.x = borderSize * size;
         top.x = bottom.x = left.y = right.y = i * borderSize;
-        container.addChild(top);
-        container.addChild(right);
-        container.addChild(bottom);
-        container.addChild(left);
+        terrainContainer.addChild(top);
+        terrainContainer.addChild(right);
+        terrainContainer.addChild(bottom);
+        terrainContainer.addChild(left);
       }
 
       // Map
@@ -480,7 +511,7 @@ module.exports = {
           }
           group.addChild(wall);
         }
-        container.addChild(group);
+        terrainContainer.addChild(group);
       }, this);
 
     }

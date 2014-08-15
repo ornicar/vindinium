@@ -1,10 +1,15 @@
 
-var bloodySoilPersistence = 150;
-var bloodWhenTakeMine = 0.3;
+var bloodWhenTakeMine = 0.4;
 var bloodWhenInjured = 0.7;
-var bloodWhenKilled = 1.4;
+var bloodWhenKilled = 2.0;
 
-var footprintPersistence = 40;
+// In move number
+var bloodUnderFootPersistence = 2;
+
+// In turn number
+var bloodySoilPersistence = 400;
+var footprintPersistence = 80;
+var footprintBloodPersistence = 60;
 
 function GameModel (state, previousState) {
   this.id = state.id;
@@ -64,9 +69,17 @@ function orientationForDelta (dx, dy) {
 GameModel.prototype = {
   initialMeta: function () {
     var game = this;
+    var nbMines = 0;
+    this.forEachTile(function (tile) {
+      if (tile[0] === "$") {
+        ++ nbMines;
+      }
+    });
     return {
       bloodyGroundFactor: genEmptyArray(this.tilesArray.length, 0),
-      footPrintFactor: genEmptyArray(this.tilesArray.length, 0),
+      footprintFactor: genEmptyArray(this.tilesArray.length, { orientation: 0, foot: 0, blood: 0 }),
+      nbMines: nbMines,
+      mines: genEmptyArray(nbMines, { owner: 0, domination: 0, adjacentOpponents: [] }),
       heroes: [1,2,3,4].map(function (id, i) {
         return {
           myturn: false,
@@ -75,11 +88,15 @@ GameModel.prototype = {
           orientation: [0],
           move: null,
           attack: null,
+          attackOrientations: [],
           attacked: null,
           kill: null,
           killed: null,
           takeMine: null,
-          drink: null
+          drink: null,
+          winning: false,
+          bloodUnderFoot: 0,
+          nbMines: 0
         };
       })
     };
@@ -88,9 +105,14 @@ GameModel.prototype = {
   aggregateMeta: function (previous) {
     if (previous.turn !== this.turn-1) throw new Error("aggregateMeta: game does not follow! "+previous.turn+"->"+this.turn);
 
+    var winner = this.getWinner();
+
     var meta = cloneObject(previous.meta);
     meta.heroes = previous.meta.heroes.map(cloneObject);
     meta.heroes.forEach(function (hero, i) {
+      if (this.turn % 4 === 0) // We only refresh at the end of a turn to avoid blink effect
+        hero.winning = winner === i+1;
+      hero.nbMines = 0;
       hero.myturn = false;
       hero.move = null;
       hero.takeMine = null;
@@ -100,8 +122,39 @@ GameModel.prototype = {
       hero.killed = null;
       hero.attacked = null;
       hero.orientation = [hero.orientation[hero.orientation.length-1]];
+      hero.attackOrientations = [];
       hero.from = previous.heroes[i];
       hero.to = this.heroes[i];
+    }, this);
+
+    meta.mines = [].concat(meta.mines);
+    var mineIndex = 0;
+    var heroesIndexes = this.heroes.map(function (hero) {
+      return this.indexForPosition(hero.pos.x, hero.pos.y);
+    }, this);
+    this.forEachTile(function (tile, tileIndex) {
+      if (tile[0] === "$") {
+        var owner = tile[1]==="-" ? 0 : parseInt(tile[1], 10);
+        if (owner) meta.heroes[owner-1].nbMines ++;
+        var pos = this.indexToPosition(tileIndex);
+        var neighbors = this.neighborsIndexes(pos.x, pos.y);
+        var heroes = [];
+        for (var i=0; i<neighbors.length; ++i) {
+          var idx = 1+heroesIndexes.indexOf(neighbors[i]);
+          if (idx) {
+            heroes.push(idx);
+          }
+        }
+        meta.mines[mineIndex++] = {
+          owner: owner,
+          adjacentOpponents: heroes.filter(function (heroId) {
+            return heroId !== owner;
+          })
+        };
+      }
+    }, this);
+    meta.mines.forEach(function (mineMeta) {
+      mineMeta.domination = !mineMeta.owner ? 0 : meta.heroes[mineMeta.owner-1].nbMines / meta.nbMines;
     }, this);
 
     // Compute last hero meta
@@ -160,20 +213,36 @@ GameModel.prototype = {
     heroMeta.attack = opponentsAttacked.length && opponentsAttacked || null;
     heroMeta.kill = opponentsKilled.length && opponentsKilled || null;
 
+
+    var attackOrientations = [];
+
+    var motionOrientation = orientationForDelta(dx, dy);
     var orientation = [];
-    orientation.push(orientationForDelta(dx, dy));
+    var or;
+    orientation.push(motionOrientation);
     if (heroMeta.attack) {
-      p = previous.heroes[opponentsAttacked[0]-1].pos;
-      orientation.push(orientationForDelta(p.x - previousHero.pos.x, p.y - previousHero.pos.y));
+      opponentsAttacked.forEach(function (o) {
+        p = previous.heroes[o-1].pos;
+        or = orientationForDelta(p.x - hero.pos.x, p.y - hero.pos.y);
+        attackOrientations.push(or);
+        orientation.push(or);
+      });
+    }
+    if (heroMeta.takeMine) {
+      p = previous.indexToPosition(takenMines[0]);
+      or = orientationForDelta(p.x - hero.pos.x, p.y - hero.pos.y);
+      attackOrientations.push(or);
+      orientation.push(or);
     }
     if (heroMeta.drink) {
       p = previous.indexToPosition(touchingTaverns[0]);
-      orientation.push(orientationForDelta(p.x - previousHero.pos.x, p.y - previousHero.pos.y));
+      orientation.push(orientationForDelta(p.x - hero.pos.x, p.y - hero.pos.y));
     }
     orientation = orientation.filter(function (o) { return o !== null; });
     if (orientation.length === 0) orientation.push(previousHeroMeta.orientation[previousHeroMeta.orientation.length-1]);
     
     heroMeta.orientation = orientation;
+    heroMeta.attackOrientations = attackOrientations;
 
     // Record metas
 
@@ -183,6 +252,7 @@ GameModel.prototype = {
     });
     opponentsKilled.forEach(function (id) {
       meta.heroes[id-1].killed = hero.id;
+      meta.heroes[id-1].bloodUnderFoot = 0;
     });
 
 
@@ -201,10 +271,23 @@ GameModel.prototype = {
       meta.bloodyGroundFactor[previousPositionIndex] += bloodWhenTakeMine;
     }
 
-    meta.footPrintFactor = meta.footPrintFactor.map(function (v) {
-      return Math.max(0, v - 1 / footprintPersistence);
+    meta.footprintFactor = meta.footprintFactor.map(function (v) {
+      var foot = Math.max(0, v.foot - 1 / footprintPersistence);
+      var blood = Math.max(0, v.blood - 1 / footprintBloodPersistence);
+      return {
+        orientation: v.orientation,
+        foot: foot,
+        blood: blood
+      };
     });
-    meta.footPrintFactor[previousPositionIndex] = 1;
+    if (heroMeta.move) {
+      heroMeta.bloodUnderFoot = Math.max(meta.bloodyGroundFactor[previousPositionIndex], heroMeta.bloodUnderFoot - 1 / bloodUnderFootPersistence);
+      meta.footprintFactor[previousPositionIndex] = {
+        orientation: motionOrientation,
+        foot: 1,
+        blood: heroMeta.bloodUnderFoot
+      };
+    }
 
     return meta;
   },

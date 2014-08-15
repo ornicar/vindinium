@@ -13,7 +13,7 @@ var GoldScoreBar = React.createClass({
     }, 0);
     return <div className="gold-score-bar">
       <div className="gold-score-bar-coin">
-        <img src="/assets/img/coin.png" className="coin" />
+        <img src="/assets/img/ui/coin.png" className="coin" />
       </div>
       <div className="bars" style={{ height: (this.props.height - 30 + 14)+"px" }}>
       {

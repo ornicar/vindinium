@@ -2,11 +2,19 @@ var PIXI = require("pixi.js");
 var smoothstep = require("smoothstep");
 var tilePIXI = require("./tilePIXI");
 var MineSparkShader = require("./shaders/MineSpark");
+var loadTexture = require("./loadTexture");
 
-var goblinTexture = PIXI.Texture.fromImage("/assets/img/goblin.png");
-var minesTextureTile = PIXI.Texture.fromImage("/assets/img/mines.png");
+var goblinTextureTile = loadTexture("goblins.png");
+var minesTextureTile = loadTexture("mines.png");
 
 var tilePIXI32 = tilePIXI(32);
+var goblinTextures = [
+  tilePIXI32(goblinTextureTile, 0, 0),
+  tilePIXI32(goblinTextureTile, 0, 1),
+  tilePIXI32(goblinTextureTile, 0, 2),
+  tilePIXI32(goblinTextureTile, 0, 3),
+  tilePIXI32(goblinTextureTile, 0, 4)
+];
 var mineTextures = [
   tilePIXI32(minesTextureTile, 0, 0),
   tilePIXI32(minesTextureTile, 0, 3),
@@ -29,40 +37,46 @@ var colorDistances = [
 ];
 
 function goldColorForOwner (owner) {
-  if (owner === "-") return [1,1,1];
-  return goldColors[parseInt(owner, 10)-1];
+  if (owner === 0) return [1,1,1];
+  return goldColors[owner-1];
 }
 function colorDistanceForOwner (owner) {
-  if (owner === "-") return 0;
-  return colorDistances[parseInt(owner, 10)-1];
+  if (owner === 0) return 0;
+  return colorDistances[owner-1];
 }
 
 function setSpriteOwner (sprite, owner) {
   sprite.position.x = -4;
-  if (owner === "-") {
+  if (owner === 0) {
     sprite.setTexture(mineTextures[0]);
     sprite.position.y = 0;
   }
   else {
-    sprite.setTexture(mineTextures[parseInt(owner, 10)]);
+    sprite.setTexture(mineTextures[owner]);
     sprite.position.y = -8;
   }
 }
+function setGoblinOwner (sprite, owner) {
+  sprite.setTexture(goblinTextures[owner]);
+}
 
-function Mine (owner) {
+function Mine (meta) {
   PIXI.DisplayObjectContainer.call(this);
   this.previousSprite = new PIXI.Sprite(mineTextures[0]);
   this.currentSprite = new PIXI.Sprite(mineTextures[0]);
   this.mineSparkShader = new MineSparkShader();
   this.currentSprite.filters = [ this.mineSparkShader ];
-  this.goblin = new PIXI.Sprite(goblinTexture);
-  this.goblin.position.x = -4;
-  this.goblin.position.y = -8;
-  setSpriteOwner(this.currentSprite, owner);
+  this.goblinFront = new PIXI.Sprite(goblinTextures[0]);
+  this.goblinFront.position.x = -4;
+  this.goblinFront.position.y = -14;
+  this.goblinBack = new PIXI.Sprite(goblinTextures[0]);
+  this.goblinBack.position.x = -4;
+  this.goblinBack.position.y = -20;
+  this.addChild(this.goblinBack);
   this.addChild(this.previousSprite);
   this.addChild(this.currentSprite);
-  this.addChild(this.goblin);
-  this.updateOwner({ owner: owner, domination: 0 });
+  this.addChild(this.goblinFront);
+  this.updateOwner(meta);
   this.startTimeMineSpark = Date.now() - 1000 * Math.PI * 2 * Math.random();
 }
 Mine.prototype = Object.create(PIXI.DisplayObjectContainer.prototype);
@@ -73,24 +87,29 @@ Mine.prototype.updateOwner = function (meta, interpolationTime) {
   // TODO : improve that with meta ?
   this.updatedTime = Date.now();
   this.interpolationTime = interpolationTime;
-  this.mineSparkShader.brightness = owner === "-" ? 0.0 : 0.5 + 3.0 * meta.domination;
+  this.mineSparkShader.brightness = owner === 0 ? 0.0 : 0.5 + 3.0 * meta.domination;
 
-  this.hasChanged = owner !== this.currentOwner;
-  if (this.hasChanged) {
-    this.hasChanged = true;
-    this.previousOwner = this.currentOwner;
+  var goblinVisible = meta.adjacentOpponents.length>0;
+  this.ownerChanged = owner !== this.currentOwner;
+  this.goblinVisibleChanged = goblinVisible !== this.goblinVisible;
+  if (this.ownerChanged || this.goblinVisibleChanged) {
+    this.goblinVisible = goblinVisible;
+    this.previousOwner = this.currentOwner||0;
     this.currentOwner = owner;
 
     this.mineSparkShader.goldcolor = goldColorForOwner(owner);
     this.mineSparkShader.colordistance = colorDistanceForOwner(owner);
 
+    setGoblinOwner(this.goblinBack, this.previousOwner);
+    setGoblinOwner(this.goblinFront, this.previousOwner);
     setSpriteOwner(this.currentSprite, this.currentOwner);
     setSpriteOwner(this.previousSprite, this.previousOwner);
     if (!this.interpolationTime) {
       this.previousSprite.alpha = 0;
       this.currentSprite.alpha = 1;
     }
-    this.goblin.alpha = (this.currentOwner === "-" ? 1 : 0);
+    this.goblinFront.alpha = goblinVisible ? 1 : 0;
+    this.goblinBack.alpha = 1 - this.goblinFront.alpha;
   }
   else {
     this.previousSprite.alpha = 0;
@@ -101,7 +120,7 @@ Mine.prototype.updateOwner = function (meta, interpolationTime) {
 Mine.prototype.render = function () {
   this.mineSparkShader.time = (Date.now()-this.startTimeMineSpark) / 1000;
 
-  if (this.hasChanged && this.previousOwner && this.interpolationTime) {
+  if (this.ownerChanged && this.previousOwner && this.interpolationTime) {
     var p = smoothstep(0, this.interpolationTime, Date.now()-this.updatedTime);
     this.previousSprite.alpha = 1-p;
     this.currentSprite.alpha = p;
