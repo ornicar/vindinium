@@ -136,7 +136,7 @@ function runGame (mount, gameId) {
 function runTV (mount, ai) {
 
   function render (game) {
-    var refreshRate = 0; // FIXME we need to bufferize a bit and figure out about how to make a dynamic refreshRate.
+    var refreshRate = 80;
     React.renderComponent(Game({
       game: game,
       refreshRate: refreshRate,
