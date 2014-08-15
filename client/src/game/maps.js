@@ -399,7 +399,7 @@ module.exports = {
             if (spawnPos.x === x && spawnPos.y === y) {
               sprite = new PIXI.Sprite(rezMarks[h]);
               sprite.position.x = -4;
-              sprite.position.y = 0;
+              sprite.position.y = -8;
               sprite.alpha = 0.8;
               group2.addChild(sprite);
             }
