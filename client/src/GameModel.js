@@ -79,7 +79,7 @@ GameModel.prototype = {
       bloodyGroundFactor: genEmptyArray(this.tilesArray.length, 0),
       footprintFactor: genEmptyArray(this.tilesArray.length, { orientation: 0, foot: 0, blood: 0 }),
       nbMines: nbMines,
-      mines: genEmptyArray(nbMines, 0),
+      mines: genEmptyArray(nbMines, { owner: 0, domination: 0, adjacentOpponents: [] }),
       heroes: [1,2,3,4].map(function (id, i) {
         return {
           myturn: false,
@@ -129,12 +129,32 @@ GameModel.prototype = {
 
     meta.mines = [].concat(meta.mines);
     var mineIndex = 0;
-    this.forEachTile(function (tile) {
+    var heroesIndexes = this.heroes.map(function (hero) {
+      return this.indexForPosition(hero.pos.x, hero.pos.y);
+    }, this);
+    this.forEachTile(function (tile, tileIndex) {
       if (tile[0] === "$") {
         var owner = tile[1]==="-" ? 0 : parseInt(tile[1], 10);
         if (owner) meta.heroes[owner-1].nbMines ++;
-        meta.mines[mineIndex++] = owner;
+        var pos = this.indexToPosition(tileIndex);
+        var neighbors = this.neighborsIndexes(pos.x, pos.y);
+        var heroes = [];
+        for (var i=0; i<neighbors.length; ++i) {
+          var idx = 1+heroesIndexes.indexOf(neighbors[i]);
+          if (idx) {
+            heroes.push(idx);
+          }
+        }
+        meta.mines[mineIndex++] = {
+          owner: owner,
+          adjacentOpponents: heroes.filter(function (heroId) {
+            return heroId !== owner;
+          })
+        };
       }
+    }, this);
+    meta.mines.forEach(function (mineMeta) {
+      mineMeta.domination = !mineMeta.owner ? 0 : meta.heroes[mineMeta.owner-1].nbMines / meta.nbMines;
     }, this);
 
     // Compute last hero meta

@@ -132,11 +132,8 @@ GameBoardRender.prototype = {
     this.updateBloodySoil();
     this.updateFootprints();
 
-    this.game.meta.mines.forEach(function (mineOwner, i) {
-      this.mines[i].updateOwner({
-        owner: mineOwner || "-",
-        domination: !mineOwner ? 0 : this.game.meta.heroes[mineOwner-1].nbMines / this.game.meta.nbMines
-      }, interpolationTime, consecutiveTurn);
+    this.game.meta.mines.forEach(function (mineMeta, i) {
+      this.mines[i].updateOwner(mineMeta, interpolationTime);
     }, this);
   },
 
@@ -240,6 +237,7 @@ GameBoardRender.prototype = {
   initObjects: function () {
     this.mines = [];
     this.taverns = [];
+    var mineIndex = 0;
     this.game.forEachTile(function (tile, i, x, y) {
       var obj;
       
@@ -249,7 +247,8 @@ GameBoardRender.prototype = {
         this.taverns.push(obj);
       }
       else if (tile[0] === "$") {
-        obj = new Mine(tile[1]);
+        var mineMeta = this.game.meta.mines[mineIndex++];
+        obj = new Mine(mineMeta);
         this.mines.push(obj);
       }
       if (obj) {
