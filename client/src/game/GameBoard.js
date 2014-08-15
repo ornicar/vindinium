@@ -2,7 +2,7 @@ var PIXI = require("pixi.js");
 var requestAnimationFrame = require("raf");
 
 var Hero = require("./Hero");
-var Ghost = require("./Ghost");
+var DeadBody = require("./DeadBody");
 var Mine = require("./Mine");
 var Tavern = require("./Tavern");
 var maps = require("./maps");
@@ -118,7 +118,7 @@ GameBoardRender.prototype = {
       var hero = this.heroes[i];
       hero.updateHero(meta, interpolationTime, consecutiveTurn);
       if (meta.killed) {
-        this.createGhostForHero(hero, interpolationTime);
+        this.createDeadBodyForHero(hero, interpolationTime);
       }
       if (this.debug) console.log(hero.logMeta(meta));
     }, this);
@@ -134,21 +134,23 @@ GameBoardRender.prototype = {
     }, this);
   },
 
-  createGhostForHero: function (hero, interpolationTime) {
-    var sprite = new Ghost(hero, 5000 + 4 * interpolationTime);
+  createDeadBodyForHero: function (hero, interpolationTime) {
+    var sprite = new DeadBody(hero, 5000 + 4 * interpolationTime);
     sprite.position.x = hero.x;
     sprite.position.y = hero.y;
     this.ghostsContainer.addChild(sprite);
   },
 
-  triggerBloodParticle: function (attacker, target, interpolationTime) {
+  triggerBloodParticle: function (attacker, target, killed, interpolationTime) {
     var positionAttacker = this.heroes[attacker-1].position.clone();
     var positionTarget = this.heroes[target-1].position.clone();
     positionAttacker.x += this.tileSize / 2;
     positionAttacker.y += this.tileSize / 2;
     positionTarget.x += this.tileSize / 2;
     positionTarget.y += this.tileSize / 2;
-    this.bloodParticlesContainer.addChild(new BloodParticles(positionAttacker, positionTarget, 500 + interpolationTime));
+    var duration = (killed ? 1000 : 500) + interpolationTime;
+    var nbParticles = killed ? 32 : 16;
+    this.bloodParticlesContainer.addChild(new BloodParticles(positionAttacker, positionTarget, duration, nbParticles));
   },
 
 

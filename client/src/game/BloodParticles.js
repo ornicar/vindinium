@@ -37,7 +37,7 @@ BloodParticle.prototype.render = function () {
     this.destroy();
 };
 
-function BloodParticles(fromPos, toPos, duration) {
+function BloodParticles(fromPos, toPos, duration, nbParticles) {
   PIXI.DisplayObjectContainer.call(this);
   this.startTime = Date.now();
 
@@ -47,12 +47,12 @@ function BloodParticles(fromPos, toPos, duration) {
   var delta = new PIXI.Point(toPos.x-fromPos.x, toPos.y-fromPos.y);
   var angle = Math.atan2(delta.y, delta.x);
   var dist = Math.sqrt(delta.x*delta.x + delta.y*delta.y);
-  for (var i=0; i<16; ++i) {
-    var a = angle + 0.8 * Math.PI * (Math.random()-0.5);
-    var velocity = dist * (0.6 + 0.5 * Math.random());
+  for (var i=0; i<nbParticles; ++i) {
+    var a = angle + 1.2 * Math.PI * (Math.random()-0.5);
+    var velocity = dist * (0.5 + 0.6 * Math.random());
     var dur = duration * (0.6 + 0.8 * Math.random());
-    var x = 8 * (Math.random()-0.5) + Math.cos(a) * velocity;
-    var y = 8 * (Math.random()-0.5) + Math.sin(a) * velocity;
+    var x = 12 * (Math.random()-0.5) + Math.cos(a) * velocity;
+    var y = 12 * (Math.random()-0.5) + Math.sin(a) * velocity;
     this.addChild(new BloodParticle(new PIXI.Point(0.0, 0.0), new PIXI.Point(x, y), dur));
   }
 }

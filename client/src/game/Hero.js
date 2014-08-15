@@ -139,7 +139,7 @@ Hero.prototype.updateHero = function (meta, interpolationTime, consecutiveTurn) 
 
   if (meta.attack) {
     meta.attack.forEach(function (p) {
-      this.triggerBloodParticle(this.id, p, interpolationTime);
+      this.triggerBloodParticle(this.id, p, meta.kill, interpolationTime);
     }, this);
   }
 };

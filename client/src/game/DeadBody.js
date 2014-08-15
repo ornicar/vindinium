@@ -1,34 +1,34 @@
 var PIXI = require("pixi.js");
 var smoothstep = require("smoothstep");
-var GhostEffect = require("./shaders/GhostEffect");
+var Dead = require("./shaders/Dead");
 var Hero = require("./Hero");
 
-function Ghost (hero, duration) {
+function DeadBody (hero, duration) {
   PIXI.DisplayObjectContainer.call(this);
   this.dead = false;
   this.phantomSprite = new PIXI.Sprite(Hero.blinkTextures[hero.meta.orientation || 0]);
   this.phantomSprite.position.x = -4;
   this.phantomSprite.position.y = -8;
-  this.effect = new GhostEffect();
+  this.effect = new Dead();
   this.phantomSprite.filters = [ this.effect ];
   this.startTime = Date.now();
   this.duration = duration;
   this.addChild(this.phantomSprite);
 }
 
-Ghost.prototype = Object.create(PIXI.DisplayObjectContainer.prototype);
-Ghost.prototype.constructor = Ghost;
+DeadBody.prototype = Object.create(PIXI.DisplayObjectContainer.prototype);
+DeadBody.prototype.constructor = DeadBody;
 
-Ghost.prototype.destroy = function () {
+DeadBody.prototype.destroy = function () {
   this.parent.removeChild(this);
 };
 
-Ghost.prototype.render = function () {
+DeadBody.prototype.render = function () {
   var progress = Math.min((Date.now() - this.startTime) / this.duration, 1);
   this.effect.progress = progress;
-  this.alpha = 0.7 * smoothstep(1.0, 0.6, progress);
+  this.alpha = 0.7 * smoothstep(1.0, 0.5, progress);
   if (progress === 1)
     this.destroy();
 };
 
-module.exports = Ghost;
+module.exports = DeadBody;
