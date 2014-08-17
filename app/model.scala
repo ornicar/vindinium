@@ -7,9 +7,10 @@ case class Pos(x: Int, y: Int) {
   def east = copy(y = y + 1)
   def west = copy(y = y - 1)
 
-  def neighbors = Set(north, south, east, west)
+  def neighbors = List(north, east, south, west)
+  def neighborSet = neighbors.toSet
 
-  val closeTo = neighbors contains _
+  val closeTo = neighborSet contains _
 
   def to(dir: Dir) = dir match {
     case Dir.North => north

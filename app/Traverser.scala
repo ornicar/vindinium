@@ -17,7 +17,7 @@ object Traverser {
       }
     }
 
-    def walkableFrom(pos: Pos) = pos.neighbors filter { p =>
+    def walkableFrom(pos: Pos) = pos.neighborSet filter { p =>
       (board get p) == Some(Tile.Air)
     }
 
