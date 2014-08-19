@@ -9,7 +9,8 @@ case class Hero(
     pos: Pos,
     life: Int,
     gold: Int,
-    timedOut: Boolean) {
+    timedOut: Boolean,
+    lastRespawn: Int = 0) {
 
   def moveTo(p: Pos) = copy(pos = p)
 
@@ -17,7 +18,7 @@ case class Hero(
     if (gold >= -Hero.beerGold) withGold(Hero.beerGold).withLife(Hero.beerLife)
     else this
 
-  def attack(enemy: Hero) = withLife(Hero.attackLife) -> enemy.withLife(Hero.defendLife)
+  def defend = withLife(Hero.defendLife)
 
   def fightMine = withLife(Hero.mineLife)
 
@@ -30,7 +31,7 @@ case class Hero(
     if (h.isDead) h.withLife(1) else h
   }
 
-  def reSpawn(p: Pos) = copy(life = Hero.maxLife, pos = p)
+  def reSpawn(p: Pos, turn: Int) = copy(life = Hero.maxLife, pos = p, lastRespawn = turn)
 
   def setTimedOut = copy(timedOut = true)
   def crashed = timedOut
@@ -61,6 +62,5 @@ object Hero {
   val beerGold = -2
   val dayLife = -1
   val mineLife = -20
-  val attackLife = -0
   val defendLife = -20
 }
