@@ -40,6 +40,14 @@ server {
 }
 ```
 
+### Developing on the Client Side stack
+
+while the Server runs with a `sbt run`, you can go in another terminal in the `client/` folder and:
+
+- Install once the dependencies with `npm install` (This requires nodejs to be installed)
+- Be sure to have `grunt` installed with `npm install -g grunt-cli`
+- Use `grunt` to compile client sources and watch for client source changes.
+
 ### Credits
 
 Kudos to:

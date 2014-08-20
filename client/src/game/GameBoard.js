@@ -17,15 +17,28 @@ function sortSpritesByPosition (a, b) {
   return a.position.y - b.position.y + 0.001 * (a.position.x - b.position.x);
 }
 
-function GameBoardRender (container, mapName, debug) {
+function GameBoardRender (container, mapName, debug, quality) {
   this.container = container;
   this.map = maps[mapName||"lowlands"]();
   this.tileSize = this.map.tileSize;
   this.borderSize = this.map.borderSize;
-  this.debug = debug;
+  this.debug = debug || false;
+  this.setQuality(quality || 3);
 }
 
+PIXI.StripShader.prototype.destroy = function() { // FIXME workaround for a bug in current Pixi.js 1.6.1
+    this.gl.deleteProgram( this.program );
+    this.uniforms = null;
+    this.gl = null;
+    this.attribute = null;
+};
+
+
 GameBoardRender.prototype = {
+  setQuality: function (quality) {
+    this.quality = quality;
+  },
+
   setGame: function (game, interpolationTime) {
     if (!this.initialized) {
       this.initGame(game);
@@ -51,14 +64,9 @@ GameBoardRender.prototype = {
 
   destroy: function () {
     this.stopRenderLoop();
+    if (!this.renderer.primitiveBatch) this.renderer.primitiveBatch = { destroy: function() {} };// FIXME workaround for a bug in current Pixi.js 1.6.1
+    this.renderer.destroy();
     this.container.removeChild(this.renderer.view);
-    try {
-      // FIXME This seems to breaks... bug in Pixi.js?
-      this.renderer.destroy();
-    }
-    catch (e) {
-      console.error(e);
-    }
   },
 
   getHeight: function () {
@@ -80,6 +88,7 @@ GameBoardRender.prototype = {
     var self = this;
     var stopped = this._stopped = (this._stopped || 0)+1;
     (function loop () {
+      if (self.quality < 2) return;
       if (self._stopped !== stopped) return;
       requestAnimationFrame(loop);
       self.render();
@@ -108,10 +117,12 @@ GameBoardRender.prototype = {
   },
 
   updateGame: function (game, interpolationTime) {
+    if (this.quality < 2 && interpolationTime) interpolationTime = 1;
+
     var consecutiveTurn = this.game && game.turn === this.game.turn+1;
     if (!consecutiveTurn) {
-      this.bloodParticlesContainer.children.forEach(function (ghost) {
-        ghost.destroy();
+      this.bloodParticlesContainer.children.forEach(function (particle) {
+        particle.destroy();
       });
       this.ghostsContainer.children.forEach(function (ghost) {
         ghost.destroy();
@@ -135,9 +146,12 @@ GameBoardRender.prototype = {
     this.game.meta.mines.forEach(function (mineMeta, i) {
       this.mines[i].updateOwner(mineMeta, interpolationTime);
     }, this);
+
+    this.render(); // Ensure a render at least once
   },
 
   createDeadBodyForHero: function (hero, interpolationTime) {
+    if (this.quality < 3) return;
     var sprite = new DeadBody(hero, 5000 + 4 * interpolationTime);
     sprite.position.x = hero.x;
     sprite.position.y = hero.y;
@@ -145,6 +159,7 @@ GameBoardRender.prototype = {
   },
 
   triggerBloodParticle: function (attacker, target, killed, interpolationTime) {
+    if (this.quality < 3) return;
     var positionAttacker = this.heroes[attacker-1].position.clone();
     var positionTarget = this.heroes[target-1].position.clone();
     var dx = 8;
@@ -154,7 +169,7 @@ GameBoardRender.prototype = {
     positionTarget.x += dx;
     positionTarget.y += dy;
     var duration = (killed ? 1000 : 500) + interpolationTime;
-    var nbParticles = killed ? 32 : 16;
+    var nbParticles = killed ? 14 : 5;
     this.bloodParticlesContainer.addChild(new BloodParticles(positionAttacker, positionTarget, duration, nbParticles));
   },
 
@@ -248,7 +263,7 @@ GameBoardRender.prototype = {
       }
       else if (tile[0] === "$") {
         var mineMeta = this.game.meta.mines[mineIndex++];
-        obj = new Mine(mineMeta);
+        obj = new Mine(mineMeta, this.quality > 1);
         this.mines.push(obj);
       }
       if (obj) {

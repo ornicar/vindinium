@@ -19,6 +19,7 @@ function aggregateGame (previousGame, game) {
 
 function GameStream (id) {
   return EventSourceObservable("/events/"+id)
+    .distinct(function (game) { return game.turn; }) // Workaround because it still happens that the server returns 2 times the same game state in a stream
     .map(bugfixServerPosition)
     .scan(null, aggregateGame);
 }

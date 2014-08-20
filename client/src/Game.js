@@ -23,12 +23,14 @@ var Game = React.createClass({
     keyboardControls: React.PropTypes.bool,
     live: React.PropTypes.bool,
     map: React.PropTypes.string,
-    debug: React.PropTypes.bool
+    debug: React.PropTypes.bool,
+    quality: React.PropTypes.oneOf([1,2,3])
   },
   getDefaultProps: function () {
     return {
       map: "lowlands",
       debug: false,
+      quality: 3,
       withControls: true,
       keyboardControls: true
     };
@@ -37,7 +39,7 @@ var Game = React.createClass({
     if (this.boardRender) {
       this.boardRender.destroy();
     }
-    this.boardRender = new GameBoardRender(this.refs.boardBox.getDOMNode(), this.props.map, this.props.debug);
+    this.boardRender = new GameBoardRender(this.refs.boardBox.getDOMNode(), this.props.map, this.props.debug, this.props.quality);
   },
   componentDidMount: function () {
     this.resetGameBoard();
@@ -48,6 +50,7 @@ var Game = React.createClass({
   },
   componentDidUpdate: function (prevProps) {
     if (prevProps.game.id !== this.props.game.id) {
+      if (prevProps.game) prevProps.game.destroy();
       this.resetGameBoard();
       this.boardRender.setGame(this.props.game);
     }
@@ -58,6 +61,9 @@ var Game = React.createClass({
         0 : this.props.refreshRate;
 
       this.boardRender.setGame(this.props.game, interpolationTime);
+    }
+    if (prevProps.quality !== this.props.quality) {
+      this.boardRender.setQuality(this.props.quality);
     }
   },
   render: function () {

@@ -10,7 +10,10 @@ var HeroStats = React.createClass({
   render: function(){
     var hero = this.props.hero;
     var first = this.props.game.getWinner() === hero.id;
-    return <div className={"hero-stats "+(first ? "first": "")}>
+    var cls = ["hero-stats"];
+    if (first) cls.push(first);
+    if (hero.crashed) cls.push("crashed");
+    return <div className={cls.join(" ")}>
       <img className="cross" src="/assets/img/ui/cross.png" />
       <img className="player" src={"/assets/img/ui/player"+hero.id+".png"} />
       <img className="award" src="/assets/img/ui/award.png" />
