@@ -11,7 +11,7 @@ var HeroStats = React.createClass({
     var hero = this.props.hero;
     var first = this.props.game.getWinner() === hero.id;
     var cls = ["hero-stats"];
-    if (first) cls.push(first);
+    if (first) cls.push("first");
     if (hero.crashed) cls.push("crashed");
     return <div className={cls.join(" ")}>
       <img className="cross" src="/assets/img/ui/cross.png" />
