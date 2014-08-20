@@ -25,6 +25,14 @@ function GameBoardRender (container, mapName, debug) {
   this.debug = debug;
 }
 
+PIXI.StripShader.prototype.destroy = function() { // FIXME workaround for a bug in current Pixi.js 1.6.1
+    this.gl.deleteProgram( this.program );
+    this.uniforms = null;
+    this.gl = null;
+    this.attribute = null;
+};
+
+
 GameBoardRender.prototype = {
   setGame: function (game, interpolationTime) {
     if (!this.initialized) {
@@ -51,14 +59,9 @@ GameBoardRender.prototype = {
 
   destroy: function () {
     this.stopRenderLoop();
+    if (!this.renderer.primitiveBatch) this.renderer.primitiveBatch = { destroy: function() {} };// FIXME workaround for a bug in current Pixi.js 1.6.1
+    this.renderer.destroy();
     this.container.removeChild(this.renderer.view);
-    try {
-      // FIXME This seems to breaks... bug in Pixi.js?
-      this.renderer.destroy();
-    }
-    catch (e) {
-      console.error(e);
-    }
   },
 
   getHeight: function () {
