@@ -50,6 +50,7 @@ var Game = React.createClass({
   },
   componentDidUpdate: function (prevProps) {
     if (prevProps.game.id !== this.props.game.id) {
+      if (prevProps.game) prevProps.game.destroy();
       this.resetGameBoard();
       this.boardRender.setGame(this.props.game);
     }
