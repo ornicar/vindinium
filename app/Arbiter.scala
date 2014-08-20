@@ -59,7 +59,7 @@ object Arbiter {
   private def fights(game: Game, id: Int): Game =
     (game.hero(id).pos.neighbors map game.hero).flatten.foldLeft(game) {
       // stop the fighting if the attacking hero has been respawned
-      case (game, enemy) if game.hero(id).lastRespawn != game.turn => attack(id, game, enemy)
+      case (game, enemy) if game.hero(id).lastRespawn != Some(game.turn) => attack(id, game, enemy)
       case (game, _) => game
     }
 

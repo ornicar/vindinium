@@ -10,7 +10,7 @@ case class Hero(
     life: Int,
     gold: Int,
     timedOut: Boolean,
-    lastRespawn: Int = 0) {
+    lastRespawn: Option[Int] = None) {
 
   def moveTo(p: Pos) = copy(pos = p)
 
@@ -31,7 +31,7 @@ case class Hero(
     if (h.isDead) h.withLife(1) else h
   }
 
-  def reSpawn(p: Pos, turn: Int) = copy(life = Hero.maxLife, pos = p, lastRespawn = turn)
+  def reSpawn(p: Pos, turn: Int) = copy(life = Hero.maxLife, pos = p, lastRespawn = Some(turn))
 
   def setTimedOut = copy(timedOut = true)
   def crashed = timedOut
