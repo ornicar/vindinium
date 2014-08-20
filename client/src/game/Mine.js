@@ -60,12 +60,14 @@ function setGoblinOwner (sprite, owner) {
   sprite.setTexture(goblinTextures[owner]);
 }
 
-function Mine (meta) {
+function Mine (meta, withSpark) {
   PIXI.DisplayObjectContainer.call(this);
   this.previousSprite = new PIXI.Sprite(mineTextures[0]);
   this.currentSprite = new PIXI.Sprite(mineTextures[0]);
-  this.mineSparkShader = new MineSparkShader();
-  this.currentSprite.filters = [ this.mineSparkShader ];
+  if (withSpark) {
+    this.mineSparkShader = new MineSparkShader();
+    this.currentSprite.filters = [ this.mineSparkShader ];
+  }
   this.goblinFront = new PIXI.Sprite(goblinTextures[0]);
   this.goblinFront.position.x = -4;
   this.goblinFront.position.y = -14;
@@ -87,7 +89,9 @@ Mine.prototype.updateOwner = function (meta, interpolationTime) {
   // TODO : improve that with meta ?
   this.updatedTime = Date.now();
   this.interpolationTime = interpolationTime;
-  this.mineSparkShader.brightness = owner === 0 ? 0.0 : 0.5 + 3.0 * meta.domination;
+  if (this.mineSparkShader) {
+    this.mineSparkShader.brightness = owner === 0 ? 0.0 : 0.5 + 3.0 * meta.domination;
+  }
 
   var goblinVisible = meta.adjacentOpponents.length>0;
   this.ownerChanged = owner !== this.currentOwner;
@@ -97,8 +101,10 @@ Mine.prototype.updateOwner = function (meta, interpolationTime) {
     this.previousOwner = this.currentOwner||0;
     this.currentOwner = owner;
 
-    this.mineSparkShader.goldcolor = goldColorForOwner(owner);
-    this.mineSparkShader.colordistance = colorDistanceForOwner(owner);
+    if (this.mineSparkShader) {
+      this.mineSparkShader.goldcolor = goldColorForOwner(owner);
+      this.mineSparkShader.colordistance = colorDistanceForOwner(owner);
+    }
 
     setGoblinOwner(this.goblinBack, this.previousOwner);
     setGoblinOwner(this.goblinFront, this.previousOwner);
@@ -118,7 +124,9 @@ Mine.prototype.updateOwner = function (meta, interpolationTime) {
 };
 
 Mine.prototype.render = function () {
-  this.mineSparkShader.time = (Date.now()-this.startTimeMineSpark) / 1000;
+  if (this.mineSparkShader) {
+    this.mineSparkShader.time = (Date.now()-this.startTimeMineSpark) / 1000;
+  }
 
   if (this.ownerChanged && this.previousOwner && this.interpolationTime) {
     var p = smoothstep(0, this.interpolationTime, Date.now()-this.updatedTime);

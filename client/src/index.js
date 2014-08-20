@@ -5,10 +5,15 @@ var GameStream = require("./GameStream");
 var GameIdStream = require("./GameIdStream");
 var Game = require("./Game");
 
+window.React = React; // This to be able to use the Chrome Web Console React Plugin
+
 var SPEEDS = [1, 2, 5, 10, 20, 50, 75, 100, 150, 200];
 var DEFAULT_SPEED = 10;
 
 var url = Url.parse(window.location.href, true);
+
+var debug = url.query.debug==="true";
+var quality = isNaN(url.query.quality) ? 3 : parseInt(url.query.quality, 10);
 
 function alwaysTrue () { return true; }
 function increment (x) { return x + 1; }
@@ -48,7 +53,8 @@ function runGame (mount, gameId) {
       playing: playing,
       buffered: buffered,
       map: url.query.map,
-      debug: url.query.debug==="true"
+      debug: debug,
+      quality: quality,
     }), mount);
   }
 
@@ -142,7 +148,8 @@ function runTV (mount, ai) {
       refreshRate: refreshRate,
       withControls: false,
       map: url.query.map,
-      debug: url.query.debug==="true",
+      debug: debug,
+      quality: quality,
       live: true
     }), mount);
   }
