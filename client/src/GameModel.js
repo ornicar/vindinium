@@ -67,6 +67,22 @@ function orientationForDelta (dx, dy) {
 }
 
 GameModel.prototype = {
+  // Destroy completely this game state and all previous game states (this should help the GC)
+  destroy: function () {
+    for (var k in this.meta)
+      this.meta[k] = null;
+    this.meta = null;
+    this.tilesArray = null;
+    this.id = null;
+    this.board = null;
+    this.finished = null;
+    this.heroes = null;
+    this.maxTurns = null;
+    this.turn = null;
+    if (this.previous) this.previous.destroy();
+    this.previous = null;
+  },
+
   initialMeta: function () {
     var game = this;
     var nbMines = 0;
