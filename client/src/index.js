@@ -147,14 +147,17 @@ function runTV (mount, ai) {
     }), mount);
   }
 
+  function startStreamingGameAfter (time) {
+    return function (id) {
+      return GameStream(id)
+        .skipUntilWithTime(time);
+    };
+  }
+
   // For now we flatten all running games to one TV.
 
   GameIdStream(ai) // A stream of game ids
-    .map(GameStream) // A stream of stream of game!
-    .map(function (gameStream) {
-      return gameStream.skipUntilWithTime(500); // Skip the past events to avoid crazy rendering
-    })
-    .concatAll() // Flattened to one TV for now
+    .concatMap(startStreamingGameAfter(1000)) // Skip the past events to avoid crazy rendering. This also allows a 1s stop at the end of each game
     .subscribe(render); // Render the game
 }
 
