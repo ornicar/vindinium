@@ -110,8 +110,8 @@ GameBoardRender.prototype = {
   updateGame: function (game, interpolationTime) {
     var consecutiveTurn = this.game && game.turn === this.game.turn+1;
     if (!consecutiveTurn) {
-      this.bloodParticlesContainer.children.forEach(function (ghost) {
-        ghost.destroy();
+      this.bloodParticlesContainer.children.forEach(function (particle) {
+        particle.destroy();
       });
       this.ghostsContainer.children.forEach(function (ghost) {
         ghost.destroy();
@@ -154,7 +154,7 @@ GameBoardRender.prototype = {
     positionTarget.x += dx;
     positionTarget.y += dy;
     var duration = (killed ? 1000 : 500) + interpolationTime;
-    var nbParticles = killed ? 32 : 16;
+    var nbParticles = killed ? 14 : 5;
     this.bloodParticlesContainer.addChild(new BloodParticles(positionAttacker, positionTarget, duration, nbParticles));
   },
 

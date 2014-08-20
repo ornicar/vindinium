@@ -49,7 +49,7 @@ function BloodParticles(fromPos, toPos, duration, nbParticles) {
   var dist = Math.sqrt(delta.x*delta.x + delta.y*delta.y);
   for (var i=0; i<nbParticles; ++i) {
     var a = angle + 1.2 * Math.PI * (Math.random()-0.5);
-    var velocity = dist * (0.5 + 0.6 * Math.random());
+    var velocity = dist * (0.5 + 0.6 * Math.random()); // FIXME this should also be function of the duration
     var dur = duration * (0.6 + 0.8 * Math.random());
     var x = 12 * (Math.random()-0.5) + Math.cos(a) * velocity;
     var y = 12 * (Math.random()-0.5) + Math.sin(a) * velocity;
