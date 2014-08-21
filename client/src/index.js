@@ -113,13 +113,13 @@ function runGame (mount, gameId) {
 
   function play () {
     if (playing) return;
-    restart(!game || game.turn-1 === game.maxTurns ? 1 : game.turn);
+    restart(!game || game.turn === game.maxTurns ? 1 : game.turn);
     render();
   }
 
   function jump (turn) {
     turn -= 1;
-    if (turn < 0 || game && turn > game.maxTurns) return;
+    if (turn < 0 || game && turn >= game.maxTurns) return;
     gameInterruptions.onNext("jumped");
     gameStream
       .skip(turn)
