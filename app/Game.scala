@@ -28,7 +28,7 @@ case class Game(
 
   def step = if (finished) this else {
     val next = copy(turn = turn + 1)
-    if (next.turn > maxTurns) next.copy(status = Status.TurnMax) else next
+    if (next.turn >= maxTurns) next.copy(status = Status.TurnMax) else next
   }
 
   def setTimedOut = hero match {
