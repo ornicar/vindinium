@@ -65,7 +65,12 @@ GameBoardRender.prototype = {
   destroy: function () {
     this.stopRenderLoop();
     if (!this.renderer.primitiveBatch) this.renderer.primitiveBatch = { destroy: function() {} };// FIXME workaround for a bug in current Pixi.js 1.6.1
-    this.renderer.destroy();
+    try {
+      this.renderer.destroy();
+    }
+    catch (e) {
+      console.error(e);
+    }
     this.container.removeChild(this.renderer.view);
   },
 
