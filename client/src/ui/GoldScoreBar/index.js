@@ -15,7 +15,7 @@ var GoldScoreBar = React.createClass({
       <div className="gold-score-bar-coin">
         <img src="/assets/img/ui/coin.png" className="coin" />
       </div>
-      <div className="bars" style={{ height: (this.props.height - 30 + 14)+"px" }}>
+      <div className="bars" style={{ height: (this.props.height - 30)+"px" }}>
       {
         this.props.game.heroes.map(function (hero, i) {
           var height = sum===0 ? "25%" : (100 * hero.gold / sum).toFixed(2)+"%";
