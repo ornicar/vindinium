@@ -34,8 +34,45 @@ function compassRoseTileName (primaryName, secondaryName, isPrimary, isValidName
     var SE = isPrimary(x+1, y+1);
 
     var nb = N+S+W+E+NW+SW+NE+SE;
-    var name;
 
+    function cond (test, from, to, dir) {
+      if (test) {
+        var unifiedName = from+(to ? "_"+to : '')+(dir ? "_"+dir : '');
+        if (isValidName(unifiedName)) return [ unifiedName ];
+        if (from && to && dir) {
+          var fromEmpty = from+'_empty_'+dir;
+          if (isValidName(fromEmpty) && isValidName(to))
+            return [ to, fromEmpty ];
+          var toEmpty = 'empty_'+to+'_'+dir;
+          if (isValidName(toEmpty) && isValidName(from))
+            return [ from, toEmpty ];
+        }
+      }
+    }
+
+    var value = cond(P, p) ||
+      cond(nb===0, s) ||
+      cond(N && S || W && E, s) ||
+      cond(SE && nb===1, s, p, "se") ||
+      cond(SW && nb===1, s, p, "sw") ||
+      cond(NE && nb===1, s, p, "ne") ||
+      cond(NW && nb===1, s, p, "nw") ||
+      cond(N && W, p, s, "se") ||
+      cond(S && W, p, s, "ne") ||
+      cond(N && E, p, s, "sw") ||
+      cond(S && E, p, s, "nw") ||
+      cond(E && !W, s, p, "e") ||
+      cond(W && !E, s, p, "w") ||
+      cond(N && !S, s, p, "n") ||
+      cond(S && !N, s, p, "s");
+
+    if (!value) {
+      console.log("couldn't properly find a terrain transition for:", p+'~>'+s, 'at ('+x+","+y+')', +N,+S,+W,+E,+NW,+SW,+NE,+SE);
+    }
+
+    return value || [s];
+
+/*
     if (P) {
       return p;
     }
@@ -70,14 +107,15 @@ function compassRoseTileName (primaryName, secondaryName, isPrimary, isValidName
       if (S && !N) name = s+"_"+p+"_s";
       if (isValidName(name)) return name;
 
-      // console.log("couldn't properly find a terrain transition for:", p+'~>'+s, 'at ('+x+","+y+')', +N,+S,+W,+E,+NW,+SW,+NE,+SE);
+      console.log("couldn't properly find a terrain transition for:", p+'~>'+s, 'at ('+x+","+y+')', +N,+S,+W,+E,+NW,+SW,+NE,+SE);
 
       return s;
     }
+*/
   };
 }
 
-function getLpcTerrainTextures () {
+function getLpcTerrainTextures (tilePixi) {
   var tileset = loadTexture("lpc_terrain_24.png");
 
   function outerTerrain3x3 (x, y, inner, outer) {
@@ -103,10 +141,10 @@ function getLpcTerrainTextures () {
     ];
   }
 
-  function terrain2objects (x, y, inner) {
+  function terrain2objects (x, y, nm) {
     return [
-      [inner+"_obj1", x, y],
-      [inner+"_obj2", x, y+1]
+      [nm+"_obj1", x, y],
+      [nm+"_obj2", x, y+1]
     ];
   }
 
@@ -119,11 +157,12 @@ function getLpcTerrainTextures () {
   }
 
   function terrain (x, y, inner, outer, twoObjsAreOne, noTerrainVariants) {
+    var nm = inner + (outer?"_"+outer:"");
     return []
       .concat(outerTerrain3x3(x, y+2, inner, outer||"empty"))
       .concat(noTerrainVariants ? [] : terrain3variant(x, y+3, inner))
-      .concat(twoObjsAreOne ? [[inner+"obj1", x, y]] : terrain2objects(x, y, inner))
-      .concat(innerTerrain2x2(x+1, y, inner, outer||"empty"))
+      .concat(twoObjsAreOne ? [[nm+"_obj1", x, y]] : terrain2objects(x, y, nm))
+      .concat(innerTerrain2x2(x+1, y, inner, outer||"empty"));
   }
 
   var tilesConf = []
@@ -147,8 +186,8 @@ function getLpcTerrainTextures () {
     .concat(terrain(21, 6, "sand", "sea"))
     .concat(terrain(15, 12, "icysea"))
     .concat(terrain(18, 12, "ice"))
-    .concat(terrain(21, 12, "ice", "icysea"))
-    .concat(terrain(21, 18, "ice", "sea"))
+    .concat(terrain(21, 12, "ice", "icysea", false, true))
+    .concat(terrain(21, 17, "ice", "sea", false, true))
     .concat(terrain(3, 18, "ground", "grass", false, true))
     .concat(terrain(3, 12, "greyroom"))
     .concat(terrain(0, 12, "darkroom"));
@@ -162,38 +201,9 @@ function getLpcTerrainTextures () {
 
 function genLpcMap (primaryTerrain, outerTerrain) {
   var tileSize = 24;
+  var borderSize = 32;
   var tilePixi = tilePIXI(tileSize);
-
-  var tiles = getLpcTerrainTextures();
-
-  /*
-  var farmingTexture = loadTexture("farming_fishing_24.png");
-  var stuffTexture = loadTexture("stuff.png");
-  var earthStuffs = [ // sorted by priority
-    tilePixi(farmingTexture, 5, 1), // medium wood
-    tilePixi(farmingTexture, 1, 1), // big wood
-    tilePixi(farmingTexture, 0, 4.5), // seeds
-    tilePixi(farmingTexture, 6, 2), // tools
-    tilePixi(farmingTexture, 0, 6.5), // green weird seeds
-    tilePixi(farmingTexture, 6, 0), // forge
-    tilePixi(farmingTexture, 1, 3), // seed bag
-    tilePixi(farmingTexture, 6, 1), // forge with hammer
-    tilePixi(farmingTexture, 7, 2), // hammers
-    tilePixi(farmingTexture, 8, 2),  // tools 2
-    tilePixi(farmingTexture, 7, 0), // cut tools 1
-    tilePixi(farmingTexture, 8, 0), // cut tools 2
-    tilePixi(farmingTexture, 7, 1), // cut tools 3
-    tilePixi(farmingTexture, 8, 1) // cut tools 4
-  ];
-  var rockStuffs = [
-    tilePixi(stuffTexture, 0, 1),
-    tilePixi(stuffTexture, 0, 2),
-    tilePixi(stuffTexture, 0, 3)
-  ];
-  var trees = [
-    loadTexture("tree.png")
-  ];
-  */
+  var tiles = getLpcTerrainTextures(tilePixi);
 
   function tileExists (id) {
     return id in tiles;
@@ -201,12 +211,14 @@ function genLpcMap (primaryTerrain, outerTerrain) {
 
   function appropriateObjectForTerrain (terrain) {
     var choices = [];
+    var i = 1;
     var obj;
     do {
-      obj = tiles[terrain+"obj1"];
+      obj = tiles[terrain+"_obj"+i];
       if (obj) {
         choices.push(obj);
       }
+      ++ i;
     } while(obj);
     return choices[Math.floor(choices.length * Math.random())];
   }
@@ -214,9 +226,10 @@ function genLpcMap (primaryTerrain, outerTerrain) {
   function generate (game, terrainContainer, terrainContainer2, objectContainer) {
     seedrandom(game.id, { global: true /* this overrides Math.random! :-D */ });
 
-    var withInnerWater = true;
+    var withInnerDeadZone = true;
     var i;
     var size = game.board.size;
+    var extraBorder = 2;
 
     var noise = PerlinNoise.generatePerlinNoise(size, size, {
       octaveCount: 4,
@@ -265,10 +278,10 @@ function genLpcMap (primaryTerrain, outerTerrain) {
 
       value = value * terrainRandomnessFactor + terrainMineTavernFactor * (mineFactor - tavernFactor);
 
-      allTilesType.push(primaryTerrain);
+      allTilesType.push(primaryTerrain); // TODO variety
     }
 
-    var initialTilesForWaterSearch = withInnerWater ? allTiles : borderTiles;
+    var initialTilesForDeadZoneSearch = withInnerDeadZone ? allTiles : borderTiles;
 
     function connected (positions, explored, canReach) {
       var news = [];
@@ -295,18 +308,18 @@ function genLpcMap (primaryTerrain, outerTerrain) {
       return i === null || game.tilesArray[i] === "##";
     }
 
-    function indexIsWaterEnoughSurrounded (nb, neighborsFilter) {
+    function indexIsDeadZoneEnoughSurrounded (nb, neighborsFilter) {
       if (!neighborsFilter) neighborsFilter = tileIsWall;
       return function (i) {
         var pos = game.indexToPosition(i);
-        var waterNeighbors = game.neighborsIndexes(pos.x, pos.y).filter(neighborsFilter);
-        return game.tilesArray[i] === "##" && waterNeighbors.length >= nb;
+        var deadZoneNeighbors = game.neighborsIndexes(pos.x, pos.y).filter(neighborsFilter);
+        return game.tilesArray[i] === "##" && deadZoneNeighbors.length >= nb;
       };
     }
 
-    var waterTiles = connected(initialTilesForWaterSearch.filter(indexIsWaterEnoughSurrounded(3)), [], indexIsWaterEnoughSurrounded(3));
-    waterTiles = waterTiles.filter(indexIsWaterEnoughSurrounded(2, function (i) {
-      return waterTiles.indexOf(i) !== -1;
+    var deadZoneTiles = connected(initialTilesForDeadZoneSearch.filter(indexIsDeadZoneEnoughSurrounded(3)), [], indexIsDeadZoneEnoughSurrounded(3));
+    deadZoneTiles = deadZoneTiles.filter(indexIsDeadZoneEnoughSurrounded(2, function (i) {
+      return deadZoneTiles.indexOf(i) !== -1;
     }));
 
     function groundForPosition (x, y) {
@@ -318,8 +331,9 @@ function genLpcMap (primaryTerrain, outerTerrain) {
       return allTilesType[i];
     }
 
-    var compassWaterCoast = compassRoseTileName(groundForPosition, outerTerrain, function (x, y) { var i = game.indexForPosition(x, y); return i !== null && waterTiles.indexOf(i) === -1; }, tileExists);
+    var compassDeadZoneCoast = compassRoseTileName(groundForPosition, outerTerrain, function (x, y) { var i = game.indexForPosition(x, y); return i !== null && deadZoneTiles.indexOf(i) === -1; }, tileExists);
 
+    /*
     function genTilesTypeIsNot (outer) {
       return function (x, y) {
         return groundForPosition(x, y) !== outer;
@@ -327,13 +341,14 @@ function genLpcMap (primaryTerrain, outerTerrain) {
     }
 
     var plainCount = 0;
+    */
 
     var groundNamesByIndex = [];
 
-    for (var y=-1; y<=size; ++y) {
-      for (var x=-1; x<=size; ++x) {
-        var isWater = x===-1||x===size||y===-1||y===size||waterTiles.indexOf(game.indexForPosition(x, y)) !== -1;
-        var resolver, name, sprite;
+    for (var y=-extraBorder; y<size+extraBorder; ++y) {
+      for (var x=-extraBorder; x<size+extraBorder; ++x) {
+        var isDeadZone = x<=0||x>=size||y<=0||y>=size||deadZoneTiles.indexOf(game.indexForPosition(x, y)) !== -1;
+        var resolver, names, sprite;
 
         var group = new PIXI.DisplayObjectContainer();
         var group2 = new PIXI.DisplayObjectContainer();
@@ -341,8 +356,12 @@ function genLpcMap (primaryTerrain, outerTerrain) {
         groupObject.x = group2.x = group.x = x * tileSize;
         groupObject.y = group2.y = group.y = y * tileSize;
 
-        resolver = compassWaterCoast;
-        name = resolver(x, y);
+        resolver = compassDeadZoneCoast;
+        names = resolver(x, y);
+        var primaryName = names[0];
+
+        // TODO different terrains
+        /*
         if (name.indexOf(outerTerrain) === -1) {
           var better = groundForPosition(x, y);
           if (better !== primaryTerrain) {
@@ -350,11 +369,14 @@ function genLpcMap (primaryTerrain, outerTerrain) {
             name = compassRoseTileName(outer, better, genTilesTypeIsNot(better), tileExists)(x, y);
           }
         }
+        */
+
+        // TODO alternative terrain texture
+        /*
         if (name === primaryTerrain) {
           ++ plainCount;
-          var center = 2*(0.5 - Math.abs(noise[game.indexForPosition(x, y)]-0.5));
 
-          /*
+          var center = 2*(0.5 - Math.abs(noise[game.indexForPosition(x, y)]-0.5));
           if (Math.random() < 0.2 * center) {
             var choices = [
               "plain_grass1",
@@ -364,17 +386,21 @@ function genLpcMap (primaryTerrain, outerTerrain) {
             ];
             name = choices[Math.floor(Math.random() * Math.random() * 4)];
           }
-          */
+        }
+        */
+
+        groundNamesByIndex[y * size + x] = primaryName;
+        for (i = 0; i < names.length; ++i) {
+          sprite = new PIXI.Sprite(tiles[names[i]]);
+          group.addChild(sprite);
         }
 
-        groundNamesByIndex[y * size + x] = name;
-        sprite = new PIXI.Sprite(tiles[name]);
-        group.addChild(sprite);
-
-        if (!isWater && game.wallAt(x, y)) {
-          var texture = appropriateObjectForTerrain(name, x, y);
-          sprite = new PIXI.Sprite(texture);
-          groupObject.addChild(sprite);
+        if (!isDeadZone && game.wallAt(x, y)) {
+          var texture = appropriateObjectForTerrain(primaryName, x, y);
+          if (texture) {
+            sprite = new PIXI.Sprite(texture);
+            groupObject.addChild(sprite);
+          }
         }
 
         for (var h = 0; h < game.heroes.length; ++h) {
@@ -404,12 +430,20 @@ function genLpcMap (primaryTerrain, outerTerrain) {
 
   return {
     generate: generate,
-    borderSize: tileSize,
+    borderSize: borderSize,
     tileSize: tileSize
   };
 }
 
 module.exports = {
+
+  lava: lazyF(function () {
+    return genLpcMap("darkrock", "lava");
+  }),
+
+  floe: lazyF(function () {
+    return genLpcMap("ice", "icysea");
+  }),
 
   lowlands: lazyF(function () {
     var tileSize = 24;
@@ -669,7 +703,7 @@ module.exports = {
         return allTilesType[i];
       }
 
-      var compassWaterCoast = compassRoseTileName(groundForPosition, outerTerrain, function (x, y) { var i = game.indexForPosition(x, y); return i !== null && waterTiles.indexOf(i) === -1; }, tileExists);
+      var compassWaterCoast = compassRoseTileName(groundForPosition, "water", function (x, y) { var i = game.indexForPosition(x, y); return i !== null && waterTiles.indexOf(i) === -1; }, tileExists);
 
       function genTilesTypeIsNot (outer) {
         return function (x, y) {
@@ -693,12 +727,12 @@ module.exports = {
           groupObject.y = group2.y = group.y = y * tileSize;
 
           resolver = compassWaterCoast;
-          name = resolver(x, y);
-          if (name.indexOf(outerTerrain) === -1) {
+          name = resolver(x, y)[0];
+          if (name.indexOf("water") === -1) {
             var better = groundForPosition(x, y);
             if (better !== "plain") {
               var outer = "plain";
-              name = compassRoseTileName(outer, better, genTilesTypeIsNot(better), tileExists)(x, y);
+              name = compassRoseTileName(outer, better, genTilesTypeIsNot(better), tileExists)(x, y)[0];
             }
           }
           if (name === "plain") {
@@ -846,7 +880,7 @@ module.exports = {
       }, this);
 
       return {
-        opacityForFootprint: function (i) {
+        opacityForFootprint: function () {
           return 1.0;
         }
       };
