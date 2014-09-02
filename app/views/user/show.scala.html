@@ -1,7 +1,7 @@
 @(user: User, replays: List[Replay], rank: Option[Int])
 
 @main(user.name) {
-<h1>@user.name (@user.elo)</h1>
+<h1><span id="user-name">@user.name</span> <span id="user-elo">(@user.elo)</span></h1>
 
 @rank.map { r =>
 Ranked @r

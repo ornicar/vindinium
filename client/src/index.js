@@ -141,6 +141,19 @@ function runGame (mount, gameId) {
 
 function runTV (mount, ai) {
 
+  function updateUserPage() {
+    var userInfo = new window.XMLHttpRequest();
+    userInfo.onload=function() {
+      if (userInfo.status === 200) {
+        document.getElementById("user-elo").innerHTML = userInfo.response.getElementById("user-elo").innerHTML;
+        document.getElementById("recent-games").innerHTML = userInfo.response.getElementById("recent-games").innerHTML;
+      }
+    };
+    userInfo.open("GET",ai,true);
+    userInfo.responseType = "document";
+    userInfo.send();
+  }
+
   function render (game) {
     var refreshRate = 80;
     React.renderComponent(Game({
@@ -152,6 +165,9 @@ function runTV (mount, ai) {
       quality: quality,
       live: true
     }), mount);
+    if (ai && game.finished) {
+      updateUserPage();
+    }
   }
 
   function startStreamingGameAfter (time) {
