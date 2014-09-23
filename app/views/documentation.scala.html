@@ -113,12 +113,12 @@ $1 Gold mine (belonging to hero 1)</pre>
             he stays in place until the game is finished. Note that he can still win if he as more gold than the other players at the end of the game.</p>
         </li>
       </ul>
-      <h4 id="post-move">Post move</h4>
-      <p>After the hero has moved, a few things happen:</p>
+      <h4 id="post-move">End of a hero turn</h4>
+      <p>After the hero has moved (or decided to stay in place), a few things happen:</p>
       <h5 id="fights">Fights</h5>
       <p>Heroes are quite nervous and never miss an opportunity to slap each others with their big blades.
-        After the hero has moved, if there is an enemy at a distance of one square in any direction,
-        the hero attacks the nemy. For instance, in this situation, after Hero 1 (@@1) has moved:</p>
+        At the end of the hero turn, if there is an enemy at a distance of one square in any direction,
+        the hero attacks the nemy. For instance, in this situation, at the end of Hero 1 (@@1) turn:</p>
       <pre>@@1@@2
   @@3</pre>
         <p>@@1 attacks @@2. @@1 does not attack @@3 because it's 2 moves away.<br />
@@ -126,10 +126,10 @@ $1 Gold mine (belonging to hero 1)</pre>
           If the defender dies (see: <a href="#death-of-a-hero">Death of a hero</a>),
           the attacking hero obtains control of all the loser's gold mines.</p>
         <h5 id="mining">Mining</h5>
-          <p>After the hero has moved, he gains one gold per controlled mine.</p>
+          <p>After the the fights resolution, he gains one gold per controlled mine.</p>
         <h5 id="thirst">Thirst</h5>
         <p>
-          After the hero has moved, he loses one HP (because all this action made him thirsty).<br />
+          Then, the hero loses one HP (because all this action made him thirsty).<br />
           Note that heroes don't die of thirst. Worse case, they fall to 1 HP.
         </p>
         <h3 id="death-of-a-hero">Death of a hero</h3>
