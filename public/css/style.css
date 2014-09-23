@@ -45,6 +45,9 @@ button, input {
 #starters dd {
     padding-left: 20px;
 }
+#starters h3 {
+  white-space: nowrap;
+}
 
 .register-form {
     padding-top: 30px;
