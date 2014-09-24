@@ -13,7 +13,7 @@ var DEFAULT_SPEED = 10;
 var url = Url.parse(window.location.href, true);
 
 var debug = url.query.debug==="true";
-var quality = isNaN(url.query.quality) ? 3 : parseInt(url.query.quality, 10);
+var quality = isNaN(url.query.quality) ? 2 : parseInt(url.query.quality, 10);
 
 function alwaysTrue () { return true; }
 function increment (x) { return x + 1; }
