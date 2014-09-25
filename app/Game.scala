@@ -34,6 +34,7 @@ case class Game(
   def setTimedOut = hero match {
     case None => this
     case Some(hero) => withHero(hero.setTimedOut) match {
+      case game if game.training                     => game.copy(status = Status.AllCrashed)
       case game if game.heroes.count(_.crashed) == 4 => game.copy(status = Status.AllCrashed)
       case game                                      => game
     }
