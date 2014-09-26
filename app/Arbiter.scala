@@ -24,7 +24,7 @@ object Arbiter {
 
   private def doMove(game: Game, id: Int, dir: Dir) = {
 
-    def reach(destPos: Pos) = (game.board get destPos) match {
+    def reach(game: Game, destPos: Pos) = (game.board get destPos) match {
       case None => game
       case Some(tile) => (game hero destPos) match {
         case Some(_) => game
@@ -42,7 +42,10 @@ object Arbiter {
     }
 
     if (dir == Dir.Crash) finalize(game.setTimedOut, id).step
-    else finalize(fights(reach(game.hero(id).pos to dir), id), id).step
+    else {
+      val h = game.hero(id).withLastDir(dir)
+      finalize(fights(reach(game.withHero(h), h.pos to dir), id), id).step
+    }
   }
 
   private def reSpawn(game: Game, h: Hero, rec: Int = 0): Game = {

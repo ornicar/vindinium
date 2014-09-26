@@ -34,6 +34,13 @@ object JsonFormat {
     "userId" -> h.userId,
     "elo" -> h.elo,
     "pos" -> apply(h.pos),
+    "lastDir" -> h.lastDir.map {
+        case Dir.North => "North"
+        case Dir.South => "South"
+        case Dir.East  => "East"
+        case Dir.West  => "West"
+        case _         => "Stay"
+    },
     "life" -> h.life,
     "gold" -> h.gold,
     "mineCount" -> g.board.countMines(h.id),
