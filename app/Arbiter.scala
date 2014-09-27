@@ -45,15 +45,16 @@ object Arbiter {
     else finalize(fights(reach(game.hero(id).pos to dir), id), id).step
   }
 
-  private def reSpawn(game: Game, h: Hero, rec: Int = 0): Game = {
-    val pos = game spawnPosOf h
-    (game hero pos match {
+  private def reSpawn(game: Game, hero: Hero): Game = {
+    val pos = game spawnPosOf hero
+    val h = hero.reSpawn(pos, game.turn)
+    game hero pos match {
       case Some(opponent) if opponent.id != h.id =>
         // play.api.Logger("Arbiter").info(s"reSpawn rec:$rec game:${game.id} hero:${h.id} ${h.pos} -> $pos")
-        if (rec > 4) throw new Exception(s"Arbiter.reSpawn recursion")
-        reSpawn(game.withBoard(_.transferMines(opponent.id, Some(h.id))), opponent, rec + 1)
-      case _ => game
-    }) withHero h.reSpawn(pos, game.turn)
+        val g = game.withHero(h).withBoard(_.transferMines(opponent.id, Some(h.id)))
+        reSpawn(g, opponent)
+      case _ => game withHero h
+    }
   }
 
   private def fights(game: Game, id: Int): Game =
