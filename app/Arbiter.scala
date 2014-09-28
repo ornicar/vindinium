@@ -53,7 +53,6 @@ object Arbiter {
     val h = hero.reSpawn(pos, game.turn)
     game hero pos match {
       case Some(opponent) if opponent.id != h.id =>
-        // play.api.Logger("Arbiter").info(s"reSpawn rec:$rec game:${game.id} hero:${h.id} ${h.pos} -> $pos")
         val g = game.withHero(h).withBoard(_.transferMines(opponent.id, Some(h.id)))
         reSpawn(g, opponent)
       case _ => game withHero h

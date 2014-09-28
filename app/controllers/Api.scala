@@ -25,7 +25,6 @@ object Api extends Controller {
         case None => Future failed UserNotFoundException("Key not found")
         case Some(user) => (Server.actor ? Server.RequestToPlayAlone(user, data.config)) map {
           case input: PlayerInput => {
-            println(input.game.render)
             Ok(JsonFormat(input, req.host)) as JSON
           }
         }
