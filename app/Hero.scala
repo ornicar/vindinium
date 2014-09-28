@@ -7,6 +7,7 @@ case class Hero(
     userId: Option[String],
     elo: Option[Int],
     pos: Pos,
+    lastDir: Option[Dir],
     life: Int,
     gold: Int,
     timedOut: Boolean,
@@ -21,6 +22,8 @@ case class Hero(
   def defend = withLife(Hero.defendLife)
 
   def fightMine = withLife(Hero.mineLife)
+
+  def withLastDir(dir: Dir) = copy(lastDir = Some(dir))
 
   def withLife(diff: Int) = copy(life = math.max(0, math.min(Hero.maxLife, life + diff)))
 
@@ -53,6 +56,7 @@ object Hero {
     userId = userId,
     elo = elo,
     pos = pos,
+    lastDir = None,
     life = maxLife,
     gold = 0,
     timedOut = false)
