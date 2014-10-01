@@ -40,11 +40,8 @@ final class Elo extends Actor with ActorLogging {
     if (player is opponent) 0
     else {
       val expected = 1 / (1 + math.pow(10, (opponent.elo - player.elo) / 400f))
-      val kFactor = math.round(
-        if (player.nbGames > 20) 16
-        else 50 - player.nbGames * (34 / 20f)
-      )
-      val diff = 2 * kFactor * (player.score(opponent) - expected)
+      val kFactor = 16
+      val diff = kFactor * (player.score(opponent) - expected)
       // println(s"$player vs $opponent = ${diff.toInt}")
       diff.toInt
     }
