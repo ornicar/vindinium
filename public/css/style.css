@@ -4,6 +4,7 @@ body {
     text-align: center;
     font-size: 13px;
     font-family: monospace;
+    padding-bottom: 4em;
 }
 
 body h1, body h2, body h3, body h4, #logo, #main-menu, #game, #gametv {
