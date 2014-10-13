@@ -54,9 +54,9 @@ final class HttpClient(token: Token, initialPromise: Promise[PlayerInput]) exten
 
   when(TimedOut) {
 
-    case Event(game: Game, _) if game.finished => goto(GameFinished)
+    case Event(game: Game, _) if game.finished && !(game.training && game.hero1.timedOut) => goto(GameFinished)
 
-    case Event(game: Game, _)                  => stay
+    case Event(game: Game, _) => stay
 
     case Event(Round.ClientPlay(_, replyTo), _) => {
       replyTo ! Status.Failure(TimeoutException("Time out! You must play faster"))
