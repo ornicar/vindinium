@@ -7,8 +7,8 @@ version := "1.1"
 scalaVersion := "2.11.1"
 
 libraryDependencies ++= Seq(
-  "org.reactivemongo" %% "reactivemongo" % "0.11.0-SNAPSHOT",
-  "org.reactivemongo" %% "play2-reactivemongo" % "0.11.0-SNAPSHOT",
+  "org.reactivemongo" %% "reactivemongo" % "0.10.5.0.akka23",
+  "org.reactivemongo" %% "play2-reactivemongo" % "0.10.5.0.akka23",
   "joda-time" % "joda-time" % "2.3")
 
 resolvers ++= Seq(
