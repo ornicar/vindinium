@@ -17,6 +17,9 @@ You need [sbt](http://www.scala-sbt.org/), a MongoDB instance running, and a Uni
 ```sh
 git clone git://github.com/ornicar/vindinium
 cd vindinium
+cd client
+./build.sh
+cd ..
 sbt compile
 sbt run
 ```
