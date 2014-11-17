@@ -17,6 +17,10 @@ package object server {
 
   def notFoundPage = play.api.mvc.Results.NotFound(views.html.notFound())
 
-  private[server] def charInt(c: Char): Option[Int] = 
-    scala.util.Try(java.lang.Integer.parseInt(c.toString)).toOption
+  private[server] def charInt(c: Char): Option[Int] = try {
+    Some(java.lang.Integer.parseInt(c.toString))
+  }
+  catch {
+    case _: Exception => None
+  }
 }
