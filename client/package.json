@@ -8,7 +8,7 @@
     "perlin-noise": "0.0.1",
     "pixi.js": "1.6.1",
     "raf": "2.0.1",
-    "react": "0.11.0",
+    "react": "0.12.1",
     "rx": "2.3.1",
     "seedrandom": "2.3.6",
     "bezier-easing": "0.4.2",
@@ -22,6 +22,6 @@
     "grunt-contrib-watch": "0.6.1",
     "grunt-jsxhint": "0.0.2",
     "matchdep": "0.3.0",
-    "reactify": "0.14.0"
+    "reactify": "0.17.0"
   }
 }
