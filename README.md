@@ -38,6 +38,7 @@ server {
   location / {
     proxy_http_version 1.1;
     proxy_read_timeout 24h;
+    proxy_set_header Host $host;
     proxy_pass  http://127.0.0.1:9000/;
   }
 }
