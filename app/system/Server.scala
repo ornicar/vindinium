@@ -20,10 +20,14 @@ final class Server extends Actor with CustomLogging {
   def receive = akka.event.LoggingReceive {
 
     case RequestToPlayAlone(user, config) => {
+      log.info(s"Request to play alone by user `${user.name}`")
       val replyTo = sender
       addRound(config) match {
-        case Failure(e) => replyTo ! Status.Failure(e)
+        case Failure(e) =>
+          log.error("Failed to add round", e)
+          replyTo ! Status.Failure(e)
         case Success((_, round)) => {
+          log.info(s"Successfuly running `${round.path}`")
           round ! Round.Join(user, inputPromise(replyTo))
           (1 to 3) foreach { _ =>
             round ! Round.JoinBot("random", Driver.Random)
@@ -34,32 +38,48 @@ final class Server extends Actor with CustomLogging {
 
     case RequestToPlayArena(user) => {
       val replyTo = sender
+
+      log.info(s"Request to play arena by user `${user.name}`")
+
       (nextArenaRoundId.flatMap(rounds.get) match {
         case Some(round) if nextArenaRoundClients < 4 => {
+          log.info(s"next arena round `${round.path}` with id ${nextArenaRoundId.getOrElse("")}")
           nextArenaRoundClients = nextArenaRoundClients + 1
           Success(round)
         }
         case _ => addRound(Config.arena) map {
           case (id, round) => {
+            log.info(s"Add round `$id`")
             nextArenaRoundId = Some(id)
             nextArenaRoundClients = 1
             round
           }
         }
       }) match {
-        case Failure(e)     => replyTo ! Status.Failure(e)
-        case Success(round) => round ! Round.Join(user, inputPromise(sender))
+        case Failure(e)     =>
+          log.error("Failed to create arena", e)
+          replyTo ! Status.Failure(e)
+        case Success(round) =>
+          log.info(s"Creating arena for user ${user.name}")
+          round ! Round.Join(user, inputPromise(sender))
       }
     }
 
     case Play(Pov(gameId, token), dir) => rounds get gameId match {
-      case None        => sender ! notFound(s"Unknown game $gameId")
-      case Some(round) => round.tell(Round.Play(token, dir), sender)
+      case None        =>
+        log.error(s"Unknown game `$gameId`")
+        sender ! notFound(s"Unknown game `$gameId`")
+      case Some(round) =>
+        log.info(s"Playing `$gameId` with token $token")
+        round.tell(Round.Play(token, dir), sender)
     }
 
-    case Round.Inactive(id) => if (nextArenaRoundId != Some(id)) sender ! PoisonPill
+    case Round.Inactive(id) =>
+      log.info(s"Inactive ${id}")
+      if (nextArenaRoundId != Some(id)) sender ! PoisonPill
 
     case Terminated(round) => {
+      log.info(s"Terminated round ${round.path}")
       context unwatch round
       rounds filter (_._2 == round) foreach { case (id, _) => rounds -= id }
     }
