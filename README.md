@@ -6,9 +6,9 @@
 
 *And looking for a tavern where to drink their gold*
 
-WARNING: These links redirect to phishing pages!
-Game rules: http://vindinium.org/doc
-Doc & starter bots: http://vindinium.org/starters
+### Warning
+
+The vindinium dot org website has been discontinued, and the domain now belongs to Internet parasites.
 
 ### Installation
 
@@ -34,7 +34,7 @@ Here's an exemple of nginx configuration:
 ```
 server {
  listen 80;
- server_name my-vindinium.org;
+ server_name my-domain.org;
 
   location / {
     proxy_http_version 1.1;
