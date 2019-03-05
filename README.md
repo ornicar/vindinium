@@ -6,6 +6,7 @@
 
 *And looking for a tavern where to drink their gold*
 
+WARNING: These links redirect to phishing pages!
 Game rules: http://vindinium.org/doc
 Doc & starter bots: http://vindinium.org/starters
 
